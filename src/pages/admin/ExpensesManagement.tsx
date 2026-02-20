@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -53,7 +54,12 @@ export default function ExpensesManagement() {
       return;
     }
 
-    const payload = { car_id: form.car_id || null, amount: form.amount, description: form.description, expense_date: form.expense_date };
+    const payload = {
+      car_id: form.car_id === 'general' ? null : (form.car_id || null),
+      amount: form.amount,
+      description: form.description,
+      expense_date: form.expense_date
+    };
     if (editId) {
       await supabase.from('expenses').update(payload).eq('id', editId);
       toast({ title: 'Expense updated', description: "Log entry has been corrected." });
@@ -61,7 +67,9 @@ export default function ExpensesManagement() {
       await supabase.from('expenses').insert(payload);
       toast({ title: 'Expense added', description: "New operational cost logged." });
     }
-    setOpen(false); setEditId(null); setForm({ car_id: '', amount: 0, description: '', expense_date: new Date().toISOString().split('T')[0] });
+    setOpen(false);
+    setEditId(null);
+    setForm({ car_id: 'general', amount: 0, description: '', expense_date: new Date().toISOString().split('T')[0] });
     fetchExpenses();
   };
 
@@ -75,7 +83,7 @@ export default function ExpensesManagement() {
 
   const carName = (id: string | null) => cars.find((c) => c.id === id)?.name || 'General Operations';
   const filtered = expenses.filter((e) => {
-    const matchesCar = filterCar === 'all' || e.car_id === filterCar;
+    const matchesCar = filterCar === 'all' ? true : (filterCar === 'general' ? e.car_id === null : e.car_id === filterCar);
     const matchesSearch = e.description.toLowerCase().includes(search.toLowerCase());
     return matchesCar && matchesSearch;
   });
@@ -110,7 +118,7 @@ export default function ExpensesManagement() {
                       <SelectValue placeholder="General (Office/Admin)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">General Operations</SelectItem>
+                      <SelectItem value="general">General Operations</SelectItem>
                       {cars.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
@@ -190,7 +198,7 @@ export default function ExpensesManagement() {
             </SelectTrigger>
             <SelectContent className="rounded-xl overflow-hidden">
               <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="">General Only</SelectItem>
+              <SelectItem value="general">General Only</SelectItem>
               {cars.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>

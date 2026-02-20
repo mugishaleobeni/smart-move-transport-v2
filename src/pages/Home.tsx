@@ -49,7 +49,6 @@ export default function Home() {
                 alt={`Hero ${i + 1}`}
                 className="w-full h-full object-cover"
                 loading={i === 0 ? 'eager' : 'lazy'}
-                fetchPriority={i === 0 ? 'high' : 'auto'}
               />
             </motion.div>
           ))}

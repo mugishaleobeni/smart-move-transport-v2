@@ -75,16 +75,16 @@ class MockQueryBuilder {
     return { data: Array.isArray(values) ? values : [values], error: null };
   }
 
-  async update(values: any) {
-    return { data: values, error: null };
+  update(values: any) {
+    return this;
   }
 
-  async upsert(values: any | any[]) {
-    return { data: values, error: null };
+  upsert(values: any | any[]) {
+    return this;
   }
 
-  async delete() {
-    return { eq: () => Promise.resolve({ data: null, error: null }) };
+  delete() {
+    return this;
   }
 
   // Support for direct await (thenable)
