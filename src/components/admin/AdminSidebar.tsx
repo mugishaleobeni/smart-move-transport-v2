@@ -21,6 +21,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 
 const menuItems = [
   { title: 'Dashboard', icon: LayoutDashboard, to: '/admin' },
@@ -49,8 +50,8 @@ export function AdminSidebar() {
             <Car className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-sidebar-primary">Smart Move</h2>
-            <p className="text-xs text-sidebar-foreground">Admin Panel</p>
+            <h2 className="text-sm font-bold text-foreground">Smart Move</h2>
+            <p className="text-xs text-muted-foreground">Admin Panel</p>
           </div>
         </div>
       </SidebarHeader>
@@ -66,15 +67,16 @@ export function AdminSidebar() {
                       to={item.to}
                       end={item.to === '/admin'}
                       className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2 rounded-lg transition-smooth ${
+                        cn(
+                          "flex items-center gap-3 px-3 py-2 rounded-lg transition-smooth w-full",
                           isActive
-                            ? 'bg-accent text-accent-foreground font-medium'
-                            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                        }`
+                            ? "bg-primary text-primary-foreground font-semibold shadow-sm"
+                            : "text-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        )
                       }
                     >
-                      <item.icon className="w-4 h-4" />
-                      <span>{item.title}</span>
+                      <item.icon className="w-4 h-4 shrink-0" />
+                      <span className="truncate">{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
