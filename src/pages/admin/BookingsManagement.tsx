@@ -6,6 +6,23 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Search,
+  Filter,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  User,
+  CarFront,
+  MapPin,
+  Calendar,
+  MoreVertical,
+  Check,
+  Ban
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface Booking {
   id: string;
@@ -21,12 +38,12 @@ interface Booking {
 
 interface CarOption { id: string; name: string; }
 
-const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-500/20 text-yellow-600 border-yellow-500/30',
-  approved: 'bg-green-500/20 text-green-600 border-green-500/30',
-  rejected: 'bg-destructive/20 text-destructive border-destructive/30',
-  completed: 'bg-accent/20 text-accent border-accent/30',
-  cancelled: 'bg-muted text-muted-foreground border-border',
+const statusMap: Record<string, { label: string; color: string; icon: any }> = {
+  pending: { label: 'Pending', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', icon: Clock },
+  approved: { label: 'Approved', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', icon: CheckCircle2 },
+  rejected: { label: 'Rejected', color: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400', icon: XCircle },
+  completed: { label: 'Completed', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', icon: CheckCircle2 },
+  cancelled: { label: 'Cancelled', color: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400', icon: Ban },
 };
 
 export default function BookingsManagement() {
@@ -60,6 +77,7 @@ export default function BookingsManagement() {
 
   const updateDriver = async (id: string, driver: string) => {
     await supabase.from('bookings').update({ driver }).eq('id', id);
+    toast({ title: 'Driver assigned' });
   };
 
   const carName = (id: string | null) => cars.find((c) => c.id === id)?.name || '—';
@@ -70,78 +88,189 @@ export default function BookingsManagement() {
     return true;
   });
 
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Bookings Management</h1>
+  const summary = {
+    total: bookings.length,
+    pending: bookings.filter(b => b.status === 'pending').length,
+    completed: bookings.filter(b => b.status === 'completed').length
+  };
 
-      <div className="flex gap-3 flex-wrap">
-        <Input placeholder="Search by client name..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-64" />
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-          </SelectContent>
-        </Select>
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Bookings</h1>
+          <p className="text-muted-foreground">Manage and track all client vehicle reservations.</p>
+        </div>
       </div>
 
-      <div className="border rounded-lg overflow-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {[
+          { label: 'Total Reservations', value: summary.total, icon: Calendar, color: 'text-blue-600 bg-blue-50' },
+          { label: 'Pending Approval', value: summary.pending, icon: Clock, color: 'text-amber-600 bg-amber-50' },
+          { label: 'Successful Trips', value: summary.completed, icon: CheckCircle2, color: 'text-emerald-600 bg-emerald-50' },
+        ].map((s, i) => (
+          <Card key={i} className="border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800">
+            <CardContent className="p-6 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">{s.label}</p>
+                <p className="text-2xl font-bold mt-1 tracking-tight">{s.value}</p>
+              </div>
+              <div className={cn("p-2.5 rounded-xl", s.color)}>
+                <s.icon className="w-5 h-5" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center justify-between">
+        <div className="flex flex-1 items-center gap-3 max-w-md">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search bookings..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 bg-white dark:bg-zinc-900"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-40 bg-white dark:bg-zinc-900">
+              <div className="flex items-center gap-2">
+                <Filter className="w-3.5 h-3.5" />
+                <SelectValue placeholder="All Status" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-zinc-900 border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 rounded-2xl overflow-hidden">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-zinc-50 dark:bg-zinc-800/50">
             <TableRow>
-              <TableHead>Client</TableHead>
-              <TableHead>Car</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Driver</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead className="font-semibold px-6 py-4">Client Details</TableHead>
+              <TableHead className="font-semibold">Vehicle</TableHead>
+              <TableHead className="font-semibold">Schedule</TableHead>
+              <TableHead className="font-semibold">Payment</TableHead>
+              <TableHead className="font-semibold">Status</TableHead>
+              <TableHead className="font-semibold">Attendant</TableHead>
+              <TableHead className="font-semibold text-right px-6">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.map((b) => (
-              <TableRow key={b.id}>
-                <TableCell>
-                  <p className="font-medium">{b.client_name}</p>
-                  {b.client_phone && <p className="text-xs text-muted-foreground">{b.client_phone}</p>}
-                </TableCell>
-                <TableCell>{carName(b.car_id)}</TableCell>
-                <TableCell>{b.booking_date}</TableCell>
-                <TableCell className="max-w-[150px] truncate">{b.pickup_location}</TableCell>
-                <TableCell>${Number(b.total_price).toLocaleString()}</TableCell>
-                <TableCell>
-                  <Badge variant="outline" className={statusColors[b.status] || ''}>{b.status}</Badge>
-                </TableCell>
-                <TableCell>
-                  <Input
-                    placeholder="Assign"
-                    defaultValue={b.driver || ''}
-                    className="h-8 w-28 text-xs"
-                    onBlur={(e) => updateDriver(b.id, e.target.value)}
-                  />
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-1">
-                    {b.status === 'pending' && (
-                      <>
-                        <Button size="sm" variant="outline" className="text-green-600 h-7 text-xs" onClick={() => updateStatus(b.id, 'approved')}>Approve</Button>
-                        <Button size="sm" variant="outline" className="text-destructive h-7 text-xs" onClick={() => updateStatus(b.id, 'rejected')}>Reject</Button>
-                      </>
-                    )}
-                    {b.status === 'approved' && (
-                      <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(b.id, 'completed')}>Complete</Button>
-                    )}
+              <TableRow key={b.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors border-zinc-100 dark:border-zinc-800">
+                <TableCell className="px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400 font-bold text-xs">
+                      {b.client_name.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">{b.client_name}</p>
+                      {b.client_phone && (
+                        <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                          <User className="w-3 h-3" /> {b.client_phone}
+                        </p>
+                      )}
+                    </div>
                   </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CarFront className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>{carName(b.car_id)}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-xs">
+                      <Calendar className="w-3 h-3 text-zinc-400" />
+                      <span>{b.booking_date}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-zinc-500 max-w-[140px] truncate">
+                      <MapPin className="w-3 h-3 text-zinc-400 shrink-0" />
+                      {b.pickup_location}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
+                    ${Number(b.total_price).toLocaleString()}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline" className={cn("h-6 text-[10px] px-2 font-medium gap-1 border-none", statusMap[b.status]?.color)}>
+                    {(() => {
+                      const Icon = statusMap[b.status]?.icon;
+                      return Icon && <Icon className="w-3 h-3" />;
+                    })()}
+                    {statusMap[b.status]?.label || b.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="relative group">
+                    <Input
+                      placeholder="Assign driver..."
+                      defaultValue={b.driver || ''}
+                      className="h-8 w-32 text-[10px] bg-transparent focus-visible:ring-1 focus-visible:ring-primary border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2"
+                      onBlur={(e) => updateDriver(b.id, e.target.value)}
+                    />
+                  </div>
+                </TableCell>
+                <TableCell className="text-right px-6">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40 rounded-xl overflow-hidden border-zinc-200 dark:border-zinc-800">
+                      {b.status === 'pending' && (
+                        <>
+                          <DropdownMenuItem onClick={() => updateStatus(b.id, 'approved')} className="gap-2 text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 cursor-pointer">
+                            <Check className="w-4 h-4" /> Approve
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateStatus(b.id, 'rejected')} className="gap-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer">
+                            <Ban className="w-4 h-4" /> Reject
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                      {b.status === 'approved' && (
+                        <DropdownMenuItem onClick={() => updateStatus(b.id, 'completed')} className="gap-2 focus:bg-blue-50 cursor-pointer">
+                          <Check className="w-4 h-4" /> Complete Trip
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem className="gap-2 cursor-pointer">
+                        View Details
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
             {filtered.length === 0 && (
-              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No bookings found</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-20">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="p-3 rounded-full bg-zinc-50 dark:bg-zinc-800/50">
+                      <Search className="w-6 h-6 text-zinc-300" />
+                    </div>
+                    <p className="text-sm font-medium text-zinc-500">No matching bookings found</p>
+                    <Button variant="link" onClick={() => { setSearch(''); setStatusFilter('all'); }} className="text-primary text-xs h-auto p-0">
+                      Clear filters
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>

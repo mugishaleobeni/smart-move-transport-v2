@@ -46,14 +46,14 @@
     --glass-border: 220 14% 90% / 0.6;
     --glass-shadow: 220 14% 10% / 0.08;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 220 14% 20%;
-    --sidebar-primary: 220 70% 45%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 222 47% 11%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 92%;
-    --sidebar-accent-foreground: 220 14% 15%;
-    --sidebar-border: 220 14% 90%;
-    --sidebar-ring: 220 70% 45%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 222 47% 11%;
   }
 
   .dark {

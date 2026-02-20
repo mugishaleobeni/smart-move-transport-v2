@@ -46,19 +46,22 @@ export function AdminSidebar() {
     <Sidebar className="border-r border-sidebar-border">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-accent text-accent-foreground">
+          <div className="p-2 rounded-lg bg-primary text-white shadow-sm">
             <Car className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-foreground">Smart Move</h2>
-            <p className="text-xs text-muted-foreground">Admin Panel</p>
+            <h2 className="text-sm font-bold text-black dark:text-white">Smart Move</h2>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">Admin Panel</p>
           </div>
         </div>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupContent>
+          <div className="px-3 py-2">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-2 px-2">
+              Main Menu
+            </p>
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.to}>
@@ -68,30 +71,33 @@ export function AdminSidebar() {
                       end={item.to === '/admin'}
                       className={({ isActive }) =>
                         cn(
-                          "flex items-center gap-3 px-3 py-2 rounded-lg transition-smooth w-full",
+                          "flex items-center gap-3 px-3 py-2 rounded-lg transition-smooth w-full group",
                           isActive
-                            ? "bg-primary text-primary-foreground font-semibold shadow-sm"
-                            : "text-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                            ? "bg-primary !text-white font-semibold shadow-md"
+                            : "text-zinc-900 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-black dark:hover:text-white"
                         )
                       }
                     >
-                      <item.icon className="w-4 h-4 shrink-0" />
+                      <item.icon className={cn(
+                        "w-4 h-4 shrink-0 transition-colors",
+                        "text-zinc-500 group-hover:text-black dark:text-zinc-400 dark:group-hover:text-white"
+                      )} />
                       <span className="truncate">{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
-          </SidebarGroupContent>
+          </div>
         </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="p-2 border-t border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleLogout} className="text-destructive hover:bg-destructive/10">
+            <SidebarMenuButton onClick={handleLogout} className="w-full justify-start gap-3 px-3 py-2 text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30 transition-colors">
               <LogOut className="w-4 h-4" />
-              <span>Logout</span>
+              <span className="font-medium">Logout</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
