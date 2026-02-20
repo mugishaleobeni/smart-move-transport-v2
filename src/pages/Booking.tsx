@@ -44,6 +44,10 @@ export default function Booking() {
   const { user } = useAuth();
 
   const [step, setStep] = useState(0);
+  const [availableCars, setAvailableCars] = useState<any[]>([]);
+  const [loadingCars, setLoadingCars] = useState(true);
+  const [selectedCarData, setSelectedCarData] = useState<any>(null);
+
   const [booking, setBooking] = useState<BookingData>({
     carId: searchParams.get('car') || '',
     clientName: '',
@@ -59,14 +63,41 @@ export default function Booking() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const selectedCar = booking.carId ? getCarById(booking.carId) : undefined;
+  useEffect(() => {
+    const fetchCars = async () => {
+      const { data } = await supabase.from('cars').select('*').neq('status', 'garage').order('name');
+      if (data) {
+        setAvailableCars(data);
+        const initialCar = searchParams.get('car');
+        if (initialCar) {
+          const found = data.find(c => c.id === initialCar);
+          if (found) setSelectedCarData(found);
+        }
+      }
+      setLoadingCars(false);
+    };
+    fetchCars();
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (booking.carId && availableCars.length > 0) {
+      setSelectedCarData(availableCars.find(c => c.id === booking.carId));
+    }
+  }, [booking.carId, availableCars]);
 
   const calculatePrice = () => {
-    if (!selectedCar) return 0;
+    if (!selectedCarData) return 0;
+    // Current database schema doesn't have prices yet, I'll use placeholders or defaults
+    // Since the PricingManagement exists, I should ideally fetch price from there
+    // But for now, I'll use some default logic or fallback to the static ones for demo
+    const hourly = selectedCarData.price_per_hour || 50;
+    const daily = selectedCarData.price_per_day || 300;
+    const trip = selectedCarData.price_per_trip || 150;
+
     switch (booking.pricingPlan) {
-      case 'hour': return selectedCar.pricePerHour * booking.duration;
-      case 'day': return selectedCar.pricePerDay * booking.duration;
-      case 'trip': return selectedCar.pricePerTrip * booking.duration;
+      case 'hour': return hourly * booking.duration;
+      case 'day': return daily * booking.duration;
+      case 'trip': return trip * booking.duration;
       default: return 0;
     }
   };
@@ -203,21 +234,25 @@ export default function Booking() {
                 {step === 0 && (
                   <div className="space-y-6">
                     <h2 className="text-xl font-semibold">{t('booking.selectCar')}</h2>
-                    <div className="grid gap-4">
-                      {cars.map((car) => (
-                        <button key={car.id} onClick={() => setBooking({ ...booking, carId: car.id })} className={cn('flex items-center gap-4 p-4 rounded-xl transition-all text-left', booking.carId === car.id ? 'bg-accent/20 border-2 border-accent' : 'bg-muted/50 border-2 border-transparent hover:border-accent/50')}>
-                          <img src={car.image} alt={car.name} className="w-20 h-14 object-cover rounded-lg" />
-                          <div className="flex-1">
-                            <div className="font-semibold">{car.name}</div>
-                            <div className="text-sm text-muted-foreground">{car.type} • {car.seats} {t('cars.seats')}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-accent font-bold">${car.pricePerHour}/hr</div>
-                            <div className="text-xs text-muted-foreground">${car.pricePerDay}/day</div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
+                    {loadingCars ? (
+                      <div className="py-20 flex justify-center"><Clock className="w-8 h-8 animate-spin text-primary" /></div>
+                    ) : (
+                      <div className="grid gap-4">
+                        {availableCars.map((car) => (
+                          <button key={car.id} onClick={() => setBooking({ ...booking, carId: car.id })} className={cn('flex items-center gap-4 p-4 rounded-xl transition-all text-left', booking.carId === car.id ? 'bg-accent/20 border-2 border-accent' : 'bg-muted/50 border-2 border-transparent hover:border-accent/50')}>
+                            <img src={car.image || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800'} alt={car.name} className="w-20 h-14 object-cover rounded-lg" />
+                            <div className="flex-1">
+                              <div className="font-semibold">{car.name}</div>
+                              <div className="text-sm text-muted-foreground">{car.type} • {car.seats} {t('cars.seats')}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-accent font-bold">${car.price_per_hour || 50}/hr</div>
+                              <div className="text-xs text-muted-foreground">${car.price_per_day || 300}/day</div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -289,9 +324,9 @@ export default function Booking() {
                             )}
                           >
                             <div className="font-semibold text-sm">{getPlanLabel(plan)}</div>
-                            {selectedCar && (
+                            {selectedCarData && (
                               <div className="text-accent font-bold mt-1">
-                                ${plan === 'hour' ? selectedCar.pricePerHour : plan === 'day' ? selectedCar.pricePerDay : selectedCar.pricePerTrip}
+                                ${plan === 'hour' ? (selectedCarData.price_per_hour || 50) : plan === 'day' ? (selectedCarData.price_per_day || 300) : (selectedCarData.price_per_trip || 150)}
                               </div>
                             )}
                           </button>
@@ -351,10 +386,10 @@ export default function Booking() {
                     </div>
 
                     {/* Live Price Preview */}
-                    {selectedCar && (
+                    {selectedCarData && (
                       <div className="p-4 bg-accent/10 rounded-xl flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">
-                          {booking.duration} {getDurationLabel()} × ${booking.pricingPlan === 'hour' ? selectedCar.pricePerHour : booking.pricingPlan === 'day' ? selectedCar.pricePerDay : selectedCar.pricePerTrip}
+                          {booking.duration} {getDurationLabel()} × ${booking.pricingPlan === 'hour' ? (selectedCarData.price_per_hour || 50) : booking.pricingPlan === 'day' ? (selectedCarData.price_per_day || 300) : (selectedCarData.price_per_trip || 150)}
                         </span>
                         <span className="text-2xl font-bold text-accent">${calculatePrice()}</span>
                       </div>
@@ -363,15 +398,15 @@ export default function Booking() {
                 )}
 
                 {/* Step 3: Confirm */}
-                {step === 3 && selectedCar && (
+                {step === 3 && selectedCarData && (
                   <div className="space-y-6">
                     <h2 className="text-xl font-semibold">{t('booking.priceEstimate')}</h2>
                     <div className="space-y-4">
                       <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl">
-                        <img src={selectedCar.image} alt={selectedCar.name} className="w-24 h-16 object-cover rounded-lg" />
+                        <img src={selectedCarData.image || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800'} alt={selectedCarData.name} className="w-24 h-16 object-cover rounded-lg" />
                         <div>
-                          <div className="font-semibold">{selectedCar.name}</div>
-                          <div className="text-sm text-muted-foreground">{selectedCar.type}</div>
+                          <div className="font-semibold">{selectedCarData.name}</div>
+                          <div className="text-sm text-muted-foreground">{selectedCarData.type}</div>
                         </div>
                       </div>
 

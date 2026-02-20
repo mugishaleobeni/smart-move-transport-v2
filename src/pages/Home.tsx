@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Star, Shield, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { cars } from '@/data/cars';
 import { Layout } from '@/components/layout/Layout';
+import { supabase } from '@/integrations/supabase/client';
 
 const heroImages = [
   'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1200&q=80&auto=format',
@@ -14,6 +14,10 @@ const heroImages = [
 ];
 
 export default function Home() {
+  const [featuredCars, setFeaturedCars] = useState<any[]>([]);
+  useEffect(() => {
+    supabase.from('cars').select('*').limit(3).then(({ data }) => { if (data) setFeaturedCars(data); });
+  }, []);
   const { t } = useLanguage();
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -135,7 +139,7 @@ export default function Home() {
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {cars.slice(0, 3).map((car, i) => (
+            {featuredCars.map((car, i) => (
               <motion.div
                 key={car.id}
                 initial={{ opacity: 0, y: 30 }}

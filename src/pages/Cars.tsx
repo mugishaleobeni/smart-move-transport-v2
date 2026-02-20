@@ -1,13 +1,46 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Phone, MessageCircle } from 'lucide-react';
+import { Users, Phone, MessageCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { cars } from '@/data/cars';
 import { Layout } from '@/components/layout/Layout';
+import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+
+interface CarItem {
+  id: string;
+  name: string;
+  type: string;
+  seats: number;
+  image: string | null;
+  status: string;
+}
 
 export default function Cars() {
   const { t } = useLanguage();
+  const [carsList, setCarsList] = useState<CarItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCars = async () => {
+      const { data } = await supabase.from('cars').select('*').order('name');
+      if (data) setCarsList(data as CarItem[]);
+      setLoading(false);
+    };
+    fetchCars();
+  }, []);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <Clock className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -38,7 +71,7 @@ export default function Cars() {
 
           {/* Car Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {cars.map((car, i) => (
+            {carsList.map((car, i) => (
               <motion.div
                 key={car.id}
                 initial={{ opacity: 0, y: 30 }}
@@ -49,13 +82,16 @@ export default function Cars() {
                 {/* Image */}
                 <div className="aspect-[16/10] overflow-hidden relative">
                   <img
-                    src={car.image}
+                    src={car.image || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800'}
                     alt={car.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                   />
-                  <div className="absolute top-4 right-4 glass px-3 py-1 rounded-full text-sm font-medium">
-                    {car.type}
+                  <div className={cn(
+                    "absolute top-4 right-4 glass px-3 py-1 rounded-full text-sm font-medium",
+                    car.status === 'garage' ? "bg-rose-500/80 text-white" : "text-foreground"
+                  )}>
+                    {car.status === 'garage' ? 'Maintenance' : car.type}
                   </div>
                 </div>
 
@@ -69,25 +105,26 @@ export default function Cars() {
                   </div>
 
                   {/* Price */}
-                  <div className="flex flex-wrap gap-3 mb-6 text-sm">
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent">
-                      ${car.pricePerHour}{t('cars.perHour')}
-                    </span>
-                    <span className="px-3 py-1 rounded-full bg-accent/10 text-accent">
-                      ${car.pricePerDay}{t('cars.perDay')}
-                    </span>
+                  <div className="flex flex-wrap gap-2 mb-6 text-sm">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block w-full mb-1">Starting from</span>
+                    <Badge variant="secondary" className="bg-accent/10 text-accent border-none font-bold">
+                      Available on Request
+                    </Badge>
                   </div>
 
                   {/* Actions */}
                   <div className="grid grid-cols-2 gap-3">
-                    <Link to={`/cars/${car.id}`}>
+                    <Link to={`/Cars/${car.id}`} className="flex-1">
                       <Button variant="outline" className="w-full glass">
                         {t('cars.viewDetails')}
                       </Button>
                     </Link>
-                    <Link to={`/booking?car=${car.id}`}>
-                      <Button className="w-full btn-accent text-white">
-                        {t('cars.bookNow')}
+                    <Link to={car.status === 'garage' ? '#' : `/booking?car=${car.id}`} className="flex-1">
+                      <Button
+                        className={cn("w-full btn-accent text-white", car.status === 'garage' && "opacity-50 cursor-not-allowed")}
+                        disabled={car.status === 'garage'}
+                      >
+                        {car.status === 'garage' ? 'In Garage' : t('cars.bookNow')}
                       </Button>
                     </Link>
                   </div>
