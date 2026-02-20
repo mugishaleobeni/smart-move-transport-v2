@@ -174,9 +174,11 @@ export function AdminTopbar() {
           </div>
           <div className="hidden sm:block">
             <p className="text-xs font-bold leading-none text-zinc-900 dark:text-zinc-100">
-              {user?.email?.split('@')[0] || 'Administrator'}
+              {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Administrator'}
             </p>
-            <p className="text-[10px] text-zinc-400 mt-0.5 font-medium">System Manager</p>
+            <p className="text-[10px] text-zinc-400 mt-0.5 font-medium truncate max-w-[120px]">
+              {user?.email}
+            </p>
           </div>
         </div>
       </div>

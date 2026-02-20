@@ -22,14 +22,17 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(form.email, form.password);
+    const { error, isAdmin } = await signIn(form.email, form.password);
     setLoading(false);
     if (error) {
       toast({ title: 'Login failed', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: 'Welcome back!' });
-      // Small delay to ensure isAdmin state is set before navigating
-      setTimeout(() => navigate('/admin'), 100);
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     }
   };
 

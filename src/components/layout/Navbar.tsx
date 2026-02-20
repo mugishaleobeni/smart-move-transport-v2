@@ -44,11 +44,10 @@ export function Navbar() {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`text-sm font-medium transition-smooth hover:text-accent ${
-                  isActive(link.to)
+                className={`text-sm font-medium transition-smooth hover:text-accent ${isActive(link.to)
                     ? 'text-accent'
                     : 'text-foreground/80'
-                }`}
+                  }`}
               >
                 {link.label}
               </Link>
@@ -83,18 +82,32 @@ export function Navbar() {
 
             {/* Auth Buttons */}
             {user ? (
-              <>
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col items-end hidden lg:flex">
+                  <span className="text-xs font-bold text-foreground">
+                    {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground leading-none">
+                    {isAdmin ? 'Administrator' : 'Client'}
+                  </span>
+                </div>
                 {isAdmin && (
                   <Link to="/admin">
-                    <Button variant="ghost" size="sm" className="gap-1">
-                      <Shield className="w-4 h-4" /> Admin
+                    <Button variant="ghost" size="sm" className="gap-1 h-9 px-3">
+                      <Shield className="w-4 h-4 text-accent" />
+                      <span className="hidden lg:inline">Dashboard</span>
                     </Button>
                   </Link>
                 )}
-                <Button variant="ghost" size="sm" onClick={() => { signOut(); navigate('/'); }}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { signOut(); navigate('/'); }}
+                  className="h-9 px-3 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20"
+                >
                   {t('nav.logout')}
                 </Button>
-              </>
+              </div>
             ) : (
               <>
                 <Link to="/login">
@@ -132,11 +145,10 @@ export function Navbar() {
                   key={link.to}
                   to={link.to}
                   onClick={() => setIsOpen(false)}
-                  className={`block py-2 text-base font-medium transition-smooth ${
-                    isActive(link.to)
+                  className={`block py-2 text-base font-medium transition-smooth ${isActive(link.to)
                       ? 'text-accent'
                       : 'text-foreground/80'
-                  }`}
+                    }`}
                 >
                   {link.label}
                 </Link>

@@ -7,7 +7,7 @@ interface AuthContextType {
   session: Session | null;
   isAdmin: boolean;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any; isAdmin?: boolean }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -20,7 +20,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const checkAdmin = async (userId: string): Promise<boolean> => {
+  // Mock admin credentials
+  const MOCK_ADMIN = {
+    email: 'leo@gmail.com',
+    password: '123456',
+    id: 'mock-admin-id'
+  };
+
+  const checkAdmin = async (userId: string, email?: string): Promise<boolean> => {
+    // Check for mock admin email
+    if (email === MOCK_ADMIN.email || userId === MOCK_ADMIN.id) {
+      setIsAdmin(true);
+      return true;
+    }
+
     try {
       const { data } = await supabase.rpc('has_role', {
         _user_id: userId,
@@ -42,10 +55,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (!isMounted) return;
+
+        // If we have a mock admin, don't let Supabase state change clear it
+        const isMockAdmin = !!localStorage.getItem('mock_admin_user');
+        if (isMockAdmin && !session) return;
+
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          setTimeout(() => checkAdmin(session.user.id), 0);
+          setTimeout(() => checkAdmin(session.user.id, session.user.email), 0);
         } else {
           setIsAdmin(false);
         }
@@ -57,11 +75,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!isMounted) return;
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await checkAdmin(session.user.id);
+
+        // Check for persisted mock admin
+        const persistedMockAdmin = localStorage.getItem('mock_admin_user');
+        if (persistedMockAdmin) {
+          const mockUser = JSON.parse(persistedMockAdmin);
+          setUser(mockUser);
+          setIsAdmin(true);
+        } else if (session?.user) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          await checkAdmin(session.user.id, session.user.email);
         }
+      } catch (err) {
+        console.error('Initialization error:', err);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -76,11 +103,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (!error && data.session?.user) {
-      await checkAdmin(data.session.user.id);
+    // Handle mock login
+    if (email === MOCK_ADMIN.email && password === MOCK_ADMIN.password) {
+      const mockUser = {
+        id: MOCK_ADMIN.id,
+        email: MOCK_ADMIN.email,
+        aud: 'authenticated',
+        role: 'authenticated',
+        app_metadata: {},
+        user_metadata: { full_name: 'Leo Admin' },
+        created_at: new Date().toISOString(),
+      } as User;
+
+      setUser(mockUser);
+      setIsAdmin(true);
+      setLoading(false);
+      localStorage.setItem('mock_admin_user', JSON.stringify(mockUser));
+      return { error: null, isAdmin: true };
     }
-    return { error };
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    let adminStatus = false;
+    if (!error && data.session?.user) {
+      adminStatus = await checkAdmin(data.session.user.id, data.session.user.email);
+    }
+    return { error, isAdmin: adminStatus };
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
@@ -97,7 +144,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
     setIsAdmin(false);
+    localStorage.removeItem('mock_admin_user');
   };
 
   return (
