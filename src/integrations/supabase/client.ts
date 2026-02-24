@@ -29,11 +29,11 @@ class MockQueryBuilder {
     // Initial static data to prevent empty screens
     if (table === 'cars') {
       this.data = [
-        { id: '1', name: 'Toyota Land Cruiser', type: 'SUV', seats: 7, status: 'available', pricePerHour: 50, pricePerDay: 300, features: ['4WD', 'AC'], image: 'https://images.unsplash.com/photo-1594611110477-6cc9da17e33f?w=800' },
-        { id: '2', name: 'Mercedes S-Class', type: 'Luxury Sedan', seats: 5, status: 'available', pricePerHour: 80, pricePerDay: 450, features: ['Leather Seats'], image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800' },
-        { id: '3', name: 'Toyota HiAce', type: 'Van', seats: 14, status: 'available', pricePerHour: 40, pricePerDay: 200, features: ['Spacious'], image: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=800' },
-        { id: '4', name: 'Range Rover Sport', type: 'SUV', seats: 5, status: 'available', pricePerHour: 70, pricePerDay: 400, features: ['Premium Sound'], image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800' },
-        { id: '5', name: 'Toyota Corolla', type: 'Sedan', seats: 5, status: 'available', pricePerHour: 25, pricePerDay: 120, features: ['Fuel Efficient'], image: 'https://images.unsplash.com/photo-1623869675781-80aa31012a5a?w=800' },
+        { id: 'toyota-land-cruiser', name: 'Toyota Land Cruiser', type: 'SUV', seats: 7, status: 'available', pricePerHour: 50, pricePerDay: 300, features: ['4WD', 'AC'], image: 'https://images.unsplash.com/photo-1594611110477-6cc9da17e33f?w=800' },
+        { id: 'mercedes-s-class', name: 'Mercedes S-Class', type: 'Luxury Sedan', seats: 5, status: 'available', pricePerHour: 80, pricePerDay: 450, features: ['Leather Seats'], image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800' },
+        { id: 'toyota-hiace', name: 'Toyota HiAce', type: 'Van', seats: 14, status: 'available', pricePerHour: 40, pricePerDay: 200, features: ['Spacious'], image: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=800' },
+        { id: 'range-rover-sport', name: 'Range Rover Sport', type: 'SUV', seats: 5, status: 'available', pricePerHour: 70, pricePerDay: 400, features: ['Premium Sound'], image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800' },
+        { id: 'toyota-corolla', name: 'Toyota Corolla', type: 'Sedan', seats: 5, status: 'available', pricePerHour: 25, pricePerDay: 120, features: ['Fuel Efficient'], image: 'https://images.unsplash.com/photo-1623869675781-80aa31012a5a?w=800' },
       ];
     } else if (table === 'notifications') {
       this.data = [

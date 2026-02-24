@@ -41,70 +41,23 @@ export function AIAssistant() {
     let assistantContent = '';
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
-      });
+      // Mock/Demo response logic
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      if (!response.ok) {
-        if (response.status === 429) {
-          throw new Error('Rate limit exceeded. Please try again later.');
-        }
-        if (response.status === 402) {
-          throw new Error('Service temporarily unavailable.');
-        }
-        throw new Error('Failed to get response');
-      }
+      const responses = [
+        "Welcome to Smart Move Transport! How can I help you today?",
+        "We offer premium car rentals in Kigali with a focus on luxury and comfort.",
+        "Our fleet includes the latest Mercedes-Benz, Range Rover, and Toyota Land Cruisers.",
+        "You can book a car directly through our booking page. Would you like a link?",
+        "We provide professional chauffeurs for all our rentals to ensure your safety and comfort."
+      ];
 
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error('No reader available');
+      assistantContent = responses[Math.floor(Math.random() * responses.length)];
 
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex: number;
-        while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
-          let line = buffer.slice(0, newlineIndex);
-          buffer = buffer.slice(newlineIndex + 1);
-
-          if (line.endsWith('\r')) line = line.slice(0, -1);
-          if (line.startsWith(':') || line.trim() === '') continue;
-          if (!line.startsWith('data: ')) continue;
-
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === '[DONE]') break;
-
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              assistantContent += content;
-              setMessages(prev => {
-                const last = prev[prev.length - 1];
-                if (last?.role === 'assistant') {
-                  return prev.map((m, i) =>
-                    i === prev.length - 1 ? { ...m, content: assistantContent } : m
-                  );
-                }
-                return [...prev, { role: 'assistant', content: assistantContent }];
-              });
-            }
-          } catch {
-            buffer = line + '\n' + buffer;
-            break;
-          }
-        }
-      }
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: assistantContent }
+      ]);
     } catch (error) {
       console.error('AI Chat error:', error);
       setMessages(prev => [
@@ -127,18 +80,21 @@ export function AIAssistant() {
     <>
       {/* Floating Button */}
       <motion.button
+        drag
+        dragConstraints={{ left: 0, right: 0, top: -400, bottom: 400 }}
+        dragElastic={0.1}
         onClick={() => setIsOpen(true)}
         className={cn(
-          'fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300',
-          'bg-accent text-accent-foreground hover:scale-110 glow',
+          'fixed left-0 top-1/2 -translate-y-1/2 z-50 w-12 h-14 rounded-r-2xl shadow-lg flex items-center justify-center transition-all duration-300 touch-none',
+          'bg-accent text-accent-foreground hover:translate-x-1 glow px-2',
           isOpen && 'scale-0 opacity-0'
         )}
-        whileHover={{ scale: 1.1 }}
+        whileHover={{ x: 5 }}
         whileTap={{ scale: 0.95 }}
         aria-label="Open AI Assistant"
       >
-        <MessageCircle className="w-6 h-6" />
-        <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+        <Bot className="w-6 h-6" />
+        <span className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
       </motion.button>
 
       {/* Chat Panel */}

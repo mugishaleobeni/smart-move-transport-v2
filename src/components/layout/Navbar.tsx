@@ -30,12 +30,9 @@ export function Navbar() {
           <div className="flex items-center justify-between h-16 md:h-20">
 
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="p-2 rounded-lg bg-primary text-primary-foreground transition-smooth group-hover:scale-105">
-                <Car className="w-5 h-5 md:w-6 md:h-6" />
-              </div>
-              <span className="text-lg md:text-xl font-bold text-metallic-gold hidden sm:block">
-                Smart Move
+            <Link to="/" className="flex items-center group">
+              <span className="text-xl md:text-2xl font-black tracking-tighter text-metallic-gold uppercase transition-smooth group-hover:scale-105">
+                Smart<span className="text-accent">Move</span>
               </span>
             </Link>
 
