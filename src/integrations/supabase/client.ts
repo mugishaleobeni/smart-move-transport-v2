@@ -35,6 +35,22 @@ class MockQueryBuilder {
         { id: 'range-rover-sport', name: 'Range Rover Sport', type: 'SUV', seats: 5, status: 'available', pricePerHour: 70, pricePerDay: 400, features: ['Premium Sound'], image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800' },
         { id: 'toyota-corolla', name: 'Toyota Corolla', type: 'Sedan', seats: 5, status: 'available', pricePerHour: 25, pricePerDay: 120, features: ['Fuel Efficient'], image: 'https://images.unsplash.com/photo-1623869675781-80aa31012a5a?w=800' },
       ];
+    } else if (table === 'bookings') {
+      this.data = [
+        { id: 'b1', client_name: 'John Doe', client_phone: '+250 788 123 456', car_id: 'toyota-land-cruiser', booking_date: '2026-02-20', pickup_location: 'Kigali International Airport', total_price: 600, status: 'completed', driver: 'Alpha', created_at: '2026-02-15T10:00:00Z' },
+        { id: 'b2', client_name: 'Jane Smith', client_phone: '+250 788 654 321', car_id: 'mercedes-s-class', booking_date: '2026-02-24', pickup_location: 'Kigali Serena Hotel', total_price: 450, status: 'approved', driver: 'Bravo', created_at: '2026-02-22T14:30:00Z' },
+        { id: 'b3', client_name: 'Robert Wilson', client_phone: '+250 788 999 888', car_id: 'toyota-hiace', booking_date: '2026-02-25', pickup_location: 'Gisenyi Waterfront', total_price: 200, status: 'pending', driver: null, created_at: '2026-02-23T09:15:00Z' },
+        { id: 'b4', client_name: 'Alice Brown', client_phone: '+250 788 111 222', car_id: 'range-rover-sport', booking_date: '2026-01-15', pickup_location: 'Kigali City Tower', total_price: 800, status: 'completed', driver: 'Charlie', created_at: '2026-01-14T11:00:00Z' },
+        { id: 'b5', client_name: 'David Lee', client_phone: '+250 788 333 444', car_id: 'toyota-corolla', booking_date: '2026-03-01', pickup_location: 'Kimironko Market', total_price: 120, status: 'approved', driver: null, created_at: '2026-02-24T16:00:00Z' },
+      ];
+    } else if (table === 'expenses') {
+      this.data = [
+        { id: 'e1', car_id: 'toyota-land-cruiser', amount: 150, description: 'Fuel Refill & Oil Change', expense_date: '2026-02-18' },
+        { id: 'e2', car_id: 'mercedes-s-class', amount: 300, description: 'Brake Pad Replacement', expense_date: '2026-02-20' },
+        { id: 'e3', car_id: null, amount: 500, description: 'Office Rent & Utilities', expense_date: '2026-02-01' },
+        { id: 'e4', car_id: 'toyota-hiace', amount: 80, description: 'Tire Repair', expense_date: '2026-02-22' },
+        { id: 'e5', car_id: 'toyota-land-cruiser', amount: 1200, description: 'Insurance Renewal', expense_date: '2026-01-10' },
+      ];
     } else if (table === 'notifications') {
       this.data = [
         { id: '1', title: 'Welcome Admin', message: 'You have successfully logged into the mock system.', type: 'info', is_read: false, created_at: new Date().toISOString() },
@@ -42,11 +58,11 @@ class MockQueryBuilder {
       ];
     } else if (table === 'pricing_rules') {
       this.data = [
-        { id: 'p1', car_id: '1', pricing_type: 'hour', amount: 50, location: 'Kigali City', notes: 'Standard rate' },
-        { id: 'p2', car_id: '1', pricing_type: 'day', amount: 300, location: 'Kigali City', notes: 'Daily discount' },
-        { id: 'p3', car_id: '2', pricing_type: 'hour', amount: 80, location: 'Airport', notes: 'VIP service' },
-        { id: 'p4', car_id: '3', pricing_type: 'trip', amount: 150, location: 'Musanze', notes: 'One way trip' },
-        { id: 'p5', car_id: '4', pricing_type: 'day', amount: 400, location: 'Across Rwanda', notes: 'Includes driver' },
+        { id: 'p1', car_id: 'toyota-land-cruiser', pricing_type: 'hour', amount: 50, location: 'Kigali City', notes: 'Standard rate' },
+        { id: 'p2', car_id: 'toyota-land-cruiser', pricing_type: 'day', amount: 300, location: 'Kigali City', notes: 'Daily discount' },
+        { id: 'p3', car_id: 'mercedes-s-class', pricing_type: 'hour', amount: 80, location: 'Airport', notes: 'VIP service' },
+        { id: 'p4', car_id: 'toyota-hiace', pricing_type: 'trip', amount: 150, location: 'Musanze', notes: 'One way trip' },
+        { id: 'p5', car_id: 'range-rover-sport', pricing_type: 'day', amount: 400, location: 'Across Rwanda', notes: 'Includes driver' },
       ];
     } else {
       this.data = [];
