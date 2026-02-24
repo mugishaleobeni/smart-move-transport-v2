@@ -13,10 +13,14 @@ export function Layout({ children }: LayoutProps) {
     <div className="min-h-screen flex flex-col">
       <OfflineBanner />
       <Navbar />
-      <main className="flex-1 pt-16 md:pt-20">
+      {/* pb-20 on mobile = clearance for the fixed bottom nav; hidden on md+ */}
+      <main className="flex-1 pt-16 md:pt-20 pb-20 md:pb-0">
         {children}
       </main>
-      <Footer />
+      {/* Footer hidden on mobile — bottom nav handles navigation there */}
+      <div className="hidden md:block">
+        <Footer />
+      </div>
       <AIAssistant />
     </div>
   );

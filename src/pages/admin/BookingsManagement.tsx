@@ -1,12 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Search,
   Filter,
@@ -19,8 +12,19 @@ import {
   Calendar,
   MoreVertical,
   Check,
-  Ban
+  Ban,
+  Plus,
+  DollarSign
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
@@ -51,6 +55,8 @@ export default function BookingsManagement() {
   const [cars, setCars] = useState<CarOption[]>([]);
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ client_name: '', client_phone: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], pickup_location: '', total_price: 0 });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -73,6 +79,24 @@ export default function BookingsManagement() {
     await supabase.from('bookings').update({ status }).eq('id', id);
     toast({ title: `Booking ${status}` });
     fetchBookings();
+  };
+
+  const handleSave = async () => {
+    if (!form.client_name || !form.car_id || !form.booking_date) {
+      toast({ title: 'Missing Info', description: 'Please fill in client name, car, and date.', variant: 'destructive' });
+      return;
+    }
+    const { error } = await supabase.from('bookings').insert({
+      ...form,
+      total_price: Number(form.total_price),
+      status: 'approved'
+    });
+    if (!error) {
+      toast({ title: 'Booking Registered', description: `Trip for ${form.client_name} confirmed.` });
+      setOpen(false);
+      setForm({ client_name: '', client_phone: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], pickup_location: '', total_price: 0 });
+      fetchBookings();
+    }
   };
 
   const updateDriver = async (id: string, driver: string) => {
@@ -101,6 +125,57 @@ export default function BookingsManagement() {
           <h1 className="text-3xl font-bold tracking-tight">Bookings</h1>
           <p className="text-muted-foreground">Manage and track all client vehicle reservations.</p>
         </div>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2 px-6 h-11 rounded-xl shadow-lg">
+              <Plus className="w-5 h-5" /> Register Trip
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md bg-background border-border">
+            <DialogHeader>
+              <DialogTitle>Manual Trip Registration</DialogTitle>
+              <DialogDescription>Enter client and trip details to secure a vehicle.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Client Name</Label>
+                <Input value={form.client_name} onChange={(e) => setForm({ ...form, client_name: e.target.value })} placeholder="Customer Full Name" className="bg-background" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Phone Number</Label>
+                  <Input value={form.client_phone} onChange={(e) => setForm({ ...form, client_phone: e.target.value })} placeholder="+250..." className="bg-background" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Select Vehicle</Label>
+                  <Select value={form.car_id} onValueChange={(v) => setForm({ ...form, car_id: v })}>
+                    <SelectTrigger className="bg-background"><SelectValue placeholder="Choose car" /></SelectTrigger>
+                    <SelectContent>
+                      {cars.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Pickup Date</Label>
+                  <Input type="date" value={form.booking_date} onChange={(e) => setForm({ ...form, booking_date: e.target.value })} className="bg-background" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Trip Total ($)</Label>
+                  <Input type="number" value={form.total_price} onChange={(e) => setForm({ ...form, total_price: Number(e.target.value) })} className="bg-background" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Pickup Location</Label>
+                <Input value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} placeholder="Address or Airport" className="bg-background" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={handleSave} className="w-full h-11">Complete Registration</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -131,11 +206,11 @@ export default function BookingsManagement() {
               placeholder="Search bookings..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-white dark:bg-zinc-900"
+              className="pl-9 bg-background border-border"
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40 bg-white dark:bg-zinc-900">
+            <SelectTrigger className="w-40 bg-background border-border">
               <div className="flex items-center gap-2">
                 <Filter className="w-3.5 h-3.5" />
                 <SelectValue placeholder="All Status" />
