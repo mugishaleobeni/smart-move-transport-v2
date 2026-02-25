@@ -23,7 +23,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { ActionConfirmation } from '@/components/dashboard/ActionConfirmation';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Expense { id: string; car_id: string | null; amount: number; description: string; expense_date: string; }
 interface CarOption { id: string; name: string; }
@@ -36,6 +37,8 @@ export default function ExpensesManagement() {
   const [form, setForm] = useState({ car_id: '', amount: 0, description: '', expense_date: new Date().toISOString().split('T')[0] });
   const [editId, setEditId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -74,8 +77,16 @@ export default function ExpensesManagement() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Delete this expense record?")) {
-      await supabase.from('expenses').delete().eq('id', id);
+    setExpenseToDelete(id);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!expenseToDelete) return;
+    const { error } = await supabase.from('expenses').delete().eq('id', expenseToDelete);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
       toast({ title: 'Expense deleted', variant: "destructive" });
       fetchExpenses();
     }
@@ -278,6 +289,15 @@ export default function ExpensesManagement() {
           </TableBody>
         </Table>
       </div>
+      <ActionConfirmation
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={confirmDelete}
+        title="Delete Expense"
+        description="Are you sure you want to remove this expense record? This action cannot be undone."
+        confirmText="Delete record"
+        variant="destructive"
+      />
     </div>
   );
 }

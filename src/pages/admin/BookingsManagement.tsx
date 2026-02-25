@@ -26,7 +26,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ActionConfirmation } from '@/components/dashboard/ActionConfirmation';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Booking {
   id: string;
@@ -56,6 +57,8 @@ export default function BookingsManagement() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{ id: string; status: string; label: string } | null>(null);
   const [form, setForm] = useState({ client_name: '', client_phone: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], pickup_location: '', total_price: 0 });
   const { toast } = useToast();
 
@@ -73,6 +76,15 @@ export default function BookingsManagement() {
   const fetchBookings = async () => {
     const { data } = await supabase.from('bookings').select('*').order('created_at', { ascending: false });
     if (data) setBookings(data as Booking[]);
+  };
+
+  const handleStatusUpdate = (id: string, status: string, label: string) => {
+    if (status === 'rejected' || status === 'cancelled') {
+      setPendingAction({ id, status, label });
+      setConfirmOpen(true);
+    } else {
+      updateStatus(id, status);
+    }
   };
 
   const updateStatus = async (id: string, status: string) => {
@@ -311,16 +323,16 @@ export default function BookingsManagement() {
                     <DropdownMenuContent align="end" className="w-40 rounded-xl overflow-hidden border-zinc-200 dark:border-zinc-800">
                       {b.status === 'pending' && (
                         <>
-                          <DropdownMenuItem onClick={() => updateStatus(b.id, 'approved')} className="gap-2 text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 cursor-pointer">
+                          <DropdownMenuItem onClick={() => handleStatusUpdate(b.id, 'approved', 'Approve')} className="gap-2 text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 cursor-pointer">
                             <Check className="w-4 h-4" /> Approve
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => updateStatus(b.id, 'rejected')} className="gap-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer">
+                          <DropdownMenuItem onClick={() => handleStatusUpdate(b.id, 'rejected', 'Reject')} className="gap-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer">
                             <Ban className="w-4 h-4" /> Reject
                           </DropdownMenuItem>
                         </>
                       )}
                       {b.status === 'approved' && (
-                        <DropdownMenuItem onClick={() => updateStatus(b.id, 'completed')} className="gap-2 focus:bg-blue-50 cursor-pointer">
+                        <DropdownMenuItem onClick={() => handleStatusUpdate(b.id, 'completed', 'Complete')} className="gap-2 focus:bg-blue-50 cursor-pointer">
                           <Check className="w-4 h-4" /> Complete Trip
                         </DropdownMenuItem>
                       )}
@@ -350,6 +362,16 @@ export default function BookingsManagement() {
           </TableBody>
         </Table>
       </div>
+
+      <ActionConfirmation
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => pendingAction && updateStatus(pendingAction.id, pendingAction.status)}
+        title={`${pendingAction?.label} Booking`}
+        description={`Are you sure you want to ${pendingAction?.label.toLowerCase()} this booking? This action might be permanent.`}
+        confirmText={pendingAction?.label}
+        variant={pendingAction?.status === 'rejected' ? 'destructive' : 'default'}
+      />
     </div>
   );
 }

@@ -30,6 +30,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 import { Progress } from "@/components/ui/progress";
 import { motion } from 'framer-motion';
+import ActionConfirmation from '@/components/dashboard/ActionConfirmation';
 
 interface CarRow {
   id: string;
@@ -54,6 +55,8 @@ export default function CarsManagement() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
   const { toast } = useToast();
 
   useEffect(() => { fetchCars(); }, []);
@@ -139,9 +142,18 @@ export default function CarsManagement() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Are you sure you want to remove ${name}?`)) {
-      await supabase.from('cars').delete().eq('id', id);
-      toast({ title: 'Vehicle deleted', variant: 'destructive' });
+    setItemToDelete({ id, name });
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+    const { id, name } = itemToDelete;
+    const { error } = await supabase.from('cars').delete().eq('id', id);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Vehicle deleted', description: `${name} has been removed.`, variant: 'destructive' });
       fetchCars();
     }
   };
@@ -311,7 +323,7 @@ export default function CarsManagement() {
               placeholder="Filter by brand, model or type..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 h-10 rounded-xl bg-slate-50 border-none focus-visible:ring-1"
+              className="pl-10 h-10 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border-none focus-visible:ring-1"
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -482,6 +494,16 @@ export default function CarsManagement() {
           </Button>
         </div>
       )}
+
+      <ActionConfirmation
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={confirmDelete}
+        title="Remove Vehicle"
+        description={`Are you sure you want to delete ${itemToDelete?.name}? This action cannot be undone.`}
+        confirmText="Delete Vehicle"
+        variant="destructive"
+      />
     </div>
   );
 }

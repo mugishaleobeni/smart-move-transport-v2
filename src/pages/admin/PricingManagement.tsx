@@ -23,8 +23,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-
-interface CarOption { id: string; name: string; }
+import { ActionConfirmation } from '@/components/dashboard/ActionConfirmation';
+import { motion, AnimatePresence } from 'framer-motion';
 interface PricingRule { id: string; car_id: string; pricing_type: string; amount: number; location: string | null; notes: string | null; }
 
 export default function PricingManagement() {
@@ -34,6 +34,8 @@ export default function PricingManagement() {
   const [form, setForm] = useState({ car_id: '', pricing_type: 'hour', amount: 0, location: '', notes: '' });
   const [editId, setEditId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [ruleToDelete, setRuleToDelete] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -67,8 +69,16 @@ export default function PricingManagement() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Permanently delete this pricing rule?")) {
-      await supabase.from('pricing_rules').delete().eq('id', id);
+    setRuleToDelete(id);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!ruleToDelete) return;
+    const { error } = await supabase.from('pricing_rules').delete().eq('id', ruleToDelete);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
       toast({ title: 'Rule deleted', variant: "destructive" });
       fetchRules();
     }
@@ -278,6 +288,15 @@ export default function PricingManagement() {
           </TableBody>
         </Table>
       </Card>
+      <ActionConfirmation
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={confirmDelete}
+        title="Delete Pricing Rule"
+        description="Are you sure you want to permanently delete this pricing rule? This will affect new bookings."
+        confirmText="Delete Rule"
+        variant="destructive"
+      />
     </div>
   );
 }
