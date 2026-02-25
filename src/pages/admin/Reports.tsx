@@ -123,8 +123,8 @@ export default function Reports() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
           { label: 'Reservations Processed', value: summary.bookings, icon: Target, color: 'text-blue-600 bg-blue-50', note: 'During selected dates' },
-          { label: 'Gross Period Income', value: `$${summary.income.toLocaleString()}`, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50', note: 'Pre-expense total' },
-          { label: 'Calculated Net Profit', value: `$${(summary.income - summary.expenses).toLocaleString()}`, icon: ArrowUpRight, color: 'text-indigo-600 bg-indigo-50', note: 'After operational costs' },
+          { label: 'Gross Period Income', value: `RWF ${summary.income.toLocaleString()}`, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50', note: 'Pre-expense total' },
+          { label: 'Calculated Net Profit', value: `RWF ${(summary.income - summary.expenses).toLocaleString()}`, icon: ArrowUpRight, color: 'text-indigo-600 bg-indigo-50', note: 'After operational costs' },
         ].map((item, i) => (
           <Card key={i} className="border-none card-premium overflow-hidden group hover:ring-primary/20">
             <CardContent className="p-6">
@@ -175,14 +175,14 @@ export default function Reports() {
               ) : carProfits.map((c) => (
                 <TableRow key={c.name} className="hover:bg-zinc-50/20 dark:hover:bg-zinc-800/20 transition-colors border-zinc-50 dark:border-zinc-800">
                   <TableCell className="px-8 py-5 font-bold text-slate-900 dark:text-zinc-100">{c.name}</TableCell>
-                  <TableCell className="text-emerald-600 font-semibold">${c.income.toLocaleString()}</TableCell>
-                  <TableCell className="text-rose-600 font-semibold">-${c.expense.toLocaleString()}</TableCell>
+                  <TableCell className="text-emerald-600 font-semibold">RWF {c.income.toLocaleString()}</TableCell>
+                  <TableCell className="text-rose-600 font-semibold">-RWF {c.expense.toLocaleString()}</TableCell>
                   <TableCell className="text-right px-8">
                     <span className={cn(
                       "inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black",
                       c.profit >= 0 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400' : 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-400'
                     )}>
-                      ${c.profit.toLocaleString()}
+                      RWF {c.profit.toLocaleString()}
                     </span>
                   </TableCell>
                 </TableRow>

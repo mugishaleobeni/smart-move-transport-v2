@@ -144,7 +144,7 @@ export default function PricingManagement() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold">Amount (USD)</Label>
+                    <Label className="text-sm font-semibold">Amount (RWF)</Label>
                     <div className="relative">
                       <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: parseFloat(e.target.value) || 0 })} className="h-11 pl-9 rounded-lg" />
@@ -203,7 +203,7 @@ export default function PricingManagement() {
             <TableRow className="hover:bg-transparent border-zinc-100 dark:border-zinc-800">
               <TableHead className="font-bold text-xs uppercase px-6 py-4">Vehicle Model</TableHead>
               <TableHead className="font-bold text-xs uppercase">Structure</TableHead>
-              <TableHead className="font-bold text-xs uppercase">Rate (USD)</TableHead>
+              <TableHead className="font-bold text-xs uppercase">Rate (RWF)</TableHead>
               <TableHead className="font-bold text-xs uppercase">Coverage</TableHead>
               <TableHead className="font-bold text-xs uppercase">Observations</TableHead>
               <TableHead className="font-bold text-xs uppercase text-right px-6">Actions</TableHead>
@@ -227,7 +227,7 @@ export default function PricingManagement() {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-lg font-black text-primary">${rule.amount}</span>
+                    <span className="text-lg font-black text-primary">RWF {rule.amount}</span>
                     <span className="text-[10px] font-medium text-slate-400">/ trip</span>
                   </div>
                 </TableCell>
