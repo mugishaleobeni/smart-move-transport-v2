@@ -40,7 +40,12 @@ const COLORS = [
 export default function Analytics() {
   const [incomePerCar, setIncomePerCar] = useState<any[]>([]);
   const [expensePerCar, setExpensePerCar] = useState<any[]>([]);
-  const [insights, setInsights] = useState({ mostProfitable: '', highestCost: '', totalBookings: 0 });
+  const [insights, setInsights] = useState({
+    mostProfitable: '',
+    highestCost: '',
+    totalBookings: 0,
+    monthlyBest: { name: '', amount: 0 }
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -81,10 +86,26 @@ export default function Analytics() {
     const sorted = Object.entries(profitMap).sort(([, a], [, b]) => b - a);
     const highCost = Object.entries(expenseMap).sort(([, a], [, b]) => b - a);
 
+    // Calculate monthly best
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const monthlyIncomeMap: Record<string, number> = {};
+    (bookings || []).forEach((b: any) => {
+      const bDate = new Date(b.created_at || b.booking_date);
+      if (b.car_id && bDate.getMonth() === currentMonth && bDate.getFullYear() === currentYear) {
+        monthlyIncomeMap[b.car_id] = (monthlyIncomeMap[b.car_id] || 0) + Number(b.total_price || 0);
+      }
+    });
+
+    const monthlySorted = Object.entries(monthlyIncomeMap).sort(([, a], [, b]) => b - a);
+
     setInsights({
       mostProfitable: sorted[0] ? carMap[sorted[0][0]] || 'N/A' : 'N/A',
       highestCost: highCost[0] ? carMap[highCost[0][0]] || 'N/A' : 'N/A',
       totalBookings: bookings?.length || 0,
+      monthlyBest: monthlySorted[0] ? { name: carMap[monthlySorted[0][0]] || 'N/A', amount: monthlySorted[0][1] } : { name: 'N/A', amount: 0 }
     });
     setLoading(false);
   };
@@ -109,8 +130,15 @@ export default function Analytics() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
+          {
+            label: 'Monthly Top Performer',
+            value: insights.monthlyBest.name,
+            icon: Zap,
+            color: 'text-amber-600 bg-amber-50',
+            sub: `Earned $${insights.monthlyBest.amount.toLocaleString()} this month`
+          },
           { label: 'Most Profitable Car', value: insights.mostProfitable, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50', sub: 'Highest net margin' },
           { label: 'Highest Cost Vehicle', value: insights.highestCost, icon: AlertTriangle, color: 'text-rose-600 bg-rose-50', sub: 'Needs maintenance review' },
           { label: 'Total Reservations', value: insights.totalBookings, icon: Briefcase, color: 'text-blue-600 bg-blue-50', sub: 'Across all models' },

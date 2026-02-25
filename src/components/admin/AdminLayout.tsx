@@ -18,7 +18,18 @@ export function AdminLayout() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-primary"
+              animate={{ x: [-64, 64] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+            />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+            Authenticating
+          </span>
+        </div>
       </div>
     );
   }

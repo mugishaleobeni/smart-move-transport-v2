@@ -26,11 +26,27 @@ const ExpensesManagement = lazy(() => import("./pages/admin/ExpensesManagement")
 const Analytics = lazy(() => import("./pages/admin/Analytics"));
 const Reports = lazy(() => import("./pages/admin/Reports"));
 
+import { NavProgressBar } from "./components/layout/NavProgressBar";
+
 const queryClient = new QueryClient();
 
 const Loading = () => (
-  <div className="flex items-center justify-center h-64">
-    <div className="animate-pulse text-muted-foreground">Loading...</div>
+  <div className="flex items-center justify-center min-h-[400px]">
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-16 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+        <motion.div
+          className="h-full bg-primary shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+          animate={{
+            x: [-64, 64],
+            opacity: [0.5, 1, 0.5]
+          }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+        />
+      </div>
+      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 animate-pulse">
+        System Sync
+      </span>
+    </div>
   </div>
 );
 
@@ -43,6 +59,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <NavProgressBar />
               <ScrollToTop />
               <Routes>
                 <Route path="/" element={<Home />} />
