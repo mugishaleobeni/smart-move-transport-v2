@@ -246,8 +246,8 @@ export default function Booking() {
                               <div className="text-sm text-muted-foreground">{car.type} • {car.seats} {t('cars.seats')}</div>
                             </div>
                             <div className="text-right">
-                              <div className="text-accent font-bold">${car.price_per_hour || 50}/hr</div>
-                              <div className="text-xs text-muted-foreground">${car.price_per_day || 300}/day</div>
+                              <div className="text-accent font-bold">RWF {car.price_per_hour || 50}/hr</div>
+                              <div className="text-xs text-muted-foreground">RWF {car.price_per_day || 300}/day</div>
                             </div>
                           </button>
                         ))}
@@ -326,7 +326,7 @@ export default function Booking() {
                             <div className="font-semibold text-sm">{getPlanLabel(plan)}</div>
                             {selectedCarData && (
                               <div className="text-accent font-bold mt-1">
-                                ${plan === 'hour' ? (selectedCarData.price_per_hour || 50) : plan === 'day' ? (selectedCarData.price_per_day || 300) : (selectedCarData.price_per_trip || 150)}
+                                RWF {plan === 'hour' ? (selectedCarData.price_per_hour || 50) : plan === 'day' ? (selectedCarData.price_per_day || 300) : (selectedCarData.price_per_trip || 150)}
                               </div>
                             )}
                           </button>
@@ -389,9 +389,9 @@ export default function Booking() {
                     {selectedCarData && (
                       <div className="p-4 bg-accent/10 rounded-xl flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">
-                          {booking.duration} {getDurationLabel()} × ${booking.pricingPlan === 'hour' ? (selectedCarData.price_per_hour || 50) : booking.pricingPlan === 'day' ? (selectedCarData.price_per_day || 300) : (selectedCarData.price_per_trip || 150)}
+                          {booking.duration} {getDurationLabel()} × RWF {booking.pricingPlan === 'hour' ? (selectedCarData.price_per_hour || 50) : booking.pricingPlan === 'day' ? (selectedCarData.price_per_day || 300) : (selectedCarData.price_per_trip || 150)}
                         </span>
-                        <span className="text-2xl font-bold text-accent">${calculatePrice()}</span>
+                        <span className="text-2xl font-bold text-accent">RWF {calculatePrice()}</span>
                       </div>
                     )}
                   </div>
@@ -434,7 +434,7 @@ export default function Booking() {
 
                       <div className="p-6 bg-accent/10 rounded-xl flex items-center justify-between">
                         <div className="text-lg font-semibold">{t('booking.total')}</div>
-                        <div className="text-3xl font-bold text-accent">${calculatePrice()}</div>
+                        <div className="text-3xl font-bold text-accent">RWF {calculatePrice()}</div>
                       </div>
                     </div>
                   </div>

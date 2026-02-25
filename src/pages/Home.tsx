@@ -164,7 +164,7 @@ export default function Home() {
                       </p>
                       <div className="flex items-center justify-between">
                         <span className="text-2xl font-bold text-accent">
-                          ${car.pricePerDay}
+                          RWF {car.pricePerDay || car.price_per_day || 300}
                           <span className="text-sm font-normal text-muted-foreground">
                             {t('cars.perDay')}
                           </span>

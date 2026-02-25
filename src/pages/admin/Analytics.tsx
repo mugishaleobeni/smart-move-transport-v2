@@ -137,7 +137,7 @@ export default function Analytics() {
             value: insights.monthlyBest.name,
             icon: Zap,
             color: 'text-amber-600 bg-amber-50',
-            sub: `Earned $${insights.monthlyBest.amount.toLocaleString()} this month`
+            sub: `Earned RWF ${insights.monthlyBest.amount.toLocaleString()} this month`
           },
           { label: 'Most Profitable Car', value: insights.mostProfitable, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50', sub: 'Highest net margin' },
           { label: 'Highest Cost Vehicle', value: insights.highestCost, icon: AlertTriangle, color: 'text-rose-600 bg-rose-50', sub: 'Needs maintenance review' },
@@ -188,7 +188,7 @@ export default function Analytics() {
                       axisLine={false}
                       tickLine={false}
                       tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
-                      tickFormatter={(value) => `$${value}`}
+                      tickFormatter={(value) => `RWF ${value}`}
                     />
                     <Tooltip
                       contentStyle={{

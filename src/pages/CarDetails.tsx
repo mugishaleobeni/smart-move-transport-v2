@@ -90,9 +90,8 @@ export default function CarDetails() {
                         <button
                           key={i}
                           onClick={() => setCurrentImage(i)}
-                          className={`w-2 h-2 rounded-full transition-all ${
-                            currentImage === i ? 'w-6 bg-accent' : 'bg-white/50'
-                          }`}
+                          className={`w-2 h-2 rounded-full transition-all ${currentImage === i ? 'w-6 bg-accent' : 'bg-white/50'
+                            }`}
                         />
                       ))}
                     </div>
@@ -107,9 +106,8 @@ export default function CarDetails() {
                     <button
                       key={i}
                       onClick={() => setCurrentImage(i)}
-                      className={`w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${
-                        currentImage === i ? 'border-accent' : 'border-transparent opacity-60'
-                      }`}
+                      className={`w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${currentImage === i ? 'border-accent' : 'border-transparent opacity-60'
+                        }`}
                     >
                       <img src={img} alt="" className="w-full h-full object-cover" />
                     </button>
@@ -141,15 +139,15 @@ export default function CarDetails() {
                   <h3 className="text-lg font-semibold mb-4">{t('cars.pricing')}</h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="glass rounded-xl p-4 text-center">
-                      <div className="text-2xl font-bold text-accent">${car.pricePerHour}</div>
+                      <div className="text-2xl font-bold text-accent">RWF {car.pricePerHour}</div>
                       <div className="text-sm text-muted-foreground">{t('cars.perHour')}</div>
                     </div>
                     <div className="glass rounded-xl p-4 text-center">
-                      <div className="text-2xl font-bold text-accent">${car.pricePerTrip}</div>
+                      <div className="text-2xl font-bold text-accent">RWF {car.pricePerTrip}</div>
                       <div className="text-sm text-muted-foreground">{t('cars.perTrip')}</div>
                     </div>
                     <div className="glass rounded-xl p-4 text-center">
-                      <div className="text-2xl font-bold text-accent">${car.pricePerDay}</div>
+                      <div className="text-2xl font-bold text-accent">RWF {car.pricePerDay}</div>
                       <div className="text-sm text-muted-foreground">{t('cars.perDay')}</div>
                     </div>
                   </div>
