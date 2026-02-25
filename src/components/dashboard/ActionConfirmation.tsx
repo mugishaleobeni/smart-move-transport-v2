@@ -16,7 +16,7 @@ interface ActionConfirmationProps {
     icon?: React.ReactNode;
 }
 
-const ActionConfirmation = ({
+export const ActionConfirmation = ({
     isOpen,
     onClose,
     onConfirm,
@@ -122,4 +122,3 @@ const ActionConfirmation = ({
     );
 };
 
-export default ActionConfirmation;

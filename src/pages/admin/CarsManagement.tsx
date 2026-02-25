@@ -30,7 +30,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 import { Progress } from "@/components/ui/progress";
 import { motion } from 'framer-motion';
-import ActionConfirmation from '@/components/dashboard/ActionConfirmation';
+import { ActionConfirmation } from '@/components/dashboard/ActionConfirmation';
 
 interface CarRow {
   id: string;
