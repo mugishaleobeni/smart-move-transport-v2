@@ -126,7 +126,7 @@ export default function Reports() {
           { label: 'Gross Period Income', value: `$${summary.income.toLocaleString()}`, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50', note: 'Pre-expense total' },
           { label: 'Calculated Net Profit', value: `$${(summary.income - summary.expenses).toLocaleString()}`, icon: ArrowUpRight, color: 'text-indigo-600 bg-indigo-50', note: 'After operational costs' },
         ].map((item, i) => (
-          <Card key={i} className="border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 overflow-hidden group">
+          <Card key={i} className="border-none card-premium overflow-hidden group hover:ring-primary/20">
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <div className={cn("p-2.5 rounded-xl transition-colors", item.color)}>
@@ -144,7 +144,7 @@ export default function Reports() {
         ))}
       </div>
 
-      <Card className="border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 rounded-3xl overflow-hidden">
+      <Card className="border-none card-premium rounded-3xl overflow-hidden bg-white dark:bg-zinc-900">
         <CardHeader className="bg-zinc-50/50 dark:bg-zinc-800/30 border-b border-zinc-100 dark:border-zinc-800 flex flex-row items-center justify-between p-8">
           <div>
             <CardTitle className="text-xl font-bold flex items-center gap-2">

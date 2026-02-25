@@ -299,18 +299,14 @@ export default function CarsManagement() {
           { label: 'Available Cars', value: fleetStats.available, icon: CheckCircle2, color: 'bg-emerald-50 text-emerald-600' },
           { label: 'In Garage', value: fleetStats.inMaintenance, icon: AlertCircle, color: 'bg-rose-50 text-rose-600' },
         ].map((s, i) => (
-          <Card key={i} className="border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 overflow-hidden group">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400">{s.label}</p>
-                  <p className="text-3xl font-bold mt-1 tracking-tight text-slate-900 dark:text-white group-hover:scale-105 transition-transform origin-left duration-300">{s.value}</p>
-                </div>
-                <div className={cn("p-2.5 rounded-xl", s.color)}>
-                  <s.icon className="w-5 h-5" />
-                </div>
-              </div>
-            </CardContent>
+          <Card key={i} className="border-none card-premium p-6 flex items-center gap-4 bg-white dark:bg-zinc-900">
+            <div className={cn("p-3 rounded-2xl", s.color)}>
+              <s.icon className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider">{s.label}</p>
+              <p className="text-2xl font-black text-slate-900 dark:text-white">{s.value}</p>
+            </div>
           </Card>
         ))}
       </div>

@@ -196,7 +196,7 @@ export default function BookingsManagement() {
           { label: 'Pending Approval', value: summary.pending, icon: Clock, color: 'text-amber-600 bg-amber-50' },
           { label: 'Successful Trips', value: summary.completed, icon: CheckCircle2, color: 'text-emerald-600 bg-emerald-50' },
         ].map((s, i) => (
-          <Card key={i} className="border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800">
+          <Card className="border-none card-premium overflow-hidden bg-white dark:bg-zinc-900">
             <CardContent className="p-6 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">{s.label}</p>

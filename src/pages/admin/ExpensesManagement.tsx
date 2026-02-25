@@ -168,23 +168,20 @@ export default function ExpensesManagement() {
           </Dialog>
         </div>
       </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {[
           { label: 'Cumulative Spending', value: `$${totalAmount.toLocaleString()}`, icon: TrendingDown, color: 'text-rose-600 bg-rose-50' },
           { label: 'Active Cost Centers', value: cars.length, icon: Car, color: 'text-blue-600 bg-blue-50' },
           { label: 'Total Entries', value: filtered.length, icon: Receipt, color: 'text-amber-600 bg-amber-50' },
         ].map((s, i) => (
-          <Card key={i} className="border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 overflow-hidden">
-            <CardContent className="p-6 flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{s.label}</p>
-                <p className="text-2xl font-bold mt-1 tracking-tight">{s.value}</p>
-              </div>
-              <div className={cn("p-2.5 rounded-xl", s.color)}>
-                <s.icon className="w-5 h-5" />
-              </div>
-            </CardContent>
+          <Card key={i} className="border-none card-premium p-6 flex items-center justify-between bg-white dark:bg-zinc-900">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{s.label}</p>
+              <p className="text-2xl font-bold mt-1 tracking-tight">{s.value}</p>
+            </div>
+            <div className={cn("p-2.5 rounded-xl", s.color)}>
+              <s.icon className="w-5 h-5" />
+            </div>
           </Card>
         ))}
       </div>
@@ -298,6 +295,6 @@ export default function ExpensesManagement() {
         confirmText="Delete record"
         variant="destructive"
       />
-    </div>
+    </div >
   );
 }

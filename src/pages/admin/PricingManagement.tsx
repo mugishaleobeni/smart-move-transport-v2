@@ -183,7 +183,7 @@ export default function PricingManagement() {
           { label: 'Standard Daily Rates', value: rules.filter(r => r.pricing_type === 'day').length, icon: Calendar, color: 'text-amber-600 bg-amber-50' },
           { label: 'Fixed Trip Rates', value: rules.filter(r => r.pricing_type === 'trip').length, icon: MapPin, color: 'text-emerald-600 bg-emerald-50' },
         ].map((s, i) => (
-          <Card key={i} className="border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 overflow-hidden">
+          <Card key={i} className="border-none card-premium overflow-hidden bg-white dark:bg-zinc-900">
             <CardContent className="p-6 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{s.label}</p>

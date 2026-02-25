@@ -115,7 +115,7 @@ export default function Analytics() {
           { label: 'Highest Cost Vehicle', value: insights.highestCost, icon: AlertTriangle, color: 'text-rose-600 bg-rose-50', sub: 'Needs maintenance review' },
           { label: 'Total Reservations', value: insights.totalBookings, icon: Briefcase, color: 'text-blue-600 bg-blue-50', sub: 'Across all models' },
         ].map((item, i) => (
-          <Card key={i} className="border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 overflow-hidden group hover:ring-primary/20 transition-all">
+          <Card key={i} className="border-none card-premium overflow-hidden group hover:ring-primary/20 transition-all">
             <CardContent className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <div className={cn("p-2.5 rounded-xl", item.color)}>
@@ -136,7 +136,7 @@ export default function Analytics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 overflow-hidden">
+        <Card className="border-none card-premium overflow-hidden">
           <CardHeader className="bg-zinc-50/50 dark:bg-zinc-800/20 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-primary" />
@@ -182,7 +182,7 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 overflow-hidden">
+        <Card className="border-none card-premium overflow-hidden">
           <CardHeader className="bg-zinc-50/50 dark:bg-zinc-800/20 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2">
               <PieChartIcon className="w-4 h-4 text-primary" />

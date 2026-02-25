@@ -208,7 +208,7 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08, duration: 0.4 }}
           >
-            <Card className="overflow-hidden border-none shadow-sm bg-white dark:bg-zinc-900 ring-1 ring-zinc-200 dark:ring-zinc-800">
+            <Card className="overflow-hidden border-none card-premium bg-white dark:bg-zinc-900">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className={cn("p-2.5 rounded-xl", card.color)}>
