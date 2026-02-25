@@ -136,25 +136,25 @@ export default function Dashboard() {
     {
       title: 'Gross Revenue',
       subtitle: 'Total earnings',
-      value: `$${stats.totalIncome.toLocaleString()}`,
+      value: `RWF ${stats.totalIncome.toLocaleString()}`,
       icon: DollarSign,
       color: 'bg-emerald-500/10 text-emerald-600',
-      trend: '+$4.2k this month',
+      trend: '+RWF 4.2k this month',
       isPositive: true
     },
     {
       title: 'Monthly Expenses',
       subtitle: 'Operation costs',
-      value: `$${stats.totalExpenses.toLocaleString()}`,
+      value: `RWF ${stats.totalExpenses.toLocaleString()}`,
       icon: Receipt,
       color: 'bg-rose-500/10 text-rose-600',
-      trend: '-$1.1k vs last month',
+      trend: '-RWF 1.1k vs last month',
       isPositive: false
     },
     {
       title: 'Net Profit',
       subtitle: 'Total margin',
-      value: `$${(stats.totalIncome - stats.totalExpenses).toLocaleString()}`,
+      value: `RWF ${(stats.totalIncome - stats.totalExpenses).toLocaleString()}`,
       icon: TrendingUp,
       color: 'bg-indigo-500/10 text-indigo-600',
       trend: '18.4% profit margin',
@@ -284,7 +284,7 @@ export default function Dashboard() {
                       axisLine={false}
                       tickLine={false}
                       tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                      tickFormatter={(value) => `$${value}`}
+                      tickFormatter={(value) => `RWF ${value}`}
                     />
                     <Tooltip
                       contentStyle={{
@@ -345,7 +345,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold">${Number(b.total_price).toLocaleString()}</p>
+                    <p className="text-sm font-bold">RWF {Number(b.total_price).toLocaleString()}</p>
                     <Badge className={cn("h-5 text-[10px] px-2 font-medium capitalize mt-1", statusMap[b.status]?.color)}>
                       {statusMap[b.status]?.label || b.status}
                     </Badge>

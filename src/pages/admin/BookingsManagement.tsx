@@ -174,7 +174,7 @@ export default function BookingsManagement() {
                   <Input type="date" value={form.booking_date} onChange={(e) => setForm({ ...form, booking_date: e.target.value })} className="bg-background" />
                 </div>
                 <div className="space-y-2">
-                  <Label>Trip Total ($)</Label>
+                  <Label>Trip Total (RWF)</Label>
                   <Input type="number" value={form.total_price} onChange={(e) => setForm({ ...form, total_price: Number(e.target.value) })} className="bg-background" />
                 </div>
               </div>
@@ -291,7 +291,7 @@ export default function BookingsManagement() {
                 </TableCell>
                 <TableCell>
                   <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
-                    ${Number(b.total_price).toLocaleString()}
+                    RWF {Number(b.total_price).toLocaleString()}
                   </span>
                 </TableCell>
                 <TableCell>

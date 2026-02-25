@@ -170,7 +170,7 @@ export default function ExpensesManagement() {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {[
-          { label: 'Cumulative Spending', value: `$${totalAmount.toLocaleString()}`, icon: TrendingDown, color: 'text-rose-600 bg-rose-50' },
+          { label: 'Cumulative Spending', value: `RWF ${totalAmount.toLocaleString()}`, icon: TrendingDown, color: 'text-rose-600 bg-rose-50' },
           { label: 'Active Cost Centers', value: cars.length, icon: Car, color: 'text-blue-600 bg-blue-50' },
           { label: 'Total Entries', value: filtered.length, icon: Receipt, color: 'text-amber-600 bg-amber-50' },
         ].map((s, i) => (
@@ -245,7 +245,7 @@ export default function ExpensesManagement() {
                 </TableCell>
                 <TableCell>
                   <span className="text-lg font-black text-rose-600">
-                    -${Number(e.amount).toLocaleString()}
+                    -RWF {Number(e.amount).toLocaleString()}
                   </span>
                 </TableCell>
                 <TableCell className="text-right px-6">
