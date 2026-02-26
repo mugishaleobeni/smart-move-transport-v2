@@ -18,6 +18,7 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import ScrollToTop from "./components/layout/ScrollToTop";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
 const CarsManagement = lazy(() => import("./pages/admin/CarsManagement"));
@@ -70,14 +71,16 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/contact" element={<Contact />} />
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<Suspense fallback={<Loading />}><Dashboard /></Suspense>} />
-                  <Route path="cars" element={<Suspense fallback={<Loading />}><CarsManagement /></Suspense>} />
-                  <Route path="pricing" element={<Suspense fallback={<Loading />}><PricingManagement /></Suspense>} />
-                  <Route path="bookings" element={<Suspense fallback={<Loading />}><BookingsManagement /></Suspense>} />
-                  <Route path="expenses" element={<Suspense fallback={<Loading />}><ExpensesManagement /></Suspense>} />
-                  <Route path="analytics" element={<Suspense fallback={<Loading />}><Analytics /></Suspense>} />
-                  <Route path="reports" element={<Suspense fallback={<Loading />}><Reports /></Suspense>} />
+                <Route element={<ProtectedRoute adminOnly />}>
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<Suspense fallback={<Loading />}><Dashboard /></Suspense>} />
+                    <Route path="cars" element={<Suspense fallback={<Loading />}><CarsManagement /></Suspense>} />
+                    <Route path="pricing" element={<Suspense fallback={<Loading />}><PricingManagement /></Suspense>} />
+                    <Route path="bookings" element={<Suspense fallback={<Loading />}><BookingsManagement /></Suspense>} />
+                    <Route path="expenses" element={<Suspense fallback={<Loading />}><ExpensesManagement /></Suspense>} />
+                    <Route path="analytics" element={<Suspense fallback={<Loading />}><Analytics /></Suspense>} />
+                    <Route path="reports" element={<Suspense fallback={<Loading />}><Reports /></Suspense>} />
+                  </Route>
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

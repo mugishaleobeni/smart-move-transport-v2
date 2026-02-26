@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
+import { MessageCircle, X, Send, Sparkles, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,14 @@ export function AIAssistant() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
   const isOnline = useOnlineStatus();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -80,21 +88,21 @@ export function AIAssistant() {
     <>
       {/* Floating Button */}
       <motion.button
-        drag
-        dragConstraints={{ left: 0, right: 0, top: -400, bottom: 400 }}
+        drag={isMobile ? "y" : false}
+        dragConstraints={{ top: -400, bottom: 400 }}
         dragElastic={0.1}
         onClick={() => setIsOpen(true)}
         className={cn(
-          'fixed left-0 top-1/2 -translate-y-1/2 z-50 w-12 h-14 rounded-r-2xl shadow-lg flex items-center justify-center transition-all duration-300 touch-none',
-          'bg-accent text-accent-foreground hover:translate-x-1 glow px-2',
+          'fixed right-0 top-1/2 -translate-y-1/2 z-50 w-12 h-14 rounded-l-2xl shadow-lg flex items-center justify-center transition-all duration-300 touch-none',
+          'bg-accent text-accent-foreground hover:-translate-x-1 glow px-2',
           isOpen && 'scale-0 opacity-0'
         )}
-        whileHover={{ x: 5 }}
+        whileHover={!isMobile ? { x: -5 } : {}}
         whileTap={{ scale: 0.95 }}
         aria-label="Open AI Assistant"
       >
-        <Bot className="w-6 h-6" />
-        <span className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+        <Sparkles className="w-6 h-6" />
+        <span className="absolute top-2 left-2 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
       </motion.button>
 
       {/* Chat Panel */}
@@ -110,7 +118,7 @@ export function AIAssistant() {
             <div className="flex items-center justify-between p-4 border-b border-border">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-accent" />
+                  <Sparkles className="w-5 h-5 text-accent" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm">{t('ai.title')}</h3>
@@ -152,7 +160,7 @@ export function AIAssistant() {
                 >
                   {msg.role === 'assistant' && (
                     <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
-                      <Bot className="w-4 h-4 text-accent" />
+                      <Sparkles className="w-4 h-4 text-accent" />
                     </div>
                   )}
                   <div
@@ -182,7 +190,7 @@ export function AIAssistant() {
               {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
-                    <Bot className="w-4 h-4 text-accent" />
+                    <Sparkles className="w-4 h-4 text-accent" />
                   </div>
                   <div className="bg-muted rounded-2xl px-4 py-3">
                     <div className="flex gap-1">

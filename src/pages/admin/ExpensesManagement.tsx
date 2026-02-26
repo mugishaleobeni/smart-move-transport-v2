@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ActionConfirmation } from '@/components/dashboard/ActionConfirmation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface Expense { id: string; car_id: string | null; amount: number; description: string; expense_date: string; }
 interface CarOption { id: string; name: string; }

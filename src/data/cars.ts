@@ -23,9 +23,9 @@ export const cars: Car[] = [
     pricePerTrip: 150,
     image: 'https://wallpapers.com/images/hd/dodge-challenger-4k-rj7427un0psvbzqq.jpg',
     images: [
-      'https://images.unsplash.com/photo-1594611110477-6cc9da17e33f?w=800',
-      'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=800',
-      'https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=800'
+      'https://wallpapers.com/images/hd/dodge-challenger-4k-rj7427un0psvbzqq.jpg',
+      'https://wallpapers.com/images/hd/dodge-challenger-4k-rj7427un0psvbzqq.jpg',
+      'https://wallpapers.com/images/hd/dodge-challenger-4k-rj7427un0psvbzqq.jpg'
     ],
     description: 'The Toyota Land Cruiser offers exceptional off-road capability combined with luxury comfort. Perfect for long journeys and rough terrains.',
     features: ['4WD', 'Leather Seats', 'Air Conditioning', 'GPS Navigation', 'Bluetooth', 'Sunroof', 'Backup Camera']

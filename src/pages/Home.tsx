@@ -94,15 +94,15 @@ export default function Home() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="w-full lg:max-w-sm glass-strong p-8 rounded-[2.5rem] border border-white/20 shadow-2xl backdrop-blur-2xl relative overflow-hidden group mb-4 lg:mb-0"
+            className="w-full lg:max-w-sm glass p-8 rounded-[2.5rem] border border-white/10 shadow-2xl backdrop-blur-xl relative overflow-hidden group mb-4 lg:mb-0 bg-white/5 dark:bg-black/20"
           >
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <Shield className="w-20 h-20 text-accent" />
             </div>
             <div className="relative z-10 space-y-6">
-              <header>
-                <span className="text-accent font-black text-[9px] uppercase tracking-[0.3em]">Express Access</span>
-                <h3 className="text-2xl font-black text-white uppercase tracking-tight">Quick Reserve</h3>
+              <header className="opacity-90">
+                <span className="text-accent/80 font-black text-[9px] uppercase tracking-[0.3em]">Express Access</span>
+                <h3 className="text-2xl font-black text-white/90 uppercase tracking-tight">Quick Reserve</h3>
               </header>
 
               <div className="space-y-4">

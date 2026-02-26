@@ -94,11 +94,18 @@ export function Navbar() {
                       {isAdmin ? 'Administrator' : 'Client'}
                     </span>
                   </div>
-                  {isAdmin && (
+                  {isAdmin ? (
                     <Link to="/admin">
                       <Button variant="ghost" size="sm" className="gap-1 h-9 px-3">
                         <Shield className="w-4 h-4 text-accent" />
                         <span className="hidden lg:inline">Dashboard</span>
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link to="/booking">
+                      <Button variant="ghost" size="sm" className="gap-1 h-9 px-3">
+                        <Calendar className="w-4 h-4 text-accent" />
+                        <span className="hidden lg:inline">My Activity</span>
                       </Button>
                     </Link>
                   )}
@@ -181,7 +188,7 @@ export function Navbar() {
           {/* Auth action at end of bottom nav */}
           {user ? (
             <>
-              {isAdmin && (
+              {isAdmin ? (
                 <Link
                   to="/admin"
                   className="flex-1 flex flex-col items-center justify-center gap-0.5 group relative"
@@ -195,6 +202,21 @@ export function Navbar() {
                   )}
                   <Shield className="w-5 h-5 text-accent" />
                   <span className="text-[10px] font-medium text-accent leading-none">Admin</span>
+                </Link>
+              ) : (
+                <Link
+                  to="/booking"
+                  className="flex-1 flex flex-col items-center justify-center gap-0.5 group relative"
+                >
+                  {isActive('/booking') && (
+                    <motion.div
+                      layoutId="mobile-nav-active"
+                      className="absolute inset-x-2 top-0 h-0.5 rounded-full bg-accent"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  <Calendar className="w-5 h-5 text-accent" />
+                  <span className="text-[10px] font-medium text-accent leading-none">Activity</span>
                 </Link>
               )}
               <button
