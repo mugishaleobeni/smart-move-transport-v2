@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
 
 export function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
@@ -38,7 +39,7 @@ export function Navbar() {
 
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center gap-6">
-              {navLinks.map((link) => (
+              {navLinks.filter(l => l.to !== '/booking').map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
@@ -52,6 +53,20 @@ export function Navbar() {
 
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center gap-3">
+              {/* Highlighted Booking Button */}
+              <Link to="/booking">
+                <Button
+                  variant={isActive('/booking') ? 'default' : 'outline'}
+                  size="sm"
+                  className={cn(
+                    "gap-2 font-bold transition-all hover:scale-105",
+                    isActive('/booking') ? "btn-accent text-white" : "border-accent text-accent hover:bg-accent/10"
+                  )}
+                >
+                  <Calendar className="w-4 h-4" />
+                  {t('nav.booking')}
+                </Button>
+              </Link>
               {/* Language Toggle */}
               <Button
                 variant="ghost"
