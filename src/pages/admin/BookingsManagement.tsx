@@ -14,7 +14,7 @@ import {
   Check,
   Ban,
   Plus,
-  DollarSign
+  Banknote
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +27,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { ActionConfirmation } from '@/components/dashboard/ActionConfirmation';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Booking {
@@ -196,7 +202,7 @@ export default function BookingsManagement() {
           { label: 'Pending Approval', value: summary.pending, icon: Clock, color: 'text-amber-600 bg-amber-50' },
           { label: 'Successful Trips', value: summary.completed, icon: CheckCircle2, color: 'text-emerald-600 bg-emerald-50' },
         ].map((s, i) => (
-          <Card className="border-none card-premium overflow-hidden bg-white dark:bg-zinc-900">
+          <Card key={i} className="border-none card-premium overflow-hidden bg-white dark:bg-zinc-900">
             <CardContent className="p-6 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">{s.label}</p>

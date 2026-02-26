@@ -254,7 +254,7 @@ export default function Booking() {
                                   'group relative flex flex-col gap-4 p-6 rounded-2xl transition-all border-2 text-left overflow-hidden h-full',
                                   booking.carId === car.id
                                     ? 'bg-accent/5 border-accent shadow-[0_0_30px_rgba(59,130,246,0.1)]'
-                                    : 'bg-white dark:bg-zinc-900 border-border/50 hover:border-accent/40 grayscale hover:grayscale-0'
+                                    : 'bg-white dark:bg-zinc-900 border-border/50 hover:border-accent/40'
                                 )}
                               >
                                 <div className="aspect-[16/9] w-full relative overflow-hidden rounded-xl">
@@ -500,7 +500,7 @@ export default function Booking() {
                                 <div className="text-xs font-bold text-muted-foreground uppercase">{booking.duration} {getDurationLabel()} × {getPlanLabel(booking.pricingPlan)}</div>
                               </div>
                               <div className="text-5xl font-black tracking-tighter text-accent">
-                                <span className="text-xl align-top mr-1">$</span>{calculatePrice()}
+                                <span className="text-xl align-top mr-1">RWF</span>{calculatePrice()}
                               </div>
                             </div>
                           </div>
@@ -587,7 +587,7 @@ export default function Booking() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center text-xs font-bold uppercase">
                         <span className="text-muted-foreground">Standard Rate</span>
-                        <span>${selectedCarData ? (booking.pricingPlan === 'hour' ? selectedCarData.price_per_hour : booking.pricingPlan === 'day' ? selectedCarData.price_per_day : selectedCarData.price_per_trip) : '0'}</span>
+                        <span>RWF {selectedCarData ? (booking.pricingPlan === 'hour' ? selectedCarData.price_per_hour : booking.pricingPlan === 'day' ? selectedCarData.price_per_day : selectedCarData.price_per_trip) : '0'}</span>
                       </div>
                       <div className="flex justify-between items-center text-xs font-bold uppercase">
                         <span className="text-muted-foreground">Duration ({getDurationLabel()})</span>
@@ -595,7 +595,7 @@ export default function Booking() {
                       </div>
                       <div className="pt-4 mt-4 border-t border-border/30 flex justify-between items-end">
                         <span className="text-[10px] font-black uppercase text-foreground tracking-widest">Final Amount</span>
-                        <span className="text-3xl font-black tracking-tighter text-foreground">${calculatePrice()}</span>
+                        <span className="text-3xl font-black tracking-tighter text-foreground">RWF {calculatePrice()}</span>
                       </div>
                     </div>
                   </div>

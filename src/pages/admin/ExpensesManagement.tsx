@@ -6,7 +6,6 @@ import {
   Receipt,
   Car,
   Calendar,
-  DollarSign,
   FileText,
   Search,
   Filter,
@@ -136,9 +135,9 @@ export default function ExpensesManagement() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold">Amount (USD)</Label>
+                    <Label className="text-sm font-semibold">Amount (RWF)</Label>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <Receipt className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: parseFloat(e.target.value) || 0 })} className="h-11 pl-9 rounded-lg" />
                     </div>
                   </div>

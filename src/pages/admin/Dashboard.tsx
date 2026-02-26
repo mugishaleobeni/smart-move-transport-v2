@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import {
   Car,
   CalendarCheck,
-  DollarSign,
   Receipt,
+  Banknote,
   TrendingUp,
   Users,
   ArrowUpRight,
@@ -137,7 +137,7 @@ export default function Dashboard() {
       title: 'Gross Revenue',
       subtitle: 'Total earnings',
       value: `RWF ${stats.totalIncome.toLocaleString()}`,
-      icon: DollarSign,
+      icon: Banknote,
       color: 'bg-emerald-500/10 text-emerald-600',
       trend: '+RWF 4.2k this month',
       isPositive: true
