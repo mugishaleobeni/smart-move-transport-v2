@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Star, Shield, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ const heroImages = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
   const [featuredCars, setFeaturedCars] = useState<any[]>([]);
   useEffect(() => {
     supabase.from('cars').select('*').limit(3).then(({ data }) => { if (data) setFeaturedCars(data); });
@@ -61,30 +62,76 @@ export default function Home() {
         </div>
 
         {/* Content */}
-        <div className="relative h-full container mx-auto px-4 flex items-end pb-32">
+        <div className="relative h-full container mx-auto px-4 flex flex-col justify-end pb-20 md:pb-32 lg:flex-row lg:items-end lg:justify-between gap-12">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="max-w-2xl"
           >
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4 leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-4 leading-tight text-white drop-shadow-[0_2px_15px_rgba(0,0,0,0.6)] uppercase tracking-tighter">
               {t('home.heroTitle')}
             </h1>
-            <p className="text-lg md:text-xl text-white/90 max-w-lg drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)] mb-6">
+            <p className="text-lg md:text-xl text-white/90 max-w-lg drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)] mb-8 font-medium italic">
               {t('home.heroSubtitle')}
             </p>
             <div className="flex flex-wrap gap-4">
               <Link to="/booking">
-                <Button size="lg" className="btn-accent text-white text-lg px-8 h-14">
+                <Button size="lg" className="btn-accent text-white text-[10px] font-black uppercase tracking-[0.2em] px-10 h-14 rounded-xl shadow-2xl">
                   {t('home.bookNow')}
                 </Button>
               </Link>
               <Link to="/cars">
-                <Button size="lg" variant="outline" className="text-lg px-8 h-14 glass">
+                <Button size="lg" variant="outline" className="text-[10px] font-black uppercase tracking-[0.2em] px-10 h-14 glass rounded-xl text-white border-white/40">
                   {t('home.viewCars')}
                 </Button>
               </Link>
+            </div>
+          </motion.div>
+
+          {/* Quick Booking Widget */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="w-full lg:max-w-sm glass-strong p-8 rounded-[2.5rem] border border-white/20 shadow-2xl backdrop-blur-2xl relative overflow-hidden group mb-4 lg:mb-0"
+          >
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Shield className="w-20 h-20 text-accent" />
+            </div>
+            <div className="relative z-10 space-y-6">
+              <header>
+                <span className="text-accent font-black text-[9px] uppercase tracking-[0.3em]">Express Access</span>
+                <h3 className="text-2xl font-black text-white uppercase tracking-tight">Quick Reserve</h3>
+              </header>
+
+              <div className="space-y-4">
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-accent/40 transition-colors cursor-pointer group/item flex items-center gap-3" onClick={() => navigate('/booking')}>
+                  <div className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center border border-accent/30 group-hover/item:bg-accent transition-colors">
+                    <Clock className="w-4 h-4 text-accent group-hover/item:text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Select Plan</p>
+                    <p className="text-sm font-bold text-white">Choose Your Rate</p>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-accent/40 transition-colors cursor-pointer group/item flex items-center gap-3" onClick={() => navigate('/booking')}>
+                  <div className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center border border-accent/30 group-hover/item:bg-accent transition-colors">
+                    <Star className="w-4 h-4 text-accent group-hover/item:text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Elite Fleet</p>
+                    <p className="text-sm font-bold text-white">Pick A Vehicle</p>
+                  </div>
+                </div>
+
+                <Button className="w-full h-14 btn-accent text-white font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-xl hover:scale-[1.02] transition-transform" onClick={() => navigate('/booking')}>
+                  Start Reservation Now
+                </Button>
+              </div>
+
+              <p className="text-[9px] text-center text-white/40 font-bold uppercase tracking-widest">Premium Service Guaranteed</p>
             </div>
           </motion.div>
         </div>

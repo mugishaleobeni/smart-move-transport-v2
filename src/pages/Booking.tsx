@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, MapPin, Clock, Check, ChevronRight, ChevronLeft, User, Mail, Phone } from 'lucide-react';
+import { Calendar as CalendarIcon, MapPin, Clock, Check, ChevronRight, ChevronLeft, User, Mail, Phone, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -50,8 +50,8 @@ export default function Booking() {
 
   const [booking, setBooking] = useState<BookingData>({
     carId: searchParams.get('car') || '',
-    clientName: '',
-    clientEmail: '',
+    clientName: user?.user_metadata?.full_name || '',
+    clientEmail: user?.email || '',
     clientPhone: '',
     pickupLocation: '',
     dropoffLocation: '',
@@ -68,10 +68,13 @@ export default function Booking() {
       const { data } = await supabase.from('cars').select('*').neq('status', 'garage').order('name');
       if (data) {
         setAvailableCars(data);
-        const initialCar = searchParams.get('car');
-        if (initialCar) {
-          const found = data.find(c => c.id === initialCar);
-          if (found) setSelectedCarData(found);
+        const initialCarId = searchParams.get('car');
+        if (initialCarId) {
+          const found = data.find(c => c.id === initialCarId);
+          if (found) {
+            setSelectedCarData(found);
+            setBooking(prev => ({ ...prev, carId: initialCarId }));
+          }
         }
       }
       setLoadingCars(false);
@@ -81,15 +84,13 @@ export default function Booking() {
 
   useEffect(() => {
     if (booking.carId && availableCars.length > 0) {
-      setSelectedCarData(availableCars.find(c => c.id === booking.carId));
+      const found = availableCars.find(c => c.id === booking.carId);
+      if (found) setSelectedCarData(found);
     }
   }, [booking.carId, availableCars]);
 
   const calculatePrice = () => {
     if (!selectedCarData) return 0;
-    // Current database schema doesn't have prices yet, I'll use placeholders or defaults
-    // Since the PricingManagement exists, I should ideally fetch price from there
-    // But for now, I'll use some default logic or fallback to the static ones for demo
     const hourly = selectedCarData.price_per_hour || 50;
     const daily = selectedCarData.price_per_day || 300;
     const trip = selectedCarData.price_per_trip || 150;
@@ -162,31 +163,25 @@ export default function Booking() {
     }
   };
 
-  // Offline sync
-  useEffect(() => {
-    if (isOnline) {
-      const pending = JSON.parse(localStorage.getItem('pendingBookings') || '[]');
-      if (pending.length > 0) {
-        console.log('Syncing pending bookings:', pending);
-        localStorage.setItem('pendingBookings', '[]');
-      }
-    }
-  }, [isOnline]);
-
   if (isSubmitted) {
     return (
       <Layout>
-        <section className="py-20 md:py-32">
-          <div className="container mx-auto px-4">
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md mx-auto text-center glass rounded-2xl p-8">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/20 flex items-center justify-center">
-                <Check className="w-10 h-10 text-accent" />
+        <section className="py-20 md:py-32 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
+          <div className="container mx-auto px-4 text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="max-w-md mx-auto glass-strong rounded-3xl p-12 shadow-2xl relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-2 bg-accent" />
+              <div className="w-24 h-24 mx-auto mb-8 rounded-full bg-accent/10 flex items-center justify-center">
+                <Check className="w-12 h-12 text-accent" />
               </div>
-              <h1 className="text-2xl font-bold mb-4">{t('booking.success')}</h1>
-              <p className="text-muted-foreground mb-8">
+              <h1 className="text-3xl font-black tracking-tight mb-4 uppercase">{t('booking.success')}</h1>
+              <p className="text-muted-foreground mb-10 leading-relaxed">
                 {!isOnline ? t('booking.offlineMessage') : t('booking.successMessage')}
               </p>
-              <Button onClick={() => navigate('/')} className="btn-accent text-white">
+              <Button onClick={() => navigate('/')} className="btn-accent text-white px-10 h-14 rounded-xl font-bold uppercase tracking-widest text-xs">
                 {t('common.back')}
               </Button>
             </motion.div>
@@ -198,268 +193,439 @@ export default function Booking() {
 
   return (
     <Layout>
-      <section className="py-12 md:py-20">
+      <section className="bg-zinc-50 dark:bg-zinc-950 min-h-screen pt-24 pb-20 md:pt-32">
         <div className="container mx-auto px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
-            <h1 className="text-3xl md:text-5xl font-bold mb-4">{t('booking.title')}</h1>
-          </motion.div>
+          <div className="grid lg:grid-cols-12 gap-12 items-start">
 
-          {/* Progress Steps */}
-          <div className="max-w-2xl mx-auto mb-12">
-            <div className="flex items-center justify-between">
-              {STEPS.map((s, i) => (
-                <div key={s} className="flex items-center">
-                  <div className={cn('w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all', i <= step ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground')}>
-                    {i < step ? <Check className="w-5 h-5" /> : i + 1}
-                  </div>
-                  {i < STEPS.length - 1 && (
-                    <div className={cn('w-12 md:w-24 h-1 mx-2', i < step ? 'bg-accent' : 'bg-muted')} />
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-between mt-2 text-xs md:text-sm text-muted-foreground">
-              {STEPS.map((s) => (
-                <span key={s} className="text-center w-20 md:w-auto">{t(`booking.${s}`)}</span>
-              ))}
-            </div>
-          </div>
+            {/* Left Column: Form Steps */}
+            <div className="lg:col-span-7 xl:col-span-8 space-y-8">
+              <header className="space-y-4">
+                <span className="text-accent font-black text-[10px] uppercase tracking-[0.3em]">Reservation Flow</span>
+                <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">
+                  Book Your <span className="text-accent">Premium</span> Move
+                </h1>
+              </header>
 
-          {/* Step Content */}
-          <div className="max-w-2xl mx-auto">
-            <AnimatePresence mode="wait">
-              <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="glass rounded-2xl p-8">
-
-                {/* Step 0: Select Car */}
-                {step === 0 && (
-                  <div className="space-y-6">
-                    <h2 className="text-xl font-semibold">{t('booking.selectCar')}</h2>
-                    {loadingCars ? (
-                      <div className="py-20 flex justify-center"><Clock className="w-8 h-8 animate-spin text-primary" /></div>
-                    ) : (
-                      <div className="grid gap-4">
-                        {availableCars.map((car) => (
-                          <button key={car.id} onClick={() => setBooking({ ...booking, carId: car.id })} className={cn('flex items-center gap-4 p-4 rounded-xl transition-all text-left', booking.carId === car.id ? 'bg-accent/20 border-2 border-accent' : 'bg-muted/50 border-2 border-transparent hover:border-accent/50')}>
-                            <img src={car.image || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800'} alt={car.name} className="w-20 h-14 object-cover rounded-lg" />
-                            <div className="flex-1">
-                              <div className="font-semibold">{car.name}</div>
-                              <div className="text-sm text-muted-foreground">{car.type} • {car.seats} {t('cars.seats')}</div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-accent font-bold">RWF {car.price_per_hour || 50}/hr</div>
-                              <div className="text-xs text-muted-foreground">RWF {car.price_per_day || 300}/day</div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
+              {/* Progress Stepper */}
+              <div className="flex gap-4 p-2 bg-zinc-200/50 dark:bg-zinc-900/50 rounded-2xl border border-border/50 backdrop-blur-sm">
+                {STEPS.map((s, i) => (
+                  <button
+                    key={s}
+                    onClick={() => i < step && setStep(i)}
+                    className={cn(
+                      "flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                      i === step ? "bg-white dark:bg-zinc-800 shadow-xl text-accent" : i < step ? "text-foreground/80 hover:text-accent" : "text-muted-foreground/50 cursor-not-allowed"
                     )}
-                  </div>
-                )}
+                  >
+                    <span className="hidden sm:inline">0{i + 1}. </span>{t(`booking.${s}`)}
+                  </button>
+                ))}
+              </div>
 
-                {/* Step 1: Client Info & Location */}
-                {step === 1 && (
-                  <div className="space-y-6">
-                    <h2 className="text-xl font-semibold">{t('booking.clientInfo') || 'Your Details'}</h2>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="clientName">Full Name *</Label>
-                        <div className="relative mt-2">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                          <Input id="clientName" value={booking.clientName} onChange={(e) => setBooking({ ...booking, clientName: e.target.value })} className="pl-10" placeholder="Your full name" required />
-                        </div>
-                      </div>
-                      <div>
-                        <Label htmlFor="clientPhone">Phone *</Label>
-                        <div className="relative mt-2">
-                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                          <Input id="clientPhone" type="tel" value={booking.clientPhone} onChange={(e) => setBooking({ ...booking, clientPhone: e.target.value })} className="pl-10" placeholder="+250 788 123 456" required />
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="clientEmail">Email</Label>
-                      <div className="relative mt-2">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                        <Input id="clientEmail" type="email" value={booking.clientEmail} onChange={(e) => setBooking({ ...booking, clientEmail: e.target.value })} className="pl-10" placeholder="you@example.com" />
-                      </div>
-                    </div>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="pickup">Pickup Location *</Label>
-                        <div className="relative mt-2">
-                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                          <Input id="pickup" value={booking.pickupLocation} onChange={(e) => setBooking({ ...booking, pickupLocation: e.target.value })} className="pl-10" placeholder="Enter pickup location" required />
-                        </div>
-                      </div>
-                      <div>
-                        <Label htmlFor="dropoff">Dropoff Location</Label>
-                        <div className="relative mt-2">
-                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                          <Input id="dropoff" value={booking.dropoffLocation} onChange={(e) => setBooking({ ...booking, dropoffLocation: e.target.value })} className="pl-10" placeholder="Enter dropoff location" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 2: Date, Time & Pricing Plan */}
-                {step === 2 && (
-                  <div className="space-y-6">
-                    <h2 className="text-xl font-semibold">{t('booking.selectDateTime')}</h2>
-
-                    {/* Pricing Plan Selector */}
-                    <div>
-                      <Label className="mb-3 block">Booking Plan</Label>
-                      <div className="grid grid-cols-3 gap-3">
-                        {(['hour', 'day', 'trip'] as PricingPlan[]).map((plan) => (
-                          <button
-                            key={plan}
-                            type="button"
-                            onClick={() => setBooking({ ...booking, pricingPlan: plan, duration: 1 })}
-                            className={cn(
-                              'p-4 rounded-xl border-2 text-center transition-all',
-                              booking.pricingPlan === plan
-                                ? 'border-accent bg-accent/10'
-                                : 'border-border bg-muted/50 hover:border-accent/50'
-                            )}
-                          >
-                            <div className="font-semibold text-sm">{getPlanLabel(plan)}</div>
-                            {selectedCarData && (
-                              <div className="text-accent font-bold mt-1">
-                                RWF {plan === 'hour' ? (selectedCarData.price_per_hour || 50) : plan === 'day' ? (selectedCarData.price_per_day || 300) : (selectedCarData.price_per_trip || 150)}
-                              </div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label>{t('booking.date')}</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className="w-full mt-2 justify-start">
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {booking.date ? format(booking.date, 'PPP') : 'Pick a date'}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar mode="single" selected={booking.date} onSelect={(date) => setBooking({ ...booking, date })} disabled={(date) => date < new Date()} />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                      <div>
-                        <Label>{t('booking.time')}</Label>
-                        <Select value={booking.time} onValueChange={(time) => setBooking({ ...booking, time })}>
-                          <SelectTrigger className="mt-2">
-                            <SelectValue placeholder="Select time" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.from({ length: 24 }, (_, i) => (
-                              <SelectItem key={i} value={`${i.toString().padStart(2, '0')}:00`}>
-                                {i.toString().padStart(2, '0')}:00
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label>Duration ({getDurationLabel()})</Label>
-                      <div className="flex items-center gap-4 mt-2">
-                        <Clock className="w-5 h-5 text-muted-foreground" />
-                        <Select value={booking.duration.toString()} onValueChange={(d) => setBooking({ ...booking, duration: parseInt(d) })}>
-                          <SelectTrigger className="flex-1">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.from({ length: booking.pricingPlan === 'day' ? 30 : 24 }, (_, i) => (
-                              <SelectItem key={i + 1} value={(i + 1).toString()}>
-                                {i + 1} {getDurationLabel()}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    {/* Live Price Preview */}
-                    {selectedCarData && (
-                      <div className="p-4 bg-accent/10 rounded-xl flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">
-                          {booking.duration} {getDurationLabel()} × RWF {booking.pricingPlan === 'hour' ? (selectedCarData.price_per_hour || 50) : booking.pricingPlan === 'day' ? (selectedCarData.price_per_day || 300) : (selectedCarData.price_per_trip || 150)}
-                        </span>
-                        <span className="text-2xl font-bold text-accent">RWF {calculatePrice()}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Step 3: Confirm */}
-                {step === 3 && selectedCarData && (
-                  <div className="space-y-6">
-                    <h2 className="text-xl font-semibold">{t('booking.priceEstimate')}</h2>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl">
-                        <img src={selectedCarData.image || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800'} alt={selectedCarData.name} className="w-24 h-16 object-cover rounded-lg" />
+              <div className="relative">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={step}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="glass-strong rounded-3xl p-8 md:p-10 border border-border/50 shadow-2xl"
+                  >
+                    {/* Step 0: Vehicle Selection */}
+                    {step === 0 && (
+                      <div className="space-y-8">
                         <div>
-                          <div className="font-semibold">{selectedCarData.name}</div>
-                          <div className="text-sm text-muted-foreground">{selectedCarData.type}</div>
+                          <h2 className="text-2xl font-black uppercase tracking-tight mb-2">Select Your Vehicle</h2>
+                          <p className="text-muted-foreground text-sm">Choose the perfect companion for your journey from our elite fleet.</p>
+                        </div>
+
+                        {loadingCars ? (
+                          <div className="py-24 flex flex-col items-center justify-center gap-4">
+                            <div className="w-12 h-12 border-4 border-accent/20 border-t-accent rounded-full animate-spin" />
+                            <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground animate-pulse">Initializing Fleet...</p>
+                          </div>
+                        ) : (
+                          <div className="grid sm:grid-cols-2 gap-4">
+                            {availableCars.map((car) => (
+                              <button
+                                key={car.id}
+                                onClick={() => setBooking({ ...booking, carId: car.id })}
+                                className={cn(
+                                  'group relative flex flex-col gap-4 p-6 rounded-2xl transition-all border-2 text-left overflow-hidden h-full',
+                                  booking.carId === car.id
+                                    ? 'bg-accent/5 border-accent shadow-[0_0_30px_rgba(59,130,246,0.1)]'
+                                    : 'bg-white dark:bg-zinc-900 border-border/50 hover:border-accent/40 grayscale hover:grayscale-0'
+                                )}
+                              >
+                                <div className="aspect-[16/9] w-full relative overflow-hidden rounded-xl">
+                                  <img
+                                    src={car.image || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800'}
+                                    alt={car.name}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                  />
+                                  <div className="absolute top-3 right-3 bg-zinc-900/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-white uppercase tracking-widest">
+                                    {car.type}
+                                  </div>
+                                </div>
+                                <div className="flex-1 space-y-2">
+                                  <div className="flex justify-between items-start">
+                                    <div className="font-black uppercase tracking-tight text-lg">{car.name}</div>
+                                    <div className="text-accent font-black tracking-tighter text-xl">${car.price_per_hour || 50}<span className="text-[10px] text-muted-foreground ml-1 uppercase">/hr</span></div>
+                                  </div>
+                                  <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">
+                                    <span className="flex items-center gap-1"><User className="w-3 h-3" /> {car.seats} Seats</span>
+                                    <span className="w-1 h-1 bg-muted-foreground/30 rounded-full" />
+                                    <span>Automatic</span>
+                                  </div>
+                                </div>
+                                {booking.carId === car.id && (
+                                  <div className="absolute inset-0 border-2 border-accent pointer-events-none rounded-2xl" />
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Step 1: Client Information */}
+                    {step === 1 && (
+                      <div className="space-y-8">
+                        <div>
+                          <h2 className="text-2xl font-black uppercase tracking-tight mb-2">Personal Details</h2>
+                          <p className="text-muted-foreground text-sm">Provide your contact information for a seamless pickup coordination.</p>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-8">
+                          <div className="space-y-2">
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Full Name</Label>
+                            <div className="relative group">
+                              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
+                              <Input
+                                value={booking.clientName}
+                                onChange={(e) => setBooking({ ...booking, clientName: e.target.value })}
+                                className="h-14 pl-12 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold shadow-inner"
+                                placeholder="E.g. John Doe"
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Phone Number</Label>
+                            <div className="relative group">
+                              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
+                              <Input
+                                type="tel"
+                                value={booking.clientPhone}
+                                onChange={(e) => setBooking({ ...booking, clientPhone: e.target.value })}
+                                className="h-14 pl-12 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold shadow-inner"
+                                placeholder="+250 788 123 456"
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div className="md:col-span-2 space-y-2">
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Email (Optional)</Label>
+                            <div className="relative group">
+                              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
+                              <Input
+                                type="email"
+                                value={booking.clientEmail}
+                                onChange={(e) => setBooking({ ...booking, clientEmail: e.target.value })}
+                                className="h-14 pl-12 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold shadow-inner"
+                                placeholder="you@example.com"
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Pickup Location</Label>
+                            <div className="relative group">
+                              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
+                              <Input
+                                value={booking.pickupLocation}
+                                onChange={(e) => setBooking({ ...booking, pickupLocation: e.target.value })}
+                                className="h-14 pl-12 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold shadow-inner"
+                                placeholder="Where to pick you up?"
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Dropoff Point</Label>
+                            <div className="relative group">
+                              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
+                              <Input
+                                value={booking.dropoffLocation}
+                                onChange={(e) => setBooking({ ...booking, dropoffLocation: e.target.value })}
+                                className="h-14 pl-12 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold shadow-inner"
+                                placeholder="Final destination (optional)"
+                                required
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
+                    )}
 
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div className="p-4 bg-muted/50 rounded-xl">
-                          <div className="text-muted-foreground mb-1">Client</div>
-                          <div className="font-medium">{booking.clientName}</div>
-                          <div className="text-xs text-muted-foreground">{booking.clientPhone}</div>
+                    {/* Step 2: Logistics & Schedule */}
+                    {step === 2 && (
+                      <div className="space-y-8">
+                        <div>
+                          <h2 className="text-2xl font-black uppercase tracking-tight mb-2">Schedule & Plan</h2>
+                          <p className="text-muted-foreground text-sm">Fine-tune your booking duration and timing for maximum efficiency.</p>
                         </div>
-                        <div className="p-4 bg-muted/50 rounded-xl">
-                          <div className="text-muted-foreground mb-1">Plan</div>
-                          <div className="font-medium">{getPlanLabel(booking.pricingPlan)}</div>
-                          <div className="text-xs text-muted-foreground">{booking.duration} {getDurationLabel()}</div>
+
+                        <div className="space-y-4">
+                          <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Select A Pricing Architecture</Label>
+                          <div className="grid grid-cols-3 gap-4">
+                            {(['hour', 'day', 'trip'] as PricingPlan[]).map((plan) => (
+                              <button
+                                key={plan}
+                                type="button"
+                                onClick={() => setBooking({ ...booking, pricingPlan: plan, duration: 1 })}
+                                className={cn(
+                                  'group px-4 py-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 overflow-hidden relative',
+                                  booking.pricingPlan === plan
+                                    ? 'border-accent bg-accent/5 shadow-lg'
+                                    : 'border-border/50 bg-white dark:bg-zinc-900 border-dashed hover:border-accent/40'
+                                )}
+                              >
+                                <span className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full transition-colors", booking.pricingPlan === plan ? "bg-accent text-white" : "bg-zinc-200 dark:bg-zinc-800 text-muted-foreground")}>{plan}</span>
+                                {selectedCarData && (
+                                  <span className="text-xl font-black tracking-tighter">
+                                    ${plan === 'hour' ? (selectedCarData.price_per_hour || 50) : plan === 'day' ? (selectedCarData.price_per_day || 300) : (selectedCarData.price_per_trip || 150)}
+                                  </span>
+                                )}
+                                {booking.pricingPlan === plan && (
+                                  <div className="absolute bottom-0 right-0 p-1">
+                                    <Check className="w-3 h-3 text-accent" />
+                                  </div>
+                                )}
+                              </button>
+                            ))}
+                          </div>
                         </div>
-                        <div className="p-4 bg-muted/50 rounded-xl">
-                          <div className="text-muted-foreground mb-1">{t('booking.pickupLocation')}</div>
-                          <div className="font-medium">{booking.pickupLocation}</div>
+
+                        <div className="grid md:grid-cols-2 gap-8 pt-4">
+                          <div className="space-y-2">
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Date</Label>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button variant="outline" className="w-full h-14 rounded-xl justify-start bg-zinc-50 dark:bg-zinc-800 border-border/50 group hover:border-accent transition-all">
+                                  <CalendarIcon className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
+                                  <span className="font-bold text-sm">{booking.date ? format(booking.date, 'PPP') : 'Selection Required'}</span>
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0 rounded-2xl border-border/50 shadow-2xl overflow-hidden" align="start">
+                                <Calendar mode="single" selected={booking.date} onSelect={(date) => setBooking({ ...booking, date })} disabled={(date) => date < new Date()} className="p-4" />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Departure Time</Label>
+                            <Select value={booking.time} onValueChange={(time) => setBooking({ ...booking, time })}>
+                              <SelectTrigger className="h-14 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:ring-0 focus:border-accent font-bold text-sm">
+                                <SelectValue placeholder="Select Time..." />
+                              </SelectTrigger>
+                              <SelectContent className="rounded-xl border-border/50 max-h-[300px]">
+                                {Array.from({ length: 24 }, (_, i) => {
+                                  const hour = i.toString().padStart(2, '0') + ":00";
+                                  return <SelectItem key={i} value={hour} className="font-bold text-xs">{hour}</SelectItem>
+                                })}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
-                        <div className="p-4 bg-muted/50 rounded-xl">
-                          <div className="text-muted-foreground mb-1">{t('booking.date')}</div>
-                          <div className="font-medium">{booking.date ? format(booking.date, 'PPP') : '-'}</div>
-                          <div className="text-xs text-muted-foreground">{booking.time}</div>
+
+                        <div className="space-y-4 pt-4 border-t border-border/30">
+                          <div className="flex justify-between items-center px-1">
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">Duration ({getDurationLabel()})</Label>
+                            <span className="text-xl font-black text-accent">{booking.duration}</span>
+                          </div>
+                          <Input
+                            type="range"
+                            min="1"
+                            max={booking.pricingPlan === 'day' ? 30 : 24}
+                            value={booking.duration}
+                            onChange={(e) => setBooking({ ...booking, duration: parseInt(e.target.value) })}
+                            className="accent-accent h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg cursor-pointer"
+                          />
+                          <div className="flex justify-between text-[8px] font-black text-muted-foreground px-1 uppercase tracking-tighter">
+                            <span>Min: 1 {getDurationLabel()}</span>
+                            <span>Max: {booking.pricingPlan === 'day' ? 30 : 24} {getDurationLabel()}</span>
+                          </div>
                         </div>
                       </div>
+                    )}
 
-                      <div className="p-6 bg-accent/10 rounded-xl flex items-center justify-between">
-                        <div className="text-lg font-semibold">{t('booking.total')}</div>
-                        <div className="text-3xl font-bold text-accent">RWF {calculatePrice()}</div>
+                    {/* Step 3: Confirmation Review */}
+                    {step === 3 && selectedCarData && (
+                      <div className="space-y-8">
+                        <div>
+                          <h2 className="text-2xl font-black uppercase tracking-tight mb-2">Final Confirmation</h2>
+                          <p className="text-muted-foreground text-sm">Please verify your reservation details below before finalizing.</p>
+                        </div>
+
+                        <div className="space-y-6">
+                          <div className="p-6 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-border/50 flex gap-6 items-center">
+                            <div className="w-32 h-20 rounded-xl overflow-hidden shadow-lg border border-border/50">
+                              <img src={selectedCarData.image} alt={selectedCarData.name} className="w-full h-full object-cover" />
+                            </div>
+                            <div>
+                              <h3 className="font-black uppercase tracking-tight text-xl">{selectedCarData.name}</h3>
+                              <p className="text-accent text-[10px] uppercase font-black tracking-widest">{selectedCarData.type} Architecture</p>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="p-5 bg-white dark:bg-zinc-900 border border-border/30 rounded-2xl">
+                              <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest mb-1 block">Client Identity</span>
+                              <p className="font-black text-sm uppercase">{booking.clientName}</p>
+                              <p className="text-[10px] text-muted-foreground">{booking.clientPhone}</p>
+                            </div>
+                            <div className="p-5 bg-white dark:bg-zinc-900 border border-border/30 rounded-2xl">
+                              <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest mb-1 block">Logistics Info</span>
+                              <p className="font-black text-sm uppercase truncate">{booking.pickupLocation}</p>
+                              <p className="text-[10px] text-muted-foreground">{booking.date ? format(booking.date, 'MMM dd, yyyy') : '-'} @ {booking.time}</p>
+                            </div>
+                          </div>
+
+                          <div className="bg-accent/5 border border-accent/20 rounded-2xl p-6 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                              <Shield className="w-24 h-24 text-accent" />
+                            </div>
+                            <div className="flex justify-between items-end relative z-10">
+                              <div className="space-y-1">
+                                <span className="text-[8px] font-black uppercase text-accent tracking-[0.3em]">Estimated Total</span>
+                                <div className="text-xs font-bold text-muted-foreground uppercase">{booking.duration} {getDurationLabel()} × {getPlanLabel(booking.pricingPlan)}</div>
+                              </div>
+                              <div className="text-5xl font-black tracking-tighter text-accent">
+                                <span className="text-xl align-top mr-1">$</span>{calculatePrice()}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Button Navigation */}
+                    <div className="flex justify-between mt-12 pt-8 border-t border-border/30">
+                      {step > 0 ? (
+                        <Button
+                          variant="ghost"
+                          onClick={() => setStep(step - 1)}
+                          className="h-14 px-8 rounded-xl uppercase text-[10px] font-black tracking-widest hover:text-accent transition-all"
+                        >
+                          <ChevronLeft className="w-4 h-4 mr-2" /> Previous Mode
+                        </Button>
+                      ) : <div />}
+
+                      <Button
+                        onClick={step === STEPS.length - 1 ? handleSubmit : () => setStep(step + 1)}
+                        disabled={!canProceed() || submitting}
+                        className={cn(
+                          "h-14 px-10 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all",
+                          step === STEPS.length - 1 ? "btn-accent text-white shadow-[0_0_30px_rgba(59,130,246,0.2)]" : "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:scale-105"
+                        )}
+                      >
+                        {submitting ? (
+                          <span className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 animate-spin" /> Finalizing...
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            {step === STEPS.length - 1 ? 'Confirm Reservation' : 'Secure Next Step'}
+                            {step === STEPS.length - 1 ? <Check className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                          </span>
+                        )}
+                      </Button>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Right Column: Live Summary Sidebar */}
+            <aside className="lg:col-span-5 xl:col-span-4 sticky top-32">
+              <div className="glass-strong rounded-3xl border border-border/50 shadow-2xl relative overflow-hidden">
+                <div className="bg-zinc-900 p-6 flex items-center justify-between text-white">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black uppercase tracking-widest">Booking Summary</h3>
+                      <p className="text-[9px] text-accent font-bold uppercase tracking-widest">Live Sync Status: Online</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-8 space-y-8">
+                  {/* Selected Vehicle Card */}
+                  <div className="space-y-4">
+                    <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest block px-1">Active Selection</span>
+                    {selectedCarData ? (
+                      <div className="group relative rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-border/50 p-4 flex gap-4">
+                        <div className="w-24 aspect-video rounded-lg overflow-hidden shrink-0 shadow-md">
+                          <img src={selectedCarData.image} className="w-full h-full object-cover" alt="" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-black uppercase tracking-tight text-sm truncate">{selectedCarData.name}</p>
+                          <p className="text-[10px] font-bold text-accent uppercase">{selectedCarData.type} Fleet</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="h-20 rounded-2xl border-2 border-dashed border-border/50 flex items-center justify-center p-6 text-center">
+                        <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Awaiting Vehicle Selection</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Pricing Breakdown */}
+                  <div className="space-y-6">
+                    <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest block px-1">Financial Architecture</span>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center text-xs font-bold uppercase">
+                        <span className="text-muted-foreground">Standard Rate</span>
+                        <span>${selectedCarData ? (booking.pricingPlan === 'hour' ? selectedCarData.price_per_hour : booking.pricingPlan === 'day' ? selectedCarData.price_per_day : selectedCarData.price_per_trip) : '0'}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs font-bold uppercase">
+                        <span className="text-muted-foreground">Duration ({getDurationLabel()})</span>
+                        <span className="text-accent underline underline-offset-4 decoration-2">×{booking.duration}</span>
+                      </div>
+                      <div className="pt-4 mt-4 border-t border-border/30 flex justify-between items-end">
+                        <span className="text-[10px] font-black uppercase text-foreground tracking-widest">Final Amount</span>
+                        <span className="text-3xl font-black tracking-tighter text-foreground">${calculatePrice()}</span>
                       </div>
                     </div>
                   </div>
-                )}
 
-                {/* Navigation */}
-                <div className="flex justify-between mt-8 pt-6 border-t border-border">
-                  {step > 0 ? (
-                    <Button variant="outline" onClick={() => setStep(step - 1)} className="gap-2">
-                      <ChevronLeft className="w-4 h-4" /> {t('booking.previous')}
-                    </Button>
-                  ) : <div />}
-
-                  {step < STEPS.length - 1 ? (
-                    <Button onClick={() => setStep(step + 1)} disabled={!canProceed()} className="btn-accent text-white gap-2">
-                      {t('booking.next')} <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  ) : (
-                    <Button onClick={handleSubmit} disabled={submitting} className="btn-accent text-white gap-2">
-                      {submitting ? 'Submitting...' : t('booking.confirm')} <Check className="w-4 h-4" />
-                    </Button>
-                  )}
+                  {/* Trust Badges */}
+                  <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border/30">
+                    <div className="flex items-center gap-2 p-3 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
+                      <Check className="w-4 h-4 text-emerald-500" />
+                      <span className="text-[8px] font-black uppercase tracking-tighter">Instant Approval</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-3 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
+                      <Shield className="w-4 h-4 text-accent" />
+                      <span className="text-[8px] font-black uppercase tracking-tighter">Safe & Secure</span>
+                    </div>
+                  </div>
                 </div>
-              </motion.div>
-            </AnimatePresence>
+              </div>
+
+              {/* Assistance Floating Card */}
+              <div className="mt-8 p-6 bg-zinc-900 dark:bg-white rounded-3xl text-white dark:text-zinc-900 flex items-center gap-4 transition-transform hover:scale-105 cursor-pointer">
+                <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center border-2 border-accent">
+                  <Phone className="w-5 h-5 text-accent" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black uppercase tracking-widest">Need Direct Support?</h4>
+                  <p className="text-[10px] opacity-70 font-bold">+250 788 000 000</p>
+                </div>
+                <ChevronRight className="w-4 h-4 ml-auto opacity-50" />
+              </div>
+            </aside>
           </div>
         </div>
       </section>
