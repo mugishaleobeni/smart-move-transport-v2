@@ -16,9 +16,10 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
-import { AdminLayout } from "./components/admin/AdminLayout";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { NavProgressBar } from "./components/layout/NavProgressBar";
 
 const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
 const CarsManagement = lazy(() => import("./pages/admin/CarsManagement"));
@@ -28,7 +29,7 @@ const ExpensesManagement = lazy(() => import("./pages/admin/ExpensesManagement")
 const Analytics = lazy(() => import("./pages/admin/Analytics"));
 const Reports = lazy(() => import("./pages/admin/Reports"));
 
-import { NavProgressBar } from "./components/layout/NavProgressBar";
+
 
 const queryClient = new QueryClient();
 

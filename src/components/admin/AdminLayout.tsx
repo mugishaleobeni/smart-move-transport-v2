@@ -56,3 +56,5 @@ export function AdminLayout() {
     </SidebarProvider>
   );
 }
+
+export default AdminLayout;
