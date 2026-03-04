@@ -84,18 +84,18 @@ export function AdminSidebar() {
                           end={item.to === '/admin'}
                           className={({ isActive }) =>
                             cn(
-                              'flex items-center gap-3 px-3 py-2 rounded-lg transition-smooth w-full group',
+                              'flex items-center gap-3 w-full group transition-colors',
                               isActive
-                                ? 'bg-primary !text-white font-semibold shadow-md'
-                                : 'text-slate-900 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 hover:text-primary dark:hover:text-primary'
+                                ? 'bg-primary !text-white font-bold shadow-md'
+                                : 'text-black dark:text-zinc-300 font-bold hover:text-primary dark:hover:text-primary'
                             )
                           }
                         >
                           <item.icon className={cn(
                             'w-4 h-4 shrink-0 transition-colors',
-                            'text-zinc-500 group-hover:text-black dark:text-zinc-400 dark:group-hover:text-white'
+                            isActive ? 'text-white' : 'text-black dark:text-zinc-400 group-hover:text-primary'
                           )} />
-                          <span className="truncate">{item.title}</span>
+                          <span className="whitespace-nowrap">{item.title}</span>
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
