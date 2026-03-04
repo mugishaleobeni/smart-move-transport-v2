@@ -26,6 +26,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ActionConfirmation } from '@/components/dashboard/ActionConfirmation';
 import {
   DropdownMenu,
@@ -64,6 +65,7 @@ export default function BookingsManagement() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<{ id: string; status: string; label: string } | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -78,10 +80,13 @@ export default function BookingsManagement() {
 
   const fetchBookings = async () => {
     try {
+      setLoading(true);
       const response = await bookingsApi.getAll();
       setBookings(response.data);
     } catch (error: any) {
       toast({ title: 'Error fetching bookings', description: error.message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -273,108 +278,130 @@ export default function BookingsManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((b) => (
-              <TableRow key={b._id || b.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors border-zinc-100 dark:border-zinc-800">
-                <TableCell className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400 font-bold text-xs">
-                      {b.client_name.split(' ').map(n => n[0]).join('')}
+            {loading ? (
+              Array(6).fill(0).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="w-9 h-9 rounded-full" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-2 w-16" />
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-semibold text-sm">{b.client_name}</p>
-                      {b.client_phone && (
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <User className="w-3 h-3" /> {b.client_phone}
-                        </p>
-                      )}
+                  </TableCell>
+                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-10 w-32" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
+                  <TableCell><Skeleton className="h-8 w-32" /></TableCell>
+                  <TableCell className="text-right px-6"><Skeleton className="h-8 w-8 rounded-full ml-auto" /></TableCell>
+                </TableRow>
+              ))
+            ) : (
+              filtered.map((b) => (
+                <TableRow key={b._id || b.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors border-zinc-100 dark:border-zinc-800 font-bold">
+                  <TableCell className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400 font-black text-xs">
+                        {b.client_name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm text-black dark:text-zinc-100">{b.client_name}</p>
+                        {b.client_phone && (
+                          <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5 font-medium">
+                            <User className="w-3 h-3" /> {b.client_phone}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2 text-sm">
-                    <CarFront className="w-3.5 h-3.5 text-zinc-400" />
-                    <span>{carName(b.car_id)}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-xs">
-                      <Calendar className="w-3 h-3 text-zinc-400" />
-                      <span>{b.booking_date}</span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 text-sm text-black dark:text-zinc-300">
+                      <CarFront className="w-3.5 h-3.5 text-zinc-400" />
+                      <span>{carName(b.car_id)}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] text-zinc-500 max-w-[140px] truncate">
-                      <MapPin className="w-3 h-3 text-zinc-400 shrink-0" />
-                      {b.pickup_location}
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-xs font-bold text-black dark:text-zinc-200">
+                        <Calendar className="w-3 h-3 text-zinc-400" />
+                        <span>{b.booking_date}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[10px] text-zinc-500 max-w-[140px] truncate font-medium">
+                        <MapPin className="w-3 h-3 text-zinc-400 shrink-0" />
+                        {b.pickup_location}
+                      </div>
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100">
-                    RWF {Number(b.total_price).toLocaleString()}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className={cn("h-6 text-[10px] px-2 font-medium gap-1 border-none", statusMap[b.status]?.color)}>
-                    {(() => {
-                      const Icon = statusMap[b.status]?.icon;
-                      return Icon && <Icon className="w-3 h-3" />;
-                    })()}
-                    {statusMap[b.status]?.label || b.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="relative group">
-                    <Input
-                      placeholder="Assign driver..."
-                      defaultValue={b.driver || ''}
-                      className="h-8 w-32 text-[10px] bg-transparent focus-visible:ring-1 focus-visible:ring-primary border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2"
-                      onBlur={(e) => updateDriver((b._id || b.id)!, e.target.value)}
-                    />
-                  </div>
-                </TableCell>
-                <TableCell className="text-right px-6">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800">
-                        <MoreVertical className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40 rounded-xl overflow-hidden border-zinc-200 dark:border-zinc-800">
-                      {b.status === 'pending' && (
-                        <>
-                          <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'approved', 'Approve')} className="gap-2 text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 cursor-pointer">
-                            <Check className="w-4 h-4" /> Approve
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-black text-sm text-zinc-900 dark:text-zinc-100">
+                      RWF {Number(b.total_price).toLocaleString()}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={cn("h-6 text-[10px] px-2 font-bold gap-1 border-none", statusMap[b.status]?.color)}>
+                      {(() => {
+                        const Icon = statusMap[b.status]?.icon;
+                        return Icon && <Icon className="w-3 h-3" />;
+                      })()}
+                      {statusMap[b.status]?.label || b.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="relative group">
+                      <Input
+                        placeholder="Assign driver..."
+                        defaultValue={b.driver || ''}
+                        className="h-8 w-32 text-[10px] bg-transparent font-bold focus-visible:ring-1 focus-visible:ring-primary border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2"
+                        onBlur={(e) => updateDriver((b._id || b.id)!, e.target.value)}
+                      />
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right px-6">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40 rounded-xl overflow-hidden border-zinc-200 dark:border-zinc-800 shadow-xl bg-white dark:bg-zinc-950">
+                        {b.status === 'pending' && (
+                          <>
+                            <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'approved', 'Approve')} className="gap-2 text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 cursor-pointer font-bold">
+                              <Check className="w-4 h-4" /> Approve
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'rejected', 'Reject')} className="gap-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer font-bold">
+                              <Ban className="w-4 h-4" /> Reject
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        {b.status === 'approved' && (
+                          <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'completed', 'Complete')} className="gap-2 focus:bg-blue-50 dark:focus:bg-blue-950/20 cursor-pointer font-bold text-blue-600">
+                            <Check className="w-4 h-4" /> Finalize Trip
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'rejected', 'Reject')} className="gap-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer">
-                            <Ban className="w-4 h-4" /> Reject
+                        )}
+                        {(b.status === 'pending' || b.status === 'approved') && (
+                          <DropdownMenuItem
+                            onClick={() => handleStatusUpdate((b._id || b.id)!, 'completed', 'Complete')}
+                            className="gap-2 text-blue-600 focus:text-blue-600 focus:bg-blue-50 dark:focus:bg-blue-950/20 cursor-pointer font-bold"
+                          >
+                            <CheckCircle2 className="w-4 h-4" /> Mark Completed
                           </DropdownMenuItem>
-                        </>
-                      )}
-                      {b.status === 'approved' && (
-                        <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'completed', 'Complete')} className="gap-2 focus:bg-blue-50 dark:focus:bg-blue-950/20 cursor-pointer">
-                          <Check className="w-4 h-4" /> Finalize Trip
-                        </DropdownMenuItem>
-                      )}
-                      {(b.status === 'pending' || b.status === 'approved') && (
+                        )}
                         <DropdownMenuItem
-                          onClick={() => handleStatusUpdate((b._id || b.id)!, 'completed', 'Complete')}
-                          className="gap-2 text-blue-600 focus:text-blue-600 focus:bg-blue-50 dark:focus:bg-blue-950/20 cursor-pointer font-bold"
+                          onClick={() => { setSelectedBooking(b); setDetailsOpen(true); }}
+                          className="gap-2 cursor-pointer dark:focus:bg-zinc-800 font-bold"
                         >
-                          <CheckCircle2 className="w-4 h-4" /> Mark Completed
+                          <User className="w-4 h-4" /> View Details
                         </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem
-                        onClick={() => { setSelectedBooking(b); setDetailsOpen(true); }}
-                        className="gap-2 cursor-pointer dark:focus:bg-zinc-800"
-                      >
-                        <User className="w-4 h-4" /> View Details
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-            {filtered.length === 0 && (
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+            {!loading && filtered.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-20">
                   <div className="flex flex-col items-center gap-2">

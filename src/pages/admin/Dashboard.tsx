@@ -27,6 +27,7 @@ import {
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Stats {
   totalCars: number;
@@ -106,31 +107,54 @@ export default function Dashboard() {
       const bookings = bookingsRes.data || [];
       const expenses = expensesRes.data || [];
 
-      const map: Record<string, { income: number; expense: number }> = {};
+      // Get last 6 months list as baseline
+      const last6Months: Record<string, { income: number; expense: number }> = {};
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - i);
+        const key = d.toISOString().slice(0, 7); // YYYY-MM
+        last6Months[key] = { income: 0, expense: 0 };
+      }
+
       bookings.forEach((b: any) => {
         const month = b.booking_date?.slice(0, 7);
-        if (month) {
-          if (!map[month]) map[month] = { income: 0, expense: 0 };
-          map[month].income += Number(b.total_price || 0);
+        if (month && last6Months[month]) {
+          last6Months[month].income += Number(b.total_price || 0);
         }
       });
       expenses.forEach((e: any) => {
         const month = e.expense_date?.slice(0, 7);
-        if (month) {
-          if (!map[month]) map[month] = { income: 0, expense: 0 };
-          map[month].expense += Number(e.amount || 0);
+        if (month && last6Months[month]) {
+          last6Months[month].expense += Number(e.amount || 0);
         }
       });
 
-      const sorted = Object.entries(map)
+      const sorted = Object.entries(last6Months)
         .sort(([a], [b]) => a.localeCompare(b))
-        .map(([month, val]) => ({
-          month: new Date(month).toLocaleString('default', { month: 'short' }),
-          ...val
-        }));
+        .map(([month, val]) => {
+          // Robust date parsing (YYYY-MM-01)
+          const date = new Date(month + '-01');
+          return {
+            month: date.toLocaleString('default', { month: 'short' }),
+            fullMonth: date.toLocaleString('default', { month: 'long', year: 'numeric' }),
+            ...val
+          };
+        });
       setChartData(sorted);
     } catch (error) {
       console.error('Chart data fetch failed', error);
+      // Fallback: Show empty baseline
+      const fallback: any[] = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - i);
+        fallback.push({
+          month: d.toLocaleString('default', { month: 'short' }),
+          income: 0,
+          expense: 0
+        });
+      }
+      setChartData(fallback);
     }
   };
 
@@ -180,16 +204,7 @@ export default function Dashboard() {
     cancelled: { label: 'Cancelled', color: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400' },
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex flex-col items-center gap-2">
-          <TrendingUp className="w-8 h-8 text-primary animate-pulse" />
-          <p className="text-sm font-medium text-muted-foreground">Refreshing dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  // Removed full-page loading to allow partial skeleton loading
 
   return (
     <div className="space-y-8 pb-8">
@@ -211,36 +226,38 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-        {statCards.map((card, i) => (
+        {(loading ? Array(5).fill(0) : statCards).map((card: any, i) => (
           <motion.div
-            key={card.title}
+            key={loading ? `skeleton-${i}` : card.title}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08, duration: 0.4 }}
           >
-            <Card className="overflow-hidden border-none card-premium bg-white dark:bg-zinc-900">
+            <Card className="overflow-hidden border-none card-premium bg-white dark:bg-zinc-900 h-full">
               <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className={cn("p-2.5 rounded-xl", card.color)}>
-                    <card.icon className="w-5 h-5" />
-                  </div>
-                  {card.trend && (
-                    <div className={cn(
-                      "flex items-center text-[10px] font-bold px-2 py-1 rounded-full",
-                      card.isPositive === undefined ? "bg-zinc-100 text-zinc-600" :
-                        card.isPositive ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
-                    )}>
-                      {card.isPositive === true && <ArrowUpRight className="w-3 h-3 mr-0.5" />}
-                      {card.isPositive === false && <ArrowDownRight className="w-3 h-3 mr-0.5" />}
-                      {card.trend.split(' ')[0]}
+                {loading ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-10 w-10 rounded-xl" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-8 w-32" />
+                      <Skeleton className="h-3 w-16" />
                     </div>
-                  )}
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">{card.title}</p>
-                  <p className="text-2xl font-bold mt-1 tracking-tight">{card.value}</p>
-                  <p className="text-[10px] text-zinc-400 mt-1">{card.subtitle}</p>
-                </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex justify-between items-start mb-4">
+                      <div className={cn("p-2.5 rounded-xl", card.color)}>
+                        <card.icon className="w-5 h-5" />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">{card.title}</p>
+                      <p className="text-2xl font-bold mt-1 tracking-tight">{card.value}</p>
+                      <p className="text-[10px] text-zinc-400 mt-1">{card.subtitle}</p>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </motion.div>
@@ -333,39 +350,60 @@ export default function Dashboard() {
 
         <Card className="border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 h-full flex flex-col overflow-hidden">
           <CardHeader className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
-            <CardTitle className="text-lg">Recent Bookings</CardTitle>
+            <CardTitle className="text-lg text-black dark:text-white">Recent Bookings</CardTitle>
             <CardDescription>Latest client reservations this week.</CardDescription>
           </CardHeader>
           <CardContent className="p-4 flex-1">
             <div className="space-y-4">
-              {recentBookings.length === 0 && (
-                <div className="py-12 text-center text-sm text-muted-foreground italic">
-                  No bookings found
-                </div>
+              {loading ? (
+                Array(5).fill(0).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between p-3">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="w-10 h-10 rounded-full" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-28" />
+                        <Skeleton className="h-3 w-20" />
+                      </div>
+                    </div>
+                    <div className="text-right space-y-2">
+                      <Skeleton className="h-4 w-20 ml-auto" />
+                      <Skeleton className="h-5 w-16 ml-auto rounded-full" />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <>
+                  {recentBookings.length === 0 ? (
+                    <div className="py-12 text-center text-sm text-muted-foreground italic">
+                      No bookings found
+                    </div>
+                  ) : (
+                    recentBookings.map((b) => (
+                      <div key={b._id || b.id} className="group flex items-center justify-between p-3 rounded-xl border border-transparent hover:border-zinc-100 dark:hover:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all font-bold">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                            {b.client_name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-black dark:text-zinc-100">{b.client_name}</p>
+                            <p className="text-[10px] text-zinc-500">{new Date(b.booking_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-black dark:text-zinc-100">RWF {Number(b.total_price).toLocaleString()}</p>
+                          <Badge className={cn("h-5 text-[10px] px-2 font-bold capitalize mt-1", statusMap[b.status]?.color)}>
+                            {statusMap[b.status]?.label || b.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </>
               )}
-              {recentBookings.map((b) => (
-                <div key={b._id || b.id} className="group flex items-center justify-between p-3 rounded-xl border border-transparent hover:border-zinc-100 dark:hover:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
-                      {b.client_name.split(' ').map(n => n[0]).join('')}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">{b.client_name}</p>
-                      <p className="text-[10px] text-zinc-500">{new Date(b.booking_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold">RWF {Number(b.total_price).toLocaleString()}</p>
-                    <Badge className={cn("h-5 text-[10px] px-2 font-medium capitalize mt-1", statusMap[b.status]?.color)}>
-                      {statusMap[b.status]?.label || b.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
             </div>
-            {recentBookings.length > 0 && (
+            {!loading && recentBookings.length > 0 && (
               <Link to="/admin/bookings" className="block mt-6">
-                <Button variant="ghost" className="w-full text-xs text-primary font-semibold hover:bg-primary/5">
+                <Button variant="ghost" className="w-full text-xs text-primary font-bold hover:bg-primary/5">
                   View full history
                 </Button>
               </Link>
