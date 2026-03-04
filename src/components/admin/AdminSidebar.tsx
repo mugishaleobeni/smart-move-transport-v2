@@ -71,37 +71,35 @@ export function AdminSidebar() {
 
           <SidebarContent>
             <SidebarGroup>
-              <div className="px-3 py-2">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-3 px-2">
+              <div className="px-5 py-2">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-5">
                   Main Menu
                 </p>
-                <SidebarMenu>
+                <SidebarMenu className="gap-2">
                   {menuItems.map((item) => (
                     <SidebarMenuItem key={item.to}>
-                      <SidebarMenuButton asChild>
-                        <NavLink
-                          to={item.to}
-                          end={item.to === '/admin'}
-                          className={({ isActive }) =>
-                            cn(
-                              'flex items-center gap-3 w-full group transition-colors',
-                              isActive
-                                ? 'bg-primary !text-white font-bold shadow-md'
-                                : 'text-black dark:text-zinc-300 font-bold hover:text-primary dark:hover:text-primary'
-                            )
-                          }
-                        >
-                          {({ isActive }) => (
-                            <>
-                              <item.icon className={cn(
-                                'w-4 h-4 shrink-0 transition-colors',
-                                isActive ? 'text-white' : 'text-black dark:text-zinc-400 group-hover:text-primary'
-                              )} />
-                              <span className="whitespace-nowrap">{item.title}</span>
-                            </>
-                          )}
-                        </NavLink>
-                      </SidebarMenuButton>
+                      <NavLink
+                        to={item.to}
+                        end={item.to === '/admin'}
+                        className={({ isActive }) =>
+                          cn(
+                            'flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group w-full',
+                            isActive
+                              ? 'bg-primary text-white font-bold shadow-lg shadow-primary/20'
+                              : 'text-black dark:text-zinc-300 font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800/40 hover:text-primary'
+                          )
+                        }
+                      >
+                        {({ isActive }) => (
+                          <>
+                            <item.icon className={cn(
+                              'w-4.5 h-4.5 shrink-0 transition-colors',
+                              isActive ? 'text-white' : 'text-black dark:text-zinc-400 group-hover:text-primary'
+                            )} />
+                            <span className="text-sm tracking-tight">{item.title}</span>
+                          </>
+                        )}
+                      </NavLink>
                     </SidebarMenuItem>
                   ))}
                 </SidebarMenu>
