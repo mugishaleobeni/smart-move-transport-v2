@@ -44,4 +44,8 @@ export const notificationsApi = {
     markAllRead: () => api.post('/notifications/mark-all-read'),
 };
 
+export const searchApi = {
+    global: (query: string) => api.get(`/search?q=${query}`),
+};
+
 export default api;

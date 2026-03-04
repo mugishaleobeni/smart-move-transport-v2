@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { CommandMenu } from './CommandMenu';
 
 interface Notification {
   id: string;
@@ -31,6 +32,7 @@ export function AdminTopbar() {
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   useEffect(() => {
@@ -71,16 +73,21 @@ export function AdminTopbar() {
     <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-40">
       <div className="flex items-center gap-4 flex-1">
         <SidebarTrigger className="h-9 w-9 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors" />
-        <div className="hidden md:flex items-center relative w-full max-w-sm group">
+        <div
+          className="hidden md:flex items-center relative w-full max-w-sm group cursor-pointer"
+          onClick={() => setIsSearchOpen(true)}
+        >
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
           <Input
             placeholder="Search dashboard... (Ctrl+K)"
-            className="h-10 pl-10 pr-10 rounded-xl bg-zinc-100/50 dark:bg-zinc-900/50 border-none focus-visible:ring-1 focus-visible:ring-primary/20 w-full"
+            readOnly
+            className="h-10 pl-10 pr-10 rounded-xl bg-zinc-100/50 dark:bg-zinc-900/50 border-none focus-visible:ring-1 focus-visible:ring-primary/20 w-full cursor-pointer"
           />
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-[10px] font-bold text-zinc-400">
             <Command className="w-2.5 h-2.5" /> K
           </div>
         </div>
+        <CommandMenu open={isSearchOpen} setOpen={setIsSearchOpen} />
       </div>
 
       <div className="flex items-center gap-3">
