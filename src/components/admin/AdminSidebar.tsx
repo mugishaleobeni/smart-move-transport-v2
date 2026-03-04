@@ -87,7 +87,7 @@ export function AdminSidebar() {
                               'flex items-center gap-3 px-3 py-2 rounded-lg transition-smooth w-full group',
                               isActive
                                 ? 'bg-primary !text-white font-semibold shadow-md'
-                                : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 hover:text-primary dark:hover:text-primary'
+                                : 'text-slate-900 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 hover:text-primary dark:hover:text-primary'
                             )
                           }
                         >
