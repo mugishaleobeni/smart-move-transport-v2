@@ -85,8 +85,8 @@ export function AdminSidebar() {
                           cn(
                             'flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group w-full',
                             isActive
-                              ? 'bg-primary text-white font-bold shadow-lg shadow-primary/20'
-                              : 'text-black dark:text-zinc-300 font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800/40 hover:text-primary'
+                              ? 'bg-accent/10 text-accent dark:bg-accent dark:text-white font-bold shadow-sm'
+                              : 'text-black dark:text-zinc-100 font-bold hover:bg-zinc-50 dark:hover:bg-zinc-800/40 hover:text-accent'
                           )
                         }
                       >
@@ -94,7 +94,9 @@ export function AdminSidebar() {
                           <>
                             <item.icon className={cn(
                               'w-4.5 h-4.5 shrink-0 transition-colors',
-                              isActive ? 'text-white' : 'text-black dark:text-zinc-400 group-hover:text-primary'
+                              isActive
+                                ? 'text-accent dark:text-white'
+                                : 'text-black dark:text-zinc-400 group-hover:text-accent'
                             )} />
                             <span className="text-sm tracking-tight">{item.title}</span>
                           </>
