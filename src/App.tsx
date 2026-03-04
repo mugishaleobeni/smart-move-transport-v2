@@ -8,6 +8,8 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { lazy, Suspense } from "react";
 import { motion } from "framer-motion";
+import { OfflineProvider } from "@/contexts/OfflineContext";
+import { NetworkStatusIndicator } from "@/components/offline/NetworkStatusIndicator";
 import Home from "./pages/Home";
 import Cars from "./pages/Cars";
 import CarDetails from "./pages/CarDetails";
@@ -58,35 +60,38 @@ const App = () => (
     <ThemeProvider>
       <LanguageProvider>
         <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-              <NavProgressBar />
-              <ScrollToTop />
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/cars" element={<Cars />} />
-                <Route path="/cars/:id" element={<CarDetails />} />
-                <Route path="/booking" element={<Booking />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route element={<ProtectedRoute adminOnly />}>
-                  <Route path="/admin" element={<AdminLayout />}>
-                    <Route index element={<Suspense fallback={<Loading />}><Dashboard /></Suspense>} />
-                    <Route path="cars" element={<Suspense fallback={<Loading />}><CarsManagement /></Suspense>} />
-                    <Route path="pricing" element={<Suspense fallback={<Loading />}><PricingManagement /></Suspense>} />
-                    <Route path="bookings" element={<Suspense fallback={<Loading />}><BookingsManagement /></Suspense>} />
-                    <Route path="expenses" element={<Suspense fallback={<Loading />}><ExpensesManagement /></Suspense>} />
-                    <Route path="analytics" element={<Suspense fallback={<Loading />}><Analytics /></Suspense>} />
-                    <Route path="reports" element={<Suspense fallback={<Loading />}><Reports /></Suspense>} />
+          <OfflineProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                <NavProgressBar />
+                <ScrollToTop />
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/cars" element={<Cars />} />
+                  <Route path="/cars/:id" element={<CarDetails />} />
+                  <Route path="/booking" element={<Booking />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route element={<ProtectedRoute adminOnly />}>
+                    <Route path="/admin" element={<AdminLayout />}>
+                      <Route index element={<Suspense fallback={<Loading />}><Dashboard /></Suspense>} />
+                      <Route path="cars" element={<Suspense fallback={<Loading />}><CarsManagement /></Suspense>} />
+                      <Route path="pricing" element={<Suspense fallback={<Loading />}><PricingManagement /></Suspense>} />
+                      <Route path="bookings" element={<Suspense fallback={<Loading />}><BookingsManagement /></Suspense>} />
+                      <Route path="expenses" element={<Suspense fallback={<Loading />}><ExpensesManagement /></Suspense>} />
+                      <Route path="analytics" element={<Suspense fallback={<Loading />}><Analytics /></Suspense>} />
+                      <Route path="reports" element={<Suspense fallback={<Loading />}><Reports /></Suspense>} />
+                    </Route>
                   </Route>
-                </Route>
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <NetworkStatusIndicator />
+              </BrowserRouter>
+            </TooltipProvider>
+          </OfflineProvider>
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>

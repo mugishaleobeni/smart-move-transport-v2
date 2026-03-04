@@ -10,6 +10,32 @@ const api = axios.create({
     },
 });
 
+// Offline Request Queuing Interceptor
+api.interceptors.request.use((config) => {
+    const isMutation = ['post', 'put', 'patch', 'delete'].includes(config.method || '');
+
+    if (isMutation && !navigator.onLine) {
+        // Broadcast the action to OfflineContext
+        const event = new CustomEvent('smartmove_offline_action', {
+            detail: {
+                url: config.url,
+                method: config.method,
+                data: config.data,
+            }
+        });
+        window.dispatchEvent(event);
+
+        // Return a mock response to prevent the UI from breaking/showing error
+        // Note: This requires the caller to handle this "silent success" appropriately if needed
+        return Promise.reject({
+            isOfflineQueue: true,
+            message: 'Action queued for offline sync',
+            config
+        });
+    }
+    return config;
+});
+
 export const carsApi = {
     getAll: () => api.get('/cars'),
     getById: (id: string) => api.get(`/cars/${id}`),

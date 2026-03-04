@@ -21,46 +21,46 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ["favicon.ico", "robots.txt"],
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp,woff,woff2}"],
-        runtimeCaching: [
           {
-            urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "unsplash-images",
-              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 30 },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/.*supabase.*\/rest\/v1\/.*/i,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "api-cache",
-              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 },
-            },
-          },
-        ],
-        navigateFallbackDenylist: [/^\/~oauth/],
+        urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
+        handler: "CacheFirst",
+        options: {
+          cacheName: "unsplash-images",
+          expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 30 },
+        },
       },
-      manifest: {
-        name: "Smart Move Transport",
-        short_name: "SmartMove",
-        description: "Premium car rental service in Kigali, Rwanda",
-        theme_color: "#0066FF",
-        background_color: "#ffffff",
-        display: "standalone",
-        start_url: "/",
-        icons: [
-          { src: "/favicon.ico", sizes: "64x64", type: "image/x-icon" },
-          { src: "/pwa-192x192.png", sizes: "192x192", type: "image/png" },
-          { src: "/pwa-512x512.png", sizes: "512x512", type: "image/png" },
-          { src: "/pwa-512x512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
-        ],
+      {
+        urlPattern: /.*\/api\/.*/i,
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "api-data-cache",
+          expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 },
+          networkTimeoutSeconds: 5,
+        },
       },
+        ],
+  navigateFallbackDenylist: [/^\/~oauth/],
+},
+  manifest: {
+  name: "Smart Move Transport",
+  short_name: "SmartMove",
+  description: "Premium car rental service in Kigali, Rwanda",
+  theme_color: "#0066FF",
+  background_color: "#ffffff",
+  display: "standalone",
+  start_url: "/",
+  icons: [
+    { src: "/favicon.ico", sizes: "64x64", type: "image/x-icon" },
+    { src: "/pwa-192x192.png", sizes: "192x192", type: "image/png" },
+    { src: "/pwa-512x512.png", sizes: "512x512", type: "image/png" },
+    { src: "/pwa-512x512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+  ],
+},
     }),
   ].filter(Boolean),
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+  alias: {
+    "@": path.resolve(__dirname, "./src"),
     },
-  },
+},
 }));
