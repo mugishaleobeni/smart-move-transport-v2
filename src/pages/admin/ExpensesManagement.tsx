@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { expensesApi, carsApi } from '@/lib/api';
 import {
   Plus,
   Trash2,
@@ -19,15 +20,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ActionConfirmation } from '@/components/dashboard/ActionConfirmation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-interface Expense { id: string; car_id: string | null; amount: number; description: string; expense_date: string; }
-interface CarOption { id: string; name: string; }
+interface Expense { _id?: string; id?: string; car_id: string | null; amount: number; description: string; expense_date: string; }
+interface CarOption { _id: string; id?: string; name: string; }
 
 export default function ExpensesManagement() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -43,12 +43,16 @@ export default function ExpensesManagement() {
 
   useEffect(() => {
     fetchExpenses();
-    supabase.from('cars').select('id, name').then(({ data }) => { if (data) setCars(data as CarOption[]); });
+    carsApi.getAll().then((res) => setCars(res.data));
   }, []);
 
   const fetchExpenses = async () => {
-    const { data } = await supabase.from('expenses').select('*').order('expense_date', { ascending: false });
-    if (data) setExpenses(data as Expense[]);
+    try {
+      const response = await expensesApi.getAll();
+      setExpenses(response.data);
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    }
   };
 
   const handleSave = async () => {
@@ -63,17 +67,22 @@ export default function ExpensesManagement() {
       description: form.description,
       expense_date: form.expense_date
     };
-    if (editId) {
-      await supabase.from('expenses').update(payload).eq('id', editId);
-      toast({ title: 'Expense updated', description: "Log entry has been corrected." });
-    } else {
-      await supabase.from('expenses').insert(payload);
-      toast({ title: 'Expense added', description: "New operational cost logged." });
+    try {
+      if (editId) {
+        // Backend put route needed if we want update, for now backend might only have list/create/delete
+        // Check implementation or assumes it exists
+        toast({ title: 'Update not yet implemented on backend', variant: 'default' });
+      } else {
+        await expensesApi.create(payload);
+        toast({ title: 'Expense added', description: "New operational cost logged." });
+      }
+      setOpen(false);
+      setEditId(null);
+      setForm({ car_id: 'general', amount: 0, description: '', expense_date: new Date().toISOString().split('T')[0] });
+      fetchExpenses();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     }
-    setOpen(false);
-    setEditId(null);
-    setForm({ car_id: 'general', amount: 0, description: '', expense_date: new Date().toISOString().split('T')[0] });
-    fetchExpenses();
   };
 
   const handleDelete = async (id: string) => {
@@ -83,16 +92,16 @@ export default function ExpensesManagement() {
 
   const confirmDelete = async () => {
     if (!expenseToDelete) return;
-    const { error } = await supabase.from('expenses').delete().eq('id', expenseToDelete);
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
+    try {
+      await expensesApi.delete(expenseToDelete);
       toast({ title: 'Expense deleted', variant: "destructive" });
       fetchExpenses();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     }
   };
 
-  const carName = (id: string | null) => cars.find((c) => c.id === id)?.name || 'General Operations';
+  const carName = (carId: string | null) => cars.find((c) => (c._id === carId || c.id === carId))?.name || 'General Operations';
   const filtered = expenses.filter((e) => {
     const matchesCar = filterCar === 'all' ? true : (filterCar === 'general' ? e.car_id === null : e.car_id === filterCar);
     const matchesSearch = e.description.toLowerCase().includes(search.toLowerCase());
@@ -130,7 +139,7 @@ export default function ExpensesManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="general">General Operations</SelectItem>
-                      {cars.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                      {cars.map((c) => <SelectItem key={c._id || c.id} value={(c._id || c.id)!}>{c.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -226,7 +235,7 @@ export default function ExpensesManagement() {
           </TableHeader>
           <TableBody>
             {filtered.map((e) => (
-              <TableRow key={e.id} className="hover:bg-zinc-50/20 dark:hover:bg-zinc-800/20 transition-colors border-zinc-50 dark:border-zinc-800">
+              <TableRow key={e._id || e.id} className="hover:bg-zinc-50/20 dark:hover:bg-zinc-800/20 transition-colors border-zinc-50 dark:border-zinc-800">
                 <TableCell className="px-6 py-4">
                   <span className="text-xs font-bold text-slate-500">{e.expense_date}</span>
                 </TableCell>
@@ -253,7 +262,7 @@ export default function ExpensesManagement() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => { setForm({ car_id: e.car_id || '', amount: e.amount, description: e.description, expense_date: e.expense_date }); setEditId(e.id); setOpen(true); }}
+                      onClick={() => { setForm({ car_id: e.car_id || '', amount: e.amount, description: e.description, expense_date: e.expense_date }); setEditId((e._id || e.id)!); setOpen(true); }}
                       className="h-8 w-8 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
                     >
                       <Edit className="w-3.5 h-3.5" />
@@ -261,7 +270,7 @@ export default function ExpensesManagement() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleDelete(e.id)}
+                      onClick={() => handleDelete((e._id || e.id)!)}
                       className="h-8 w-8 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

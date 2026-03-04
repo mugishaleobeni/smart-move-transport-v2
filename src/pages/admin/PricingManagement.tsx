@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { supabase } from '@/integrations/supabase/client';
+import { pricingApi, carsApi } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -39,13 +39,17 @@ export default function PricingManagement() {
   const { toast } = useToast();
 
   useEffect(() => {
-    supabase.from('cars').select('id, name').then(({ data }) => { if (data) setCars(data as CarOption[]); });
+    carsApi.getAll().then(({ data }) => { if (data) setCars(data as CarOption[]); });
     fetchRules();
   }, []);
 
   const fetchRules = async () => {
-    const { data } = await supabase.from('pricing_rules').select('*').order('created_at', { ascending: false });
-    if (data) setRules(data as PricingRule[]);
+    try {
+      const { data } = await pricingApi.getAll();
+      if (data) setRules(data as PricingRule[]);
+    } catch (error: any) {
+      toast({ title: 'Error fetching rules', description: error.message, variant: 'destructive' });
+    }
   };
 
   const filtered = selectedCar === 'all' ? rules : rules.filter((r) => r.car_id === selectedCar);
@@ -57,15 +61,19 @@ export default function PricingManagement() {
     }
 
     const payload = { car_id: form.car_id, pricing_type: form.pricing_type, amount: form.amount, location: form.location || null, notes: form.notes || null };
-    if (editId) {
-      await supabase.from('pricing_rules').update(payload).eq('id', editId);
-      toast({ title: 'Rule updated', description: "The pricing rule has been modified." });
-    } else {
-      await supabase.from('pricing_rules').insert(payload);
-      toast({ title: 'Rule added', description: "New pricing rate established." });
+    try {
+      if (editId) {
+        await pricingApi.update(editId, payload);
+        toast({ title: 'Rule updated', description: "The pricing rule has been modified." });
+      } else {
+        await pricingApi.create(payload);
+        toast({ title: 'Rule added', description: "New pricing rate established." });
+      }
+      setOpen(false); setEditId(null); setForm({ car_id: '', pricing_type: 'hour', amount: 0, location: '', notes: '' });
+      fetchRules();
+    } catch (error: any) {
+      toast({ title: 'Error saving rule', description: error.message, variant: 'destructive' });
     }
-    setOpen(false); setEditId(null); setForm({ car_id: '', pricing_type: 'hour', amount: 0, location: '', notes: '' });
-    fetchRules();
   };
 
   const handleDelete = async (id: string) => {
@@ -74,17 +82,16 @@ export default function PricingManagement() {
   };
 
   const confirmDelete = async () => {
-    if (!ruleToDelete) return;
-    const { error } = await supabase.from('pricing_rules').delete().eq('id', ruleToDelete);
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
+    try {
+      await pricingApi.delete(ruleToDelete);
       toast({ title: 'Rule deleted', variant: "destructive" });
       fetchRules();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
     }
   };
 
-  const carName = (id: string) => cars.find((c) => c.id === id)?.name || 'Unknown Vehicle';
+  const carName = (id: string) => cars.find((c) => (c._id === id || c.id === id))?.name || 'Unknown Vehicle';
 
   return (
     <div className="space-y-8 pb-10">

@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Star, Shield, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star, Shield, Clock, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { Layout } from '@/components/layout/Layout';
-import { supabase } from '@/integrations/supabase/client';
+import { carsApi } from '@/lib/api';
 
-const heroImages = [
+const defaultHeroImages = [
   'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1200&q=80&auto=format',
   'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1200&q=80&auto=format',
   'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=1200&q=80&auto=format',
@@ -16,18 +16,41 @@ const heroImages = [
 export default function Home() {
   const navigate = useNavigate();
   const [featuredCars, setFeaturedCars] = useState<any[]>([]);
-  useEffect(() => {
-    supabase.from('cars').select('*').limit(3).then(({ data }) => { if (data) setFeaturedCars(data); });
-  }, []);
   const { t } = useLanguage();
+  const [heroImages, setHeroImages] = useState<string[]>(defaultHeroImages);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
+    const loadHomeData = async () => {
+      try {
+        const { data } = await carsApi.getAll();
+        if (data && data.length > 0) {
+          setFeaturedCars(data.slice(0, 3));
+
+          // Use images from cars for hero section if they exist
+          const carImages = data
+            .map((car: any) => car.image)
+            .filter((img: string | null) => img !== null)
+            .slice(0, 5);
+
+          if (carImages.length > 0) {
+            setHeroImages(carImages);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading home data:', err);
+      }
+    };
+    loadHomeData();
+  }, []);
+
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroImages.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroImages]);
 
   const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % heroImages.length);
   const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length);
@@ -188,13 +211,13 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredCars.map((car, i) => (
               <motion.div
-                key={car.id}
+                key={car._id || car.id || i}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
               >
-                <Link to={`/cars/${car.id}`} className="block">
+                <Link to={`/cars/${car._id || car.id}`} className="block">
                   <div className="glass rounded-2xl overflow-hidden hover-lift group">
                     <div className="aspect-[16/10] overflow-hidden">
                       <img
@@ -203,6 +226,12 @@ export default function Home() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
                       />
+                      {car.images && car.images.length > 1 && (
+                        <div className="absolute top-2 right-2 glass-premium px-2 py-1 rounded-lg flex items-center gap-1.5 border border-white/10">
+                          <ImageIcon className="w-3 h-3 text-white" />
+                          <span className="text-[10px] font-black text-white">{car.images.length}</span>
+                        </div>
+                      )}
                     </div>
                     <div className="p-6">
                       <h3 className="text-xl font-semibold mb-2">{car.name}</h3>
@@ -211,7 +240,7 @@ export default function Home() {
                       </p>
                       <div className="flex items-center justify-between">
                         <span className="text-2xl font-bold text-accent">
-                          RWF {car.pricePerDay || car.price_per_day || 300}
+                          RWF {car.price || '30,000'}
                           <span className="text-sm font-normal text-muted-foreground">
                             {t('cars.perDay')}
                           </span>

@@ -1,10 +1,10 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Users, Phone, MessageCircle, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Users, Phone, MessageCircle, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { getCarById } from '@/data/cars';
+import { carsApi } from '@/lib/api';
 import { Layout } from '@/components/layout/Layout';
 
 export default function CarDetails() {
@@ -12,8 +12,34 @@ export default function CarDetails() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [currentImage, setCurrentImage] = useState(0);
+  const [car, setCar] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const car = id ? getCarById(id) : undefined;
+  useEffect(() => {
+    const fetchCar = async () => {
+      if (!id) return;
+      try {
+        const { data } = await carsApi.getById(id);
+        setCar(data);
+      } catch (error) {
+        console.error('Failed to fetch car details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCar();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-20 flex flex-col items-center justify-center gap-4">
+          <Loader2 className="w-12 h-12 text-accent animate-spin" />
+          <p className="text-muted-foreground font-medium">Fetching excellence...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!car) {
     return (
@@ -28,8 +54,9 @@ export default function CarDetails() {
     );
   }
 
-  const nextImage = () => setCurrentImage((prev) => (prev + 1) % car.images.length);
-  const prevImage = () => setCurrentImage((prev) => (prev - 1 + car.images.length) % car.images.length);
+  const images = Array.isArray(car.images) ? car.images : [car.image || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200'];
+  const nextImage = () => setCurrentImage((prev) => (prev + 1) % images.length);
+  const prevImage = () => setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
 
   return (
     <Layout>
@@ -54,7 +81,7 @@ export default function CarDetails() {
               animate={{ opacity: 1, y: 0 }}
             >
               <div className="relative aspect-[16/10] rounded-2xl overflow-hidden glass">
-                {car.images.map((img, i) => (
+                {images.map((img, i) => (
                   <motion.img
                     key={i}
                     src={img}
@@ -66,7 +93,7 @@ export default function CarDetails() {
                   />
                 ))}
 
-                {car.images.length > 1 && (
+                {images.length > 1 && (
                   <>
                     <Button
                       variant="ghost"
@@ -86,7 +113,7 @@ export default function CarDetails() {
                     </Button>
 
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                      {car.images.map((_, i) => (
+                      {images.map((_, i) => (
                         <button
                           key={i}
                           onClick={() => setCurrentImage(i)}
@@ -100,18 +127,31 @@ export default function CarDetails() {
               </div>
 
               {/* Thumbnails */}
-              {car.images.length > 1 && (
-                <div className="flex gap-3 mt-4">
-                  {car.images.map((img, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setCurrentImage(i)}
-                      className={`w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${currentImage === i ? 'border-accent' : 'border-transparent opacity-60'
-                        }`}
-                    >
-                      <img src={img} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
+              {images.length > 1 && (
+                <div className="space-y-4 mt-6">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/60">Vehicle Gallery</h4>
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-accent/10 text-accent uppercase">
+                      {images.length} Photos
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    {images.map((img, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentImage(i)}
+                        className={`w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${currentImage === i ? 'border-accent' : 'border-transparent opacity-60'
+                          }`}
+                      >
+                        <img src={img} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                        {currentImage === i && (
+                          <div className="absolute inset-0 bg-accent/20 flex items-center justify-center">
+                            <div className="w-2 h-2 rounded-full bg-white shadow-lg" />
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </motion.div>
@@ -139,15 +179,15 @@ export default function CarDetails() {
                   <h3 className="text-lg font-semibold mb-4">{t('cars.pricing')}</h3>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="glass rounded-xl p-4 text-center">
-                      <div className="text-2xl font-bold text-accent">RWF {car.pricePerHour}</div>
+                      <div className="text-2xl font-bold text-accent">RWF {car.pricePerHour || '5,000'}</div>
                       <div className="text-sm text-muted-foreground">{t('cars.perHour')}</div>
                     </div>
                     <div className="glass rounded-xl p-4 text-center">
-                      <div className="text-2xl font-bold text-accent">RWF {car.pricePerTrip}</div>
+                      <div className="text-2xl font-bold text-accent">RWF {car.pricePerTrip || '15,000'}</div>
                       <div className="text-sm text-muted-foreground">{t('cars.perTrip')}</div>
                     </div>
                     <div className="glass rounded-xl p-4 text-center">
-                      <div className="text-2xl font-bold text-accent">RWF {car.pricePerDay}</div>
+                      <div className="text-2xl font-bold text-accent">RWF {car.price || car.pricePerDay || '30,000'}</div>
                       <div className="text-sm text-muted-foreground">{t('cars.perDay')}</div>
                     </div>
                   </div>
@@ -174,7 +214,7 @@ export default function CarDetails() {
 
                 {/* Actions */}
                 <div className="space-y-4">
-                  <Link to={`/booking?car=${car.id}`} className="block">
+                  <Link to={`/booking?car=${car._id || car.id}`} className="block">
                     <Button size="lg" className="w-full btn-accent text-white text-lg h-14">
                       {t('cars.bookNow')}
                     </Button>

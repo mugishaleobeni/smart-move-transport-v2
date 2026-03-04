@@ -10,11 +10,10 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { cars, getCarById } from '@/data/cars';
+import { bookingsApi, carsApi } from '@/lib/api';
 import { Layout } from '@/components/layout/Layout';
 import { useOnlineStatus } from '@/components/offline/OfflineBanner';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -50,9 +49,9 @@ export default function Booking() {
 
   const [booking, setBooking] = useState<BookingData>({
     carId: searchParams.get('car') || '',
-    clientName: user?.user_metadata?.full_name || '',
+    clientName: user?.name || '',
     clientEmail: user?.email || '',
-    clientPhone: '',
+    clientPhone: user?.phone || '',
     pickupLocation: '',
     dropoffLocation: '',
     date: undefined,
@@ -64,27 +63,49 @@ export default function Booking() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Update form if user data loads after mount
+  useEffect(() => {
+    if (user && !booking.clientName) {
+      setBooking(prev => ({
+        ...prev,
+        clientName: user.name || '',
+        clientEmail: user.email || '',
+        clientPhone: user.phone || ''
+      }));
+    }
+  }, [user]);
+
+  useEffect(() => {
     const fetchCars = async () => {
-      const { data } = await supabase.from('cars').select('*').neq('status', 'garage').order('name');
-      if (data) {
-        setAvailableCars(data);
+      try {
+        const { data } = await carsApi.getAll();
+        const activeCars = data.filter((c: any) => c.status !== 'garage');
+        setAvailableCars(activeCars);
         const initialCarId = searchParams.get('car');
         if (initialCarId) {
-          const found = data.find(c => c.id === initialCarId);
+          const found = activeCars.find((c: any) => (c._id || c.id) === initialCarId);
           if (found) {
             setSelectedCarData(found);
             setBooking(prev => ({ ...prev, carId: initialCarId }));
           }
         }
+      } catch (error) {
+        console.error('Failed to fetch cars:', error);
+      } finally {
+        setLoadingCars(false);
       }
-      setLoadingCars(false);
     };
     fetchCars();
   }, [searchParams]);
 
   useEffect(() => {
     if (booking.carId && availableCars.length > 0) {
-      const found = availableCars.find(c => c.id === booking.carId);
+      const found = availableCars.find((c: any) => (c._id || c.id) === booking.carId);
       if (found) setSelectedCarData(found);
     }
   }, [booking.carId, availableCars]);
@@ -141,7 +162,6 @@ export default function Booking() {
       booking_time: booking.time || null,
       duration_hours: booking.pricingPlan === 'day' ? booking.duration * 24 : booking.duration,
       total_price: calculatePrice(),
-      user_id: user?.id || null,
       status: 'pending',
     };
 
@@ -154,12 +174,25 @@ export default function Booking() {
       return;
     }
 
-    const { error } = await supabase.from('bookings').insert(bookingPayload);
-    setSubmitting(false);
-    if (error) {
-      toast({ title: 'Booking failed', description: error.message, variant: 'destructive' });
-    } else {
+    try {
+      await bookingsApi.create(bookingPayload);
       setIsSubmitted(true);
+
+      // Browser Notification
+      if (Notification.permission === 'granted') {
+        new Notification('Booking Confirmed!', {
+          body: `Your request for ${selectedCarData?.name || 'the vehicle'} has been received.`,
+          icon: '/pwa-192x192.png'
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Booking failed',
+        description: error.response?.data?.error || error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -248,8 +281,8 @@ export default function Booking() {
                           <div className="grid sm:grid-cols-2 gap-4">
                             {availableCars.map((car) => (
                               <button
-                                key={car.id}
-                                onClick={() => setBooking({ ...booking, carId: car.id })}
+                                key={car._id || car.id}
+                                onClick={() => setBooking({ ...booking, carId: car._id || car.id })}
                                 className={cn(
                                   'group relative flex flex-col gap-4 p-6 rounded-2xl transition-all border-2 text-left overflow-hidden h-full',
                                   booking.carId === car.id
@@ -278,7 +311,7 @@ export default function Booking() {
                                     <span>Automatic</span>
                                   </div>
                                 </div>
-                                {booking.carId === car.id && (
+                                {booking.carId === (car._id || car.id) && (
                                   <div className="absolute inset-0 border-2 border-accent pointer-events-none rounded-2xl" />
                                 )}
                               </button>

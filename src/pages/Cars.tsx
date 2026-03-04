@@ -1,21 +1,25 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, Phone, MessageCircle, Clock } from 'lucide-react';
+import { Users, Phone, MessageCircle, Clock, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { Layout } from '@/components/layout/Layout';
-import { supabase } from '@/integrations/supabase/client';
+import { carsApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
 interface CarItem {
+  _id?: string;
   id: string;
   name: string;
   type: string;
   seats: number;
   image: string | null;
   status: string;
+  price?: string | number;
+  pricePerDay?: string | number;
+  images?: string[];
 }
 
 export default function Cars() {
@@ -25,9 +29,14 @@ export default function Cars() {
 
   useEffect(() => {
     const fetchCars = async () => {
-      const { data } = await supabase.from('cars').select('*').order('name');
-      if (data) setCarsList(data as CarItem[]);
-      setLoading(false);
+      try {
+        const { data } = await carsApi.getAll();
+        if (data) setCarsList(data as CarItem[]);
+      } catch (error) {
+        console.error('Failed to fetch cars:', error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchCars();
   }, []);
@@ -73,7 +82,7 @@ export default function Cars() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {carsList.map((car, i) => (
               <motion.div
-                key={car.id}
+                key={car._id || car.id || i}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
@@ -87,6 +96,12 @@ export default function Cars() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                   />
+                  {car.images && car.images.length > 1 && (
+                    <div className="absolute top-4 left-4 glass-dark px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-white/10 z-10">
+                      <ImageIcon className="w-3 h-3 text-white" />
+                      <span className="text-[10px] font-bold text-white uppercase tracking-tighter">{car.images.length} Photos</span>
+                    </div>
+                  )}
                   <div className={cn(
                     "absolute top-4 right-4 glass px-3 py-1 rounded-full text-sm font-medium",
                     car.status === 'garage' ? "bg-rose-500/80 text-white" : "text-foreground"
@@ -108,18 +123,18 @@ export default function Cars() {
                   <div className="flex flex-wrap gap-2 mb-6 text-sm">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block w-full mb-1">Starting from</span>
                     <Badge variant="secondary" className="bg-accent/10 text-accent border-none font-bold">
-                      Available on Request
+                      RWF {car.price || car.pricePerDay || '30,000'} / Day
                     </Badge>
                   </div>
 
                   {/* Actions */}
                   <div className="grid grid-cols-2 gap-3">
-                    <Link to={`/Cars/${car.id}`} className="flex-1">
+                    <Link to={`/Cars/${car._id || car.id}`} className="flex-1">
                       <Button variant="outline" className="w-full glass">
                         {t('cars.viewDetails')}
                       </Button>
                     </Link>
-                    <Link to={car.status === 'garage' ? '#' : `/booking?car=${car.id}`} className="flex-1">
+                    <Link to={car.status === 'garage' ? '#' : `/booking?car=${car._id || car.id}`} className="flex-1">
                       <Button
                         className={cn("w-full btn-accent text-white", car.status === 'garage' && "opacity-50 cursor-not-allowed")}
                         disabled={car.status === 'garage'}

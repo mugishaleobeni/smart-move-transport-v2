@@ -16,7 +16,7 @@ import {
   Search,
   CheckCircle2
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { carsApi, bookingsApi, expensesApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
@@ -38,42 +38,57 @@ export default function Reports() {
 
   const fetchReport = async () => {
     setIsLoading(true);
-    const [{ data: cars }, { data: bookings }, { data: expenses }] = await Promise.all([
-      supabase.from('cars').select('id, name'),
-      supabase.from('bookings').select('car_id, total_price, booking_date').gte('booking_date', startDate).lte('booking_date', endDate),
-      supabase.from('expenses').select('car_id, amount, expense_date').gte('expense_date', startDate).lte('expense_date', endDate),
-    ]);
+    try {
+      const [{ data: cars }, { data: bookings }, { data: expenses }] = await Promise.all([
+        carsApi.getAll(),
+        bookingsApi.getAll(),
+        expensesApi.getAll(),
+      ]);
 
-    const carMap: Record<string, string> = {};
-    (cars || []).forEach((c: any) => { carMap[c.id] = c.name; });
+      const carMap: Record<string, string> = {};
+      (cars || []).forEach((c: any) => { carMap[c._id || c.id] = c.name; });
 
-    const incomeMap: Record<string, number> = {};
-    const expenseMap: Record<string, number> = {};
-    let totalIncome = 0, totalExpense = 0;
+      // Filter by date
+      const filteredBookings = (bookings || []).filter((b: any) => {
+        const date = b.booking_date || b.created_at;
+        return date >= startDate && date <= endDate;
+      });
 
-    (bookings || []).forEach((b: any) => {
-      const amt = Number(b.total_price || 0);
-      totalIncome += amt;
-      if (b.car_id) incomeMap[b.car_id] = (incomeMap[b.car_id] || 0) + amt;
-    });
+      const filteredExpenses = (expenses || []).filter((e: any) => {
+        return e.expense_date >= startDate && e.expense_date <= endDate;
+      });
 
-    (expenses || []).forEach((e: any) => {
-      const amt = Number(e.amount || 0);
-      totalExpense += amt;
-      if (e.car_id) expenseMap[e.car_id] = (expenseMap[e.car_id] || 0) + amt;
-    });
+      const incomeMap: Record<string, number> = {};
+      const expenseMap: Record<string, number> = {};
+      let totalIncome = 0, totalExpense = 0;
 
-    const allIds = new Set([...Object.keys(incomeMap), ...Object.keys(expenseMap)]);
-    const profits: CarProfit[] = Array.from(allIds).map((id) => ({
-      name: carMap[id] || 'Unknown',
-      income: incomeMap[id] || 0,
-      expense: expenseMap[id] || 0,
-      profit: (incomeMap[id] || 0) - (expenseMap[id] || 0),
-    })).sort((a, b) => b.profit - a.profit);
+      filteredBookings.forEach((b: any) => {
+        const amt = Number(b.total_price || 0);
+        totalIncome += amt;
+        if (b.car_id) incomeMap[b.car_id] = (incomeMap[b.car_id] || 0) + amt;
+      });
 
-    setCarProfits(profits);
-    setSummary({ bookings: bookings?.length || 0, income: totalIncome, expenses: totalExpense });
-    setIsLoading(false);
+      filteredExpenses.forEach((e: any) => {
+        const amt = Number(e.amount || 0);
+        totalExpense += amt;
+        if (e.car_id) expenseMap[e.car_id] = (expenseMap[e.car_id] || 0) + amt;
+      });
+
+      const allIds = new Set([...Object.keys(incomeMap), ...Object.keys(expenseMap)]);
+      const profits: CarProfit[] = Array.from(allIds).map((id) => ({
+        name: carMap[id] || 'Unknown',
+        income: incomeMap[id] || 0,
+        expense: expenseMap[id] || 0,
+        profit: (incomeMap[id] || 0) - (expenseMap[id] || 0),
+      })).sort((a, b) => b.profit - a.profit);
+
+      setCarProfits(profits);
+      setSummary({ bookings: filteredBookings.length, income: totalIncome, expenses: totalExpense });
+    } catch (error) {
+      console.error('Report fetch failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const exportCSV = () => {

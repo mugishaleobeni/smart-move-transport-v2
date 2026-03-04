@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { supabase } from '@/integrations/supabase/client';
+import { carsApi, bookingsApi, expensesApi } from '@/lib/api';
 import {
   BarChart,
   Bar,
@@ -54,60 +54,65 @@ export default function Analytics() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [{ data: cars }, { data: bookings }, { data: expenses }] = await Promise.all([
-      supabase.from('cars').select('id, name'),
-      supabase.from('bookings').select('car_id, total_price'),
-      supabase.from('expenses').select('car_id, amount'),
-    ]);
+    try {
+      const [{ data: cars }, { data: bookings }, { data: expenses }] = await Promise.all([
+        carsApi.getAll(),
+        bookingsApi.getAll(),
+        expensesApi.getAll(),
+      ]);
 
-    const carMap: Record<string, string> = {};
-    (cars || []).forEach((c: any) => { carMap[c.id] = c.name; });
+      const carMap: Record<string, string> = {};
+      (cars || []).forEach((c: any) => { carMap[c._id || c.id] = c.name; });
 
-    const incomeMap: Record<string, number> = {};
-    const expenseMap: Record<string, number> = {};
+      const incomeMap: Record<string, number> = {};
+      const expenseMap: Record<string, number> = {};
 
-    (bookings || []).forEach((b: any) => {
-      if (b.car_id) incomeMap[b.car_id] = (incomeMap[b.car_id] || 0) + Number(b.total_price || 0);
-    });
+      (bookings || []).forEach((b: any) => {
+        if (b.car_id) incomeMap[b.car_id] = (incomeMap[b.car_id] || 0) + Number(b.total_price || 0);
+      });
 
-    (expenses || []).forEach((e: any) => {
-      if (e.car_id) expenseMap[e.car_id] = (expenseMap[e.car_id] || 0) + Number(e.amount || 0);
-    });
+      (expenses || []).forEach((e: any) => {
+        if (e.car_id) expenseMap[e.car_id] = (expenseMap[e.car_id] || 0) + Number(e.amount || 0);
+      });
 
-    const incData = Object.entries(incomeMap).map(([id, val]) => ({ name: carMap[id] || 'Unknown', value: val }));
-    const expData = Object.entries(expenseMap).map(([id, val]) => ({ name: carMap[id] || 'Unknown', value: val }));
-    setIncomePerCar(incData);
-    setExpensePerCar(expData);
+      const incData = Object.entries(incomeMap).map(([id, val]) => ({ name: carMap[id] || 'Unknown', value: val }));
+      const expData = Object.entries(expenseMap).map(([id, val]) => ({ name: carMap[id] || 'Unknown', value: val }));
+      setIncomePerCar(incData);
+      setExpensePerCar(expData);
 
-    const profitMap: Record<string, number> = {};
-    Object.keys({ ...incomeMap, ...expenseMap }).forEach((id) => {
-      profitMap[id] = (incomeMap[id] || 0) - (expenseMap[id] || 0);
-    });
-    const sorted = Object.entries(profitMap).sort(([, a], [, b]) => b - a);
-    const highCost = Object.entries(expenseMap).sort(([, a], [, b]) => b - a);
+      const profitMap: Record<string, number> = {};
+      Object.keys({ ...incomeMap, ...expenseMap }).forEach((id) => {
+        profitMap[id] = (incomeMap[id] || 0) - (expenseMap[id] || 0);
+      });
+      const sorted = Object.entries(profitMap).sort(([, a], [, b]) => b - a);
+      const highCost = Object.entries(expenseMap).sort(([, a], [, b]) => b - a);
 
-    // Calculate monthly best
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
+      // Calculate monthly best
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
 
-    const monthlyIncomeMap: Record<string, number> = {};
-    (bookings || []).forEach((b: any) => {
-      const bDate = new Date(b.created_at || b.booking_date);
-      if (b.car_id && bDate.getMonth() === currentMonth && bDate.getFullYear() === currentYear) {
-        monthlyIncomeMap[b.car_id] = (monthlyIncomeMap[b.car_id] || 0) + Number(b.total_price || 0);
-      }
-    });
+      const monthlyIncomeMap: Record<string, number> = {};
+      (bookings || []).forEach((b: any) => {
+        const bDate = new Date(b.created_at || b.booking_date);
+        if (b.car_id && bDate.getMonth() === currentMonth && bDate.getFullYear() === currentYear) {
+          monthlyIncomeMap[b.car_id] = (monthlyIncomeMap[b.car_id] || 0) + Number(b.total_price || 0);
+        }
+      });
 
-    const monthlySorted = Object.entries(monthlyIncomeMap).sort(([, a], [, b]) => b - a);
+      const monthlySorted = Object.entries(monthlyIncomeMap).sort(([, a], [, b]) => b - a);
 
-    setInsights({
-      mostProfitable: sorted[0] ? carMap[sorted[0][0]] || 'N/A' : 'N/A',
-      highestCost: highCost[0] ? carMap[highCost[0][0]] || 'N/A' : 'N/A',
-      totalBookings: bookings?.length || 0,
-      monthlyBest: monthlySorted[0] ? { name: carMap[monthlySorted[0][0]] || 'N/A', amount: monthlySorted[0][1] } : { name: 'N/A', amount: 0 }
-    });
-    setLoading(false);
+      setInsights({
+        mostProfitable: sorted[0] ? carMap[sorted[0][0]] || 'N/A' : 'N/A',
+        highestCost: highCost[0] ? carMap[highCost[0][0]] || 'N/A' : 'N/A',
+        totalBookings: bookings?.length || 0,
+        monthlyBest: monthlySorted[0] ? { name: carMap[monthlySorted[0][0]] || 'N/A', amount: monthlySorted[0][1] } : { name: 'N/A', amount: 0 }
+      });
+    } catch (error) {
+      console.error('Analytics fetch failed', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
@@ -176,29 +181,52 @@ export default function Analytics() {
             {incomePerCar.length > 0 ? (
               <div className="h-[350px] w-full pt-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={incomePerCar} margin={{ bottom: 10 }}>
+                  <BarChart data={incomePerCar} margin={{ bottom: 10, left: 10 }}>
+                    <defs>
+                      <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={1} />
+                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.6} />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                     <XAxis
                       dataKey="name"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 10, fontWeight: 600, fill: 'hsl(var(--muted-foreground))' }}
+                      tick={{ fontSize: 10, fontWeight: 700, fill: 'hsl(var(--muted-foreground))' }}
+                      interval={0}
                     />
                     <YAxis
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
-                      tickFormatter={(value) => `RWF ${value}`}
+                      tick={{ fontSize: 10, fontWeight: 600, fill: 'hsl(var(--muted-foreground))' }}
+                      tickFormatter={(value) => value >= 1000 ? `${(value / 1000).toFixed(0)}k` : value}
                     />
                     <Tooltip
-                      contentStyle={{
-                        borderRadius: '12px',
-                        border: 'none',
-                        boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                        backgroundColor: 'hsl(var(--card))'
+                      cursor={{ fill: 'hsl(var(--primary) / 0.05)', radius: 8 }}
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="glass-strong p-3 rounded-xl shadow-2xl border border-white/20">
+                              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
+                                {payload[0].payload.name}
+                              </p>
+                              <p className="text-sm font-black text-primary">
+                                RWF {Number(payload[0].value).toLocaleString()}
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
                       }}
                     />
-                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[5, 5, 0, 0]} barSize={40} />
+                    <Bar
+                      dataKey="value"
+                      fill="url(#revenueGradient)"
+                      radius={[8, 8, 0, 0]}
+                      barSize={32}
+                      animationDuration={1500}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -220,7 +248,7 @@ export default function Analytics() {
           </CardHeader>
           <CardContent className="p-6">
             {expensePerCar.length > 0 ? (
-              <div className="h-[350px] w-full">
+              <div className="h-[350px] w-full relative">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -229,26 +257,57 @@ export default function Analytics() {
                       nameKey="name"
                       cx="50%"
                       cy="45%"
-                      innerRadius={80}
-                      outerRadius={110}
-                      paddingAngle={5}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      innerRadius={85}
+                      outerRadius={115}
+                      paddingAngle={8}
+                      stroke="none"
                     >
                       {expensePerCar.map((_, i) => (
-                        <Cell key={i} fill={COLORS[i % COLORS.length]} className="stroke-white dark:stroke-zinc-900 stroke-2 outline-none" />
+                        <Cell
+                          key={i}
+                          fill={COLORS[i % COLORS.length]}
+                          className="hover:opacity-80 transition-opacity cursor-pointer outline-none"
+                        />
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{
-                        borderRadius: '12px',
-                        border: 'none',
-                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-                        backgroundColor: 'hsl(var(--card))'
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="glass-strong p-3 rounded-xl shadow-2xl border border-white/20">
+                              <div className="flex items-center gap-2 mb-1">
+                                <div
+                                  className="w-2 h-2 rounded-full"
+                                  style={{ backgroundColor: payload[0].payload.fill }}
+                                />
+                                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                                  {payload[0].name}
+                                </p>
+                              </div>
+                              <p className="text-sm font-black text-white ml-4">
+                                RWF {Number(payload[0].value).toLocaleString()}
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
                       }}
                     />
-                    <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                    <Legend
+                      verticalAlign="bottom"
+                      height={36}
+                      iconType="circle"
+                      formatter={(v) => <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">{v}</span>}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
+                {/* Central Statistics */}
+                <div className="absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+                  <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">Total Load</p>
+                  <p className="text-xl font-black text-slate-900 dark:text-white">
+                    {Math.round(expensePerCar.reduce((s, e) => s + e.value, 0) / 1000)}k
+                  </p>
+                </div>
               </div>
             ) : (
               <div className="h-[300px] flex items-center justify-center text-zinc-400 border border-dashed rounded-xl border-zinc-200">

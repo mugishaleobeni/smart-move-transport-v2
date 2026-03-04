@@ -54,8 +54,17 @@ export function AdminSidebar() {
                 <Car className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-sm font-bold text-black dark:text-white">Smart Move</h2>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">Admin Panel</p>
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-sm font-bold text-black dark:text-white">Smart Move</h2>
+                  <div className="flex items-center gap-1">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-tighter">Live</span>
+                  </div>
+                </div>
+                <p className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-tight">Fleet Enterprise</p>
               </div>
             </div>
           </SidebarHeader>
@@ -63,7 +72,7 @@ export function AdminSidebar() {
           <SidebarContent>
             <SidebarGroup>
               <div className="px-3 py-2">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-500 mb-2 px-2">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-3 px-2">
                   Main Menu
                 </p>
                 <SidebarMenu>
@@ -78,7 +87,7 @@ export function AdminSidebar() {
                               'flex items-center gap-3 px-3 py-2 rounded-lg transition-smooth w-full group',
                               isActive
                                 ? 'bg-primary !text-white font-semibold shadow-md'
-                                : 'text-zinc-900 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-black dark:hover:text-white'
+                                : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 hover:text-primary dark:hover:text-primary'
                             )
                           }
                         >

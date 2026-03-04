@@ -6,6 +6,18 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useState } from 'react';
 
 export function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
@@ -13,6 +25,13 @@ export function Navbar() {
   const location = useLocation();
   const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+    setShowLogoutDialog(false);
+  };
 
   const navLinks = [
     { to: '/', label: t('nav.home'), icon: Home },
@@ -88,7 +107,7 @@ export function Navbar() {
                 <div className="flex items-center gap-4">
                   <div className="flex flex-col items-end hidden lg:flex">
                     <span className="text-xs font-bold text-foreground">
-                      {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                      {user.name || user.email?.split('@')[0]}
                     </span>
                     <span className="text-[10px] text-muted-foreground leading-none">
                       {isAdmin ? 'Administrator' : 'Client'}
@@ -112,7 +131,7 @@ export function Navbar() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => { signOut(); navigate('/'); }}
+                    onClick={() => setShowLogoutDialog(true)}
                     className="h-9 px-3 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20"
                   >
                     {t('nav.logout')}
@@ -220,7 +239,7 @@ export function Navbar() {
                 </Link>
               )}
               <button
-                onClick={() => { signOut(); navigate('/'); }}
+                onClick={() => setShowLogoutDialog(true)}
                 className="flex-1 flex flex-col items-center justify-center gap-0.5 group"
               >
                 <LogOut className="w-5 h-5 text-rose-500 group-hover:text-rose-600 transition-smooth" />
@@ -256,6 +275,27 @@ export function Navbar() {
 
       {/* Mobile bottom spacer so content isn't hidden behind bottom nav */}
       <div className="md:hidden h-16 w-full" aria-hidden="true" />
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent className="glass-strong border-accent/20">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold">Are you sure you want to log out?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Any unsaved changes might be lost. You will need to sign in again to access your dashboard.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6 gap-3">
+            <AlertDialogCancel className="border-border hover:bg-zinc-100">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleSignOut}
+              className="bg-rose-500 hover:bg-rose-600 text-white border-none"
+            >
+              Log Out
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

@@ -1,14 +1,23 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { User, Session } from '@supabase/supabase-js';
+import { auth, signInWithGoogle as firebaseSignInWithGoogle } from '@/lib/firebase';
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import api from '@/lib/api';
+
+interface User {
+  uid: string;
+  email: string | null;
+  name: string | null;
+  phone?: string | null;
+  role: string;
+}
 
 interface AuthContextType {
   user: User | null;
-  session: Session | null;
   isAdmin: boolean;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any; isAdmin?: boolean }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
+  signInWithGoogle: () => Promise<void>;
+  loginManual: (credentials: any) => Promise<void>;
+  registerManual: (data: any) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -16,142 +25,121 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Mock admin credentials
-  const MOCK_ADMIN = {
-    email: 'leo@gmail.com',
-    password: '123456',
-    id: 'mock-admin-id'
-  };
-
-  const checkAdmin = async (userId: string, email?: string): Promise<boolean> => {
-    // Check for mock admin email
-    if (email === MOCK_ADMIN.email || userId === MOCK_ADMIN.id) {
-      setIsAdmin(true);
-      return true;
-    }
-
-    try {
-      const { data } = await supabase.rpc('has_role', {
-        _user_id: userId,
-        _role: 'admin',
-      });
-      const admin = !!data;
-      setIsAdmin(admin);
-      return admin;
-    } catch {
-      setIsAdmin(false);
-      return false;
-    }
-  };
-
   useEffect(() => {
-    let isMounted = true;
-
-    // Listener for ongoing auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (!isMounted) return;
-
-        // If we have a mock admin, don't let Supabase state change clear it
-        const isMockAdmin = !!localStorage.getItem('mock_admin_user');
-        if (isMockAdmin && !session) return;
-
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          setTimeout(() => checkAdmin(session.user.id, session.user.email), 0);
-        } else {
-          setIsAdmin(false);
-        }
-      }
-    );
-
-    // Initial load - wait for admin check before setting loading false
-    const initializeAuth = async () => {
+    // Check if user is already logged in via Flask session
+    const checkSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!isMounted) return;
-
-        // Check for persisted mock admin
-        const persistedMockAdmin = localStorage.getItem('mock_admin_user');
-        if (persistedMockAdmin) {
-          const mockUser = JSON.parse(persistedMockAdmin);
-          setUser(mockUser);
-          setIsAdmin(true);
-        } else if (session?.user) {
-          setSession(session);
-          setUser(session?.user ?? null);
-          await checkAdmin(session.user.id, session.user.email);
+        const response = await api.get('/auth/me');
+        if (response.data.authenticated) {
+          // You might want to store user details in session or fetch them here
+          setUser({
+            uid: response.data.uid,
+            email: response.data.email,
+            name: response.data.name,
+            phone: response.data.phone,
+            role: response.data.role
+          });
+          setIsAdmin(response.data.role === 'admin');
         }
-      } catch (err) {
-        console.error('Initialization error:', err);
+      } catch (error) {
+        console.log('No active session');
       } finally {
-        if (isMounted) setLoading(false);
+        setLoading(false);
       }
     };
 
-    initializeAuth();
+    checkSession();
 
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // We handle the login via the manual call to signInWithGoogle
+        // But if the user refreshes, we might need to re-verify or rely on Flask session
+      } else {
+        // If Firebase says logged out, we should probably clear local state
+        // but Flask session might still be active. Usually they are synced.
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    // Handle mock login
-    if (email === MOCK_ADMIN.email && password === MOCK_ADMIN.password) {
-      const mockUser = {
-        id: MOCK_ADMIN.id,
-        email: MOCK_ADMIN.email,
-        aud: 'authenticated',
-        role: 'authenticated',
-        app_metadata: {},
-        user_metadata: { full_name: 'Leo Admin' },
-        created_at: new Date().toISOString(),
-      } as User;
+  const signInWithGoogle = async () => {
+    setLoading(true);
+    try {
+      const { idToken } = await firebaseSignInWithGoogle();
 
-      setUser(mockUser);
-      setIsAdmin(true);
+      // Verify token with backend
+      const response = await api.post('/auth/login', { idToken });
+
+      if (response.data.user) {
+        const userData = response.data.user;
+        setUser(userData);
+        setIsAdmin(userData.role === 'admin');
+      }
+    } catch (error: any) {
+      console.error('Sign in failed:', error);
+      if (error.response) {
+        console.error('Backend Error Response:', error.response.data);
+      }
+      throw error;
+    } finally {
       setLoading(false);
-      localStorage.setItem('mock_admin_user', JSON.stringify(mockUser));
-      return { error: null, isAdmin: true };
     }
-
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    let adminStatus = false;
-    if (!error && data.session?.user) {
-      adminStatus = await checkAdmin(data.session.user.id, data.session.user.email);
-    }
-    return { error, isAdmin: adminStatus };
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    return { error };
+  const loginManual = async (credentials: any) => {
+    setLoading(true);
+    try {
+      const response = await api.post('/auth/login/manual', credentials);
+      if (response.data.user) {
+        const userData = response.data.user;
+        setUser(userData);
+        setIsAdmin(userData.role === 'admin');
+      }
+    } catch (error) {
+      console.error('Manual login failed:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const registerManual = async (data: any) => {
+    setLoading(true);
+    try {
+      const response = await api.post('/auth/register/manual', data);
+      return response.data;
+    } catch (error) {
+      console.error('Manual registration failed:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setIsAdmin(false);
-    localStorage.removeItem('mock_admin_user');
+    setLoading(true);
+    try {
+      try {
+        await auth.signOut();
+      } catch (e) {
+        console.log('Firebase signOut failed or not logged in via Firebase');
+      }
+      await api.post('/auth/logout');
+      setUser(null);
+      setIsAdmin(false);
+    } catch (error) {
+      console.error('Sign out failed:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, isAdmin, loading, signInWithGoogle, loginManual, registerManual, signOut }}>
       {children}
     </AuthContext.Provider>
   );

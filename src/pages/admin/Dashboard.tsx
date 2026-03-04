@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
+import { carsApi, bookingsApi, expensesApi } from '@/lib/api';
 import {
   AreaChart,
   Area,
@@ -36,7 +36,8 @@ interface Stats {
 }
 
 interface RecentBooking {
-  id: string;
+  _id?: string;
+  id?: string;
   client_name: string;
   booking_date: string;
   total_price: number;
@@ -52,68 +53,85 @@ export default function Dashboard() {
   useEffect(() => {
     const loadDashboardData = async () => {
       setLoading(true);
-      await Promise.all([
-        fetchStats(),
-        fetchRecentBookings(),
-        fetchChartData()
-      ]);
-      setLoading(false);
+      try {
+        await Promise.all([
+          fetchStats(),
+          fetchRecentBookings(),
+          fetchChartData()
+        ]);
+      } catch (err) {
+        console.error('Final Dashboard Error:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     loadDashboardData();
   }, []);
 
   const fetchStats = async () => {
-    const [carsRes, bookingsRes, expensesRes] = await Promise.all([
-      supabase.from('cars').select('id', { count: 'exact', head: true }),
-      supabase.from('bookings').select('total_price'),
-      supabase.from('expenses').select('amount'),
-    ]);
-    const totalIncome = (bookingsRes.data || []).reduce((sum: number, b: any) => sum + Number(b.total_price || 0), 0);
-    const totalExpenses = (expensesRes.data || []).reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0);
-    setStats({
-      totalCars: carsRes.count || 0,
-      totalBookings: bookingsRes.data?.length || 0,
-      totalIncome: totalIncome,
-      totalExpenses: totalExpenses,
-    });
+    try {
+      const [carsRes, bookingsRes, expensesRes] = await Promise.all([
+        carsApi.getAll(),
+        bookingsApi.getAll(),
+        expensesApi.getAll(),
+      ]);
+      const totalIncome = (bookingsRes.data || []).reduce((sum: number, b: any) => sum + Number(b.total_price || 0), 0);
+      const totalExpenses = (expensesRes.data || []).reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0);
+      setStats({
+        totalCars: carsRes.data?.length || 0,
+        totalBookings: bookingsRes.data?.length || 0,
+        totalIncome: totalIncome,
+        totalExpenses: totalExpenses,
+      });
+    } catch (error) {
+      console.error('Stats fetch failed', error);
+    }
   };
 
   const fetchRecentBookings = async () => {
-    const { data } = await supabase
-      .from('bookings')
-      .select('id, client_name, booking_date, total_price, status')
-      .order('created_at', { ascending: false })
-      .limit(6);
-    if (data) setRecentBookings(data as RecentBooking[]);
+    try {
+      const response = await bookingsApi.getAll();
+      setRecentBookings((response.data || []).slice(0, 6));
+    } catch (error) {
+      console.error('Recent bookings fetch failed', error);
+    }
   };
 
   const fetchChartData = async () => {
-    const { data: bookings } = await supabase.from('bookings').select('booking_date, total_price');
-    const { data: expenses } = await supabase.from('expenses').select('expense_date, amount');
+    try {
+      const [bookingsRes, expensesRes] = await Promise.all([
+        bookingsApi.getAll(),
+        expensesApi.getAll()
+      ]);
+      const bookings = bookingsRes.data || [];
+      const expenses = expensesRes.data || [];
 
-    const map: Record<string, { income: number; expense: number }> = {};
-    (bookings || []).forEach((b: any) => {
-      const month = b.booking_date?.slice(0, 7);
-      if (month) {
-        if (!map[month]) map[month] = { income: 0, expense: 0 };
-        map[month].income += Number(b.total_price || 0);
-      }
-    });
-    (expenses || []).forEach((e: any) => {
-      const month = e.expense_date?.slice(0, 7);
-      if (month) {
-        if (!map[month]) map[month] = { income: 0, expense: 0 };
-        map[month].expense += Number(e.amount || 0);
-      }
-    });
+      const map: Record<string, { income: number; expense: number }> = {};
+      bookings.forEach((b: any) => {
+        const month = b.booking_date?.slice(0, 7);
+        if (month) {
+          if (!map[month]) map[month] = { income: 0, expense: 0 };
+          map[month].income += Number(b.total_price || 0);
+        }
+      });
+      expenses.forEach((e: any) => {
+        const month = e.expense_date?.slice(0, 7);
+        if (month) {
+          if (!map[month]) map[month] = { income: 0, expense: 0 };
+          map[month].expense += Number(e.amount || 0);
+        }
+      });
 
-    const sorted = Object.entries(map)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([month, val]) => ({
-        month: new Date(month).toLocaleString('default', { month: 'short' }),
-        ...val
-      }));
-    setChartData(sorted);
+      const sorted = Object.entries(map)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([month, val]) => ({
+          month: new Date(month).toLocaleString('default', { month: 'short' }),
+          ...val
+        }));
+      setChartData(sorted);
+    } catch (error) {
+      console.error('Chart data fetch failed', error);
+    }
   };
 
   const statCards = [
@@ -123,7 +141,6 @@ export default function Dashboard() {
       value: stats.totalCars,
       icon: Car,
       color: 'bg-blue-500/10 text-blue-600',
-      trend: '+2 new this month'
     },
     {
       title: 'Current Bookings',
@@ -131,7 +148,6 @@ export default function Dashboard() {
       value: stats.totalBookings,
       icon: CalendarCheck,
       color: 'bg-amber-500/10 text-amber-600',
-      trend: '+12% from last week'
     },
     {
       title: 'Gross Revenue',
@@ -139,8 +155,6 @@ export default function Dashboard() {
       value: `RWF ${stats.totalIncome.toLocaleString()}`,
       icon: Banknote,
       color: 'bg-emerald-500/10 text-emerald-600',
-      trend: '+RWF 4.2k this month',
-      isPositive: true
     },
     {
       title: 'Monthly Expenses',
@@ -148,8 +162,6 @@ export default function Dashboard() {
       value: `RWF ${stats.totalExpenses.toLocaleString()}`,
       icon: Receipt,
       color: 'bg-rose-500/10 text-rose-600',
-      trend: '-RWF 1.1k vs last month',
-      isPositive: false
     },
     {
       title: 'Net Profit',
@@ -157,8 +169,6 @@ export default function Dashboard() {
       value: `RWF ${(stats.totalIncome - stats.totalExpenses).toLocaleString()}`,
       icon: TrendingUp,
       color: 'bg-indigo-500/10 text-indigo-600',
-      trend: '18.4% profit margin',
-      isPositive: true
     },
   ];
 
@@ -334,7 +344,7 @@ export default function Dashboard() {
                 </div>
               )}
               {recentBookings.map((b) => (
-                <div key={b.id} className="group flex items-center justify-between p-3 rounded-xl border border-transparent hover:border-zinc-100 dark:hover:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all">
+                <div key={b._id || b.id} className="group flex items-center justify-between p-3 rounded-xl border border-transparent hover:border-zinc-100 dark:hover:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
                       {b.client_name.split(' ').map(n => n[0]).join('')}

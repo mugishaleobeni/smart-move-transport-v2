@@ -24,7 +24,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { supabase } from '@/integrations/supabase/client';
+import { carsApi } from '@/lib/api';
+import api from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
@@ -33,7 +34,8 @@ import { motion } from 'framer-motion';
 import { ActionConfirmation } from '@/components/dashboard/ActionConfirmation';
 
 interface CarRow {
-  id: string;
+  _id?: string;
+  id?: string; // for compatibility
   name: string;
   type: string;
   seats: number;
@@ -42,9 +44,24 @@ interface CarRow {
   image: string | null;
   images: string[];
   status: string;
+  price?: string | number;
+  pricePerHour?: string | number;
+  pricePerTrip?: string | number;
 }
 
-const emptyForm = { name: '', type: '', seats: 5, description: '', features: '', image: '', status: 'available' };
+const emptyForm = {
+  name: '',
+  type: '',
+  seats: 5,
+  description: '',
+  features: '',
+  image: '',
+  status: 'available',
+  price: '',
+  pricePerHour: '',
+  pricePerTrip: '',
+  images: [] as string[]
+};
 
 export default function CarsManagement() {
   const [cars, setCars] = useState<CarRow[]>([]);
@@ -62,8 +79,12 @@ export default function CarsManagement() {
   useEffect(() => { fetchCars(); }, []);
 
   const fetchCars = async () => {
-    const { data } = await supabase.from('cars').select('*').order('created_at', { ascending: false });
-    if (data) setCars(data as CarRow[]);
+    try {
+      const response = await carsApi.getAll();
+      setCars(response.data);
+    } catch (error: any) {
+      toast({ title: 'Error fetching cars', description: error.message, variant: 'destructive' });
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,23 +93,21 @@ export default function CarsManagement() {
 
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${Math.random()}.${fileExt}`;
+      const formData = new FormData();
+      formData.append('file', file);
 
-      const { data, error } = await supabase.storage
-        .from('car-images')
-        .upload(filePath, file);
+      const response = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
 
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('car-images')
-        .getPublicUrl(data.path);
-
-      setForm({ ...form, image: publicUrl });
-      toast({ title: 'Success', description: 'Image uploaded successfully' });
+      setForm({
+        ...form,
+        image: form.image || response.data.url,
+        images: [...(form.images || []), response.data.url]
+      });
+      toast({ title: 'Success', description: 'Image added to gallery' });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: 'Upload failed', description: error.message, variant: 'destructive' });
     } finally {
       setUploading(false);
     }
@@ -107,24 +126,29 @@ export default function CarsManagement() {
       seats: form.seats,
       description: form.description,
       features: featuresArr,
-      image: form.image || null,
-      images: form.image ? [form.image] : [],
+      image: form.image || (form.images && form.images[0]) || null,
+      images: form.images || [],
       status: form.status,
+      price: form.price,
+      pricePerHour: form.pricePerHour,
+      pricePerTrip: form.pricePerTrip,
     };
 
-    if (editId) {
-      const { error } = await supabase.from('cars').update(payload).eq('id', editId);
-      if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
-      toast({ title: 'Vehicle updated', description: `${form.name} updated successfully.` });
-    } else {
-      const { error } = await supabase.from('cars').insert(payload);
-      if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
-      toast({ title: 'Vehicle added', description: `${form.name} added to the fleet.` });
+    try {
+      if (editId) {
+        await carsApi.update(editId, payload);
+        toast({ title: 'Vehicle updated', description: `${form.name} updated successfully.` });
+      } else {
+        await carsApi.create(payload);
+        toast({ title: 'Vehicle added', description: `${form.name} added to the fleet.` });
+      }
+      setOpen(false);
+      setEditId(null);
+      setForm(emptyForm);
+      fetchCars();
+    } catch (error: any) {
+      toast({ title: 'Save failed', description: error.message, variant: 'destructive' });
     }
-    setOpen(false);
-    setEditId(null);
-    setForm(emptyForm);
-    fetchCars();
   };
 
   const handleEdit = (car: CarRow) => {
@@ -136,8 +160,12 @@ export default function CarsManagement() {
       features: car.features?.join(', ') || '',
       image: car.image || '',
       status: car.status,
+      price: car.price?.toString() || '',
+      pricePerHour: car.pricePerHour?.toString() || '',
+      pricePerTrip: car.pricePerTrip?.toString() || '',
+      images: car.images || (car.image ? [car.image] : []),
     });
-    setEditId(car.id);
+    setEditId(car._id || car.id || null);
     setOpen(true);
   };
 
@@ -149,12 +177,12 @@ export default function CarsManagement() {
   const confirmDelete = async () => {
     if (!itemToDelete) return;
     const { id, name } = itemToDelete;
-    const { error } = await supabase.from('cars').delete().eq('id', id);
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
+    try {
+      await carsApi.delete(id);
       toast({ title: 'Vehicle deleted', description: `${name} has been removed.`, variant: 'destructive' });
       fetchCars();
+    } catch (error: any) {
+      toast({ title: 'Delete failed', description: error.message, variant: 'destructive' });
     }
   };
 
@@ -180,7 +208,7 @@ export default function CarsManagement() {
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); setForm(emptyForm); } }}>
           <DialogTrigger asChild>
-            <Button className="gap-2 px-6 h-11 rounded-xl shadow-lg shadow-primary/20">
+            <Button className="btn-accent gap-2 px-6 h-11 rounded-xl shadow-lg shadow-primary/20 text-white">
               <Plus className="w-5 h-5" /> Add New Vehicle
             </Button>
           </DialogTrigger>
@@ -198,6 +226,21 @@ export default function CarsManagement() {
                 <div className="space-y-2">
                   <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Vehicle Type</Label>
                   <Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="e.g. Premium SUV" className="h-11 rounded-lg" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Daily Rate (RWF)</Label>
+                  <Input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="30,000" className="h-11 rounded-lg" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Hourly Rate (RWF)</Label>
+                  <Input value={form.pricePerHour} onChange={(e) => setForm({ ...form, pricePerHour: e.target.value })} placeholder="5,000" className="h-11 rounded-lg" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Trip Rate (RWF)</Label>
+                  <Input value={form.pricePerTrip} onChange={(e) => setForm({ ...form, pricePerTrip: e.target.value })} placeholder="15,000" className="h-11 rounded-lg" />
                 </div>
               </div>
 
@@ -263,22 +306,78 @@ export default function CarsManagement() {
                     </div>
                   </TabsContent>
                   <TabsContent value="url" className="pt-4">
-                    <div className="relative">
-                      <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <Input value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="https://external-storage.com/vehicle-image.jpg" className="h-11 pl-10 rounded-lg" />
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <Input
+                          id="url-input"
+                          placeholder="https://external-storage.com/image.jpg"
+                          className="h-11 pl-10 rounded-lg"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          const input = document.getElementById('url-input') as HTMLInputElement;
+                          if (input.value) {
+                            setForm({
+                              ...form,
+                              image: form.image || input.value,
+                              images: [...form.images, input.value]
+                            });
+                            input.value = '';
+                          }
+                        }}
+                      >
+                        Add
+                      </Button>
                     </div>
                   </TabsContent>
                 </Tabs>
               </div>
 
-              {form.image && (
-                <div className="relative aspect-video rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden shadow-inner bg-zinc-50">
-                  <img src={form.image} alt="Preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/20" />
-                  <div className="absolute top-3 right-3 flex gap-2">
-                    <Badge className="bg-white/90 text-slate-900 hover:bg-white flex gap-1 items-center backdrop-blur-sm border-none">
-                      <ImageIcon className="w-3 h-3" /> Preview
-                    </Badge>
+              {form.images && form.images.length > 0 && (
+                <div className="space-y-3">
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Image Gallery ({form.images.length})</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {form.images.map((img, i) => (
+                      <div key={i} className="group relative aspect-video rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-zinc-50">
+                        <img src={img} alt={`Preview ${i}`} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-white hover:text-rose-500"
+                            onClick={() => {
+                              const newImages = [...form.images];
+                              newImages.splice(i, 1);
+                              setForm({
+                                ...form,
+                                images: newImages,
+                                image: form.image === img ? (newImages[0] || '') : form.image
+                              });
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                          {form.image !== img && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-[10px] text-white hover:text-accent font-bold"
+                              onClick={() => setForm({ ...form, image: img })}
+                            >
+                              Set Main
+                            </Button>
+                          )}
+                        </div>
+                        {form.image === img && (
+                          <div className="absolute top-1 left-1">
+                            <Badge className="bg-accent text-[8px] h-4">Main</Badge>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -323,7 +422,7 @@ export default function CarsManagement() {
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-44 rounded-xl h-10 bg-slate-50 border-none focus:ring-1">
+            <SelectTrigger className="w-44 rounded-xl h-10 bg-slate-50 dark:bg-zinc-800 border-none focus:ring-1 text-slate-900 dark:text-zinc-100">
               <div className="flex items-center gap-2">
                 <Filter className="w-3.5 h-3.5" />
                 <SelectValue placeholder="All Status" />
@@ -409,11 +508,11 @@ export default function CarsManagement() {
                   </div>
                 </CardContent>
                 <CardFooter className="p-4 bg-slate-50/50 dark:bg-zinc-800/20 border-t border-slate-100 dark:border-zinc-800 flex gap-3">
-                  <Button variant="outline" size="sm" onClick={() => handleEdit(car)} className="flex-1 h-10 rounded-xl border-slate-200 dark:border-zinc-700 hover:bg-white font-bold gap-2 group/btn">
+                  <Button variant="outline" size="sm" onClick={() => handleEdit(car)} className="flex-1 h-10 rounded-xl border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 font-bold gap-2 group/btn">
                     <Edit className="w-3.5 h-3.5 group-hover/btn:text-primary transition-colors" />
                     Edit Features
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(car.id, car.name)} className="h-10 w-10 rounded-xl text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20">
+                  <Button variant="ghost" size="icon" onClick={() => handleDelete((car._id || car.id)!, car.name)} className="h-10 w-10 rounded-xl text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20">
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </CardFooter>
@@ -456,7 +555,9 @@ export default function CarsManagement() {
                   <td className="px-6 py-4">
                     <Badge variant="outline" className={cn(
                       "h-6 text-[10px] font-bold border-none",
-                      car.status === 'available' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
+                      car.status === 'available'
+                        ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        : "bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400"
                     )}>
                       {car.status}
                     </Badge>
