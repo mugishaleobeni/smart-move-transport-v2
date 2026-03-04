@@ -91,11 +91,15 @@ export function AdminSidebar() {
                             )
                           }
                         >
-                          <item.icon className={cn(
-                            'w-4 h-4 shrink-0 transition-colors',
-                            isActive ? 'text-white' : 'text-black dark:text-zinc-400 group-hover:text-primary'
-                          )} />
-                          <span className="whitespace-nowrap">{item.title}</span>
+                          {({ isActive }) => (
+                            <>
+                              <item.icon className={cn(
+                                'w-4 h-4 shrink-0 transition-colors',
+                                isActive ? 'text-white' : 'text-black dark:text-zinc-400 group-hover:text-primary'
+                              )} />
+                              <span className="whitespace-nowrap">{item.title}</span>
+                            </>
+                          )}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
