@@ -88,28 +88,38 @@ export default function CarsManagement() {
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
+    let newImages = [...(form.images || [])];
 
-      const response = await api.post('/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await api.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+
+        const url = response.data.url;
+        newImages.push(url);
+      }
 
       setForm({
         ...form,
-        image: form.image || response.data.url,
-        images: [...(form.images || []), response.data.url]
+        image: form.image || newImages[0],
+        images: newImages
       });
-      toast({ title: 'Success', description: 'Image added to gallery' });
+      toast({ title: 'Success', description: `${files.length} images added to gallery` });
     } catch (error: any) {
       toast({ title: 'Upload failed', description: error.message, variant: 'destructive' });
     } finally {
       setUploading(false);
+      // Reset input
+      e.target.value = '';
     }
   };
 
@@ -284,8 +294,8 @@ export default function CarsManagement() {
                     <TabsTrigger value="url" className="rounded-md">External URL</TabsTrigger>
                   </TabsList>
                   <TabsContent value="upload" className="space-y-4 pt-4">
-                    <div className="border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl p-8 flex flex-col items-center justify-center bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all cursor-pointer relative overflow-hidden group">
-                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={handleFileUpload} disabled={uploading} />
+                    <div className="border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl p-8 flex flex-col items-center justify-center bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all cursor-pointer relative overflow-hidden group min-h-[160px]">
+                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" multiple onChange={handleFileUpload} disabled={uploading} />
                       {uploading ? (
                         <div className="flex flex-col items-center gap-4 w-full max-w-[200px]">
                           <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -299,8 +309,8 @@ export default function CarsManagement() {
                           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                             <Upload className="w-5 h-5 text-primary" />
                           </div>
-                          <p className="text-sm font-bold text-slate-900 dark:text-white">Choose a cover photo</p>
-                          <p className="text-xs text-slate-500 mt-1">High resolution PNG, JPG (Max 5MB)</p>
+                          <p className="text-sm font-bold text-slate-900 dark:text-white">Upload Gallery Photos</p>
+                          <p className="text-xs text-slate-500 mt-1">Select one or more (Max 5MB each)</p>
                         </>
                       )}
                     </div>

@@ -135,15 +135,15 @@ export default function CarDetails() {
                       {images.length} Photos
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-3 max-h-[150px] overflow-y-auto pb-2 scrollbar-hide">
                     {images.map((img, i) => (
                       <button
                         key={i}
                         onClick={() => setCurrentImage(i)}
-                        className={`w-20 h-14 rounded-lg overflow-hidden border-2 transition-all ${currentImage === i ? 'border-accent' : 'border-transparent opacity-60'
+                        className={`group/thumb relative w-24 h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 ${currentImage === i ? 'border-accent ring-2 ring-accent/20' : 'border-transparent opacity-60 hover:opacity-100 hover:border-accent/40'
                           }`}
                       >
-                        <img src={img} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                        <img src={img} alt="" className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-500" />
                         {currentImage === i && (
                           <div className="absolute inset-0 bg-accent/20 flex items-center justify-center">
                             <div className="w-2 h-2 rounded-full bg-white shadow-lg" />
