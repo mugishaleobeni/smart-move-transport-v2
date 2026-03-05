@@ -99,7 +99,13 @@ export default function CarsManagement() {
   const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => { fetchCars(); }, []);
+  useEffect(() => {
+    fetchCars();
+    const interval = setInterval(() => {
+      fetchCars();
+    }, 15000); // Poll every 15s
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchCars = async () => {
     try {

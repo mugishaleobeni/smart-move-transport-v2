@@ -77,6 +77,12 @@ export default function BookingsManagement() {
   useEffect(() => {
     fetchBookings();
     carsApi.getAll().then((res) => setCars(res.data));
+
+    const interval = setInterval(() => {
+      fetchBookings();
+    }, 15000); // Poll every 15s
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchBookings = async () => {

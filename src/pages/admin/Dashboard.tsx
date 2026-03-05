@@ -69,11 +69,11 @@ export default function Dashboard() {
 
     loadDashboardData();
 
-    // Real-time polling: Refresh data every 30 seconds
+    // Real-time polling: Refresh data every 10 seconds for a snappy experience
     const interval = setInterval(() => {
       console.log('Refreshing dashboard data...');
       loadDashboardData(false); // Silent refresh in background
-    }, 30000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);
