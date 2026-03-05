@@ -124,8 +124,8 @@ export default function Home() {
             </div>
             <div className="relative z-10 space-y-6">
               <header className="opacity-90">
-                <span className="text-accent/80 font-black text-[9px] uppercase tracking-[0.3em]">Express Access</span>
-                <h3 className="text-2xl font-black text-white/90 uppercase tracking-tight">Quick Reserve</h3>
+                <span className="text-accent/80 font-bold text-[8px] uppercase tracking-[0.3em]">Express Access</span>
+                <h3 className="text-lg font-bold text-white/90 uppercase tracking-tight">Quick Reserve</h3>
               </header>
 
               <div className="space-y-4">
