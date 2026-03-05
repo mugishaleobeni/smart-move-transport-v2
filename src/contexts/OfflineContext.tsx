@@ -17,6 +17,7 @@ interface OfflineContextType {
     queueAction: (action: Omit<QueuedAction, 'id' | 'timestamp'>) => void;
     isBannerDismissed: boolean;
     setBannerDismissed: (dismissed: boolean) => void;
+    syncQueue: () => Promise<void>;
 }
 
 const OfflineContext = createContext<OfflineContextType | undefined>(undefined);
@@ -41,6 +42,19 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
     }, [queue]);
+
+    // Automatic Sync on Reconnection
+    useEffect(() => {
+        if (isOnline && queue.length > 0) {
+            // Wait 3 seconds to ensure connection is stable before auto-sync
+            const timer = setTimeout(() => {
+                console.log('Online detected, auto-syncing queue...');
+                syncQueue();
+                setBannerDismissed(false); // Show status during sync
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [isOnline, queue.length]);
 
     const queueAction = useCallback((action: Omit<QueuedAction, 'id' | 'timestamp'>) => {
         const newAction: QueuedAction = {

@@ -52,8 +52,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadDashboardData = async () => {
-      setLoading(true);
+    const loadDashboardData = async (showLoading = true) => {
+      if (showLoading) setLoading(true);
       try {
         await Promise.all([
           fetchStats(),
@@ -63,10 +63,19 @@ export default function Dashboard() {
       } catch (err) {
         console.error('Final Dashboard Error:', err);
       } finally {
-        setLoading(false);
+        if (showLoading) setLoading(false);
       }
     };
+
     loadDashboardData();
+
+    // Real-time polling: Refresh data every 30 seconds
+    const interval = setInterval(() => {
+      console.log('Refreshing dashboard data...');
+      loadDashboardData(false); // Silent refresh in background
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchStats = async () => {
