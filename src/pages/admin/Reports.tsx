@@ -12,13 +12,20 @@ import {
   ArrowUpRight,
   Target,
   PieChart,
-  Filter,
   Search,
-  CheckCircle2
+  CheckCircle2,
+  ChevronDown,
+  Car
 } from 'lucide-react';
 import { carsApi, bookingsApi, expensesApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface CarProfit { name: string; income: number; expense: number; profit: number; }
 
@@ -93,11 +100,59 @@ export default function Reports() {
 
   const exportCSV = () => {
     const rows = [['Car', 'Income', 'Expenses', 'Profit'], ...carProfits.map((c) => [c.name, c.income, c.expense, c.profit])];
-    const csv = rows.map((r) => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const csvContent = rows.map((r) => r.map(v => `"${v}"`).join(',')).join('\n');
+    downloadFile(csvContent, `fleet_performance_${startDate}_${endDate}.csv`);
+  };
+
+  const exportCompletedBookings = async () => {
+    try {
+      const { data: bookings } = await bookingsApi.getAll();
+      const completed = (bookings || []).filter((b: any) => b.status === 'completed');
+
+      const headers = ['Client', 'Date', 'Pickup', 'Price (RWF)', 'Driver'];
+      const rows = completed.map((b: any) => [
+        b.client_name,
+        b.booking_date,
+        b.pickup_location,
+        b.total_price,
+        b.driver || 'N/A'
+      ]);
+
+      const csvContent = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+      downloadFile(csvContent, 'completed_bookings_report.csv');
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
+
+  const exportCarsList = async () => {
+    try {
+      const { data: cars } = await carsApi.getAll();
+      const headers = ['Vehicle Name', 'Type', 'Seats', 'Status', 'Daily Rate'];
+      const rows = (cars || []).map((c: any) => [
+        c.name,
+        c.type,
+        c.seats,
+        c.status,
+        c.price || c.pricePerDay || 'N/A'
+      ]);
+
+      const csvContent = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+      downloadFile(csvContent, 'fleet_inventory_list.csv');
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
+
+  const downloadFile = (content: string, fileName: string) => {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `fleet_report_${startDate}_${endDate}.csv`; a.click();
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
@@ -108,9 +163,27 @@ export default function Reports() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Fleet Performance Reports</h1>
           <p className="text-slate-500 dark:text-zinc-400">Generate detailed financial logs and vehicle profitability statements.</p>
         </div>
-        <Button onClick={exportCSV} className="gap-2 px-6 h-11 rounded-xl shadow-lg shadow-zinc-200 dark:shadow-none font-semibold">
-          <Download className="w-4 h-4" /> Export Statement
-        </Button>
+        <div className="flex gap-3">
+          <Button onClick={exportCSV} className="gap-2 px-6 h-11 rounded-xl shadow-lg shadow-zinc-200 dark:shadow-none font-semibold">
+            <Download className="w-4 h-4" /> Export Statement
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2 h-11 rounded-xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+                More <ChevronDown className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 rounded-xl p-1 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 shadow-2xl">
+              <DropdownMenuItem onClick={exportCompletedBookings} className="gap-3 py-2.5 cursor-pointer rounded-lg font-bold">
+                <FileText className="w-4 h-4 text-blue-500" /> Export Completed Trips
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportCarsList} className="gap-3 py-2.5 cursor-pointer rounded-lg font-bold">
+                <Car className="w-4 h-4 text-emerald-500" /> Export Fleet List
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 flex flex-col sm:flex-row items-end gap-6">
