@@ -93,12 +93,12 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="max-w-2xl"
           >
-            <div className="flex items-center gap-2 mb-4">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/20 border border-accent/30 text-accent text-[7px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
-                <span className="w-1 h-1 rounded-full bg-accent animate-pulse" />
+            <div className="flex flex-col items-start gap-2 mb-6">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 border border-accent/40 text-accent text-[8px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
                 Fleet Available Now
               </span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-white text-[7px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-[8px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
                 Instant Confirmation
               </span>
             </div>
@@ -115,7 +115,7 @@ export default function Home() {
                 </Button>
               </Link>
               <Link to="/cars">
-                <Button size="default" variant="outline" className="text-[9px] font-black uppercase tracking-widest px-8 h-12 glass rounded-lg text-white border-white/30">
+                <Button size="default" variant="outline" className="text-[9px] font-black uppercase tracking-widest px-8 h-12 rounded-lg text-white border-white/40 hover:bg-white hover:text-black transition-colors bg-transparent">
                   {t('home.viewCars')}
                 </Button>
               </Link>
@@ -127,44 +127,44 @@ export default function Home() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="w-full lg:max-w-sm glass p-8 rounded-[2.5rem] border border-white/10 shadow-2xl backdrop-blur-xl relative overflow-hidden group mb-4 lg:mb-0 bg-white/5 dark:bg-black/20"
+            className="w-full lg:max-w-[320px] glass p-5 rounded-[2rem] border border-white/10 shadow-2xl backdrop-blur-xl relative overflow-hidden group mb-4 lg:mb-0 bg-white/5 dark:bg-black/20"
           >
             <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Shield className="w-20 h-20 text-accent" />
+              <Shield className="w-16 h-16 text-accent" />
             </div>
-            <div className="relative z-10 space-y-6">
+            <div className="relative z-10 space-y-4">
               <header className="opacity-90">
-                <span className="text-accent/80 font-bold text-[8px] uppercase tracking-[0.3em]">Express Access</span>
-                <h3 className="text-lg font-bold text-white/90 uppercase tracking-tight">Quick Reserve</h3>
+                <span className="text-accent/80 font-bold text-[7px] uppercase tracking-[0.3em]">Express Access</span>
+                <h3 className="text-sm font-bold text-white uppercase tracking-tight">Quick Reserve</h3>
               </header>
 
-              <div className="space-y-4">
-                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-accent/40 transition-colors cursor-pointer group/item flex items-center gap-3" onClick={() => navigate('/booking')}>
-                  <div className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center border border-accent/30 group-hover/item:bg-accent transition-colors">
-                    <Clock className="w-4 h-4 text-accent group-hover/item:text-white" />
+              <div className="space-y-3">
+                <div className="p-3 bg-white/5 rounded-xl border border-white/10 hover:border-accent/40 transition-colors cursor-pointer group/item flex items-center gap-2" onClick={() => navigate('/booking')}>
+                  <div className="w-8 h-8 bg-accent/20 rounded-lg flex items-center justify-center border border-accent/30 group-hover/item:bg-accent transition-colors">
+                    <Clock className="w-3.5 h-3.5 text-accent group-hover/item:text-white" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Select Plan</p>
-                    <p className="text-sm font-bold text-white">Choose Your Rate</p>
+                    <p className="text-[8px] font-black text-white/40 uppercase tracking-widest">Select Plan</p>
+                    <p className="text-xs font-bold text-white">Choose Your Rate</p>
                   </div>
                 </div>
 
-                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-accent/40 transition-colors cursor-pointer group/item flex items-center gap-3" onClick={() => navigate('/booking')}>
-                  <div className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center border border-accent/30 group-hover/item:bg-accent transition-colors">
-                    <Star className="w-4 h-4 text-accent group-hover/item:text-white" />
+                <div className="p-3 bg-white/5 rounded-xl border border-white/10 hover:border-accent/40 transition-colors cursor-pointer group/item flex items-center gap-2" onClick={() => navigate('/booking')}>
+                  <div className="w-8 h-8 bg-accent/20 rounded-lg flex items-center justify-center border border-accent/30 group-hover/item:bg-accent transition-colors">
+                    <Star className="w-3.5 h-3.5 text-accent group-hover/item:text-white" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Elite Fleet</p>
-                    <p className="text-sm font-bold text-white">Pick A Vehicle</p>
+                    <p className="text-[8px] font-black text-white/40 uppercase tracking-widest">Elite Fleet</p>
+                    <p className="text-xs font-bold text-white">Pick A Vehicle</p>
                   </div>
                 </div>
 
-                <Button className="w-full h-14 btn-accent text-white font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-xl hover:scale-[1.02] transition-transform" onClick={() => navigate('/booking')}>
+                <Button className="w-full h-11 btn-accent text-white font-black uppercase tracking-widest text-[9px] rounded-xl shadow-xl hover:scale-[1.02] transition-transform" onClick={() => navigate('/booking')}>
                   Start Reservation Now
                 </Button>
               </div>
 
-              <p className="text-[9px] text-center text-white/40 font-bold uppercase tracking-widest">Premium Service Guaranteed</p>
+              <p className="text-[8px] text-center text-white/40 font-bold uppercase tracking-widest">Premium Service Guaranteed</p>
             </div>
           </motion.div>
         </div>
