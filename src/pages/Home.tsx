@@ -8,9 +8,9 @@ import { Layout } from '@/components/layout/Layout';
 import { carsApi } from '@/lib/api';
 
 const defaultHeroImages = [
-  'https://images.unsplash.com/photo-1550355291-bbee04a92027?w=1600&q=80', // Luxury car luxury setting
-  'https://images.unsplash.com/photo-1485291571150-772bcfc10da5?w=1600&q=80', // Car keys handover vibe
-  'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=1600&q=80', // Luxury SUV airport/hotel vibe
+  'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600&q=80', // Timeless luxury sports car
+  'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1600&q=80', // Elegant Ferrari detail
+  'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1600&q=80', // Classic black luxury car
 ];
 
 export default function Home() {
@@ -80,8 +80,9 @@ export default function Home() {
               />
             </motion.div>
           ))}
-          {/* Overlay - very minimal in light mode to keep photos visible */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent dark:from-background/90 dark:via-background/40 dark:to-background/20" />
+          {/* Overlay - elegant darkened gradient for a classic high-end feel */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent dark:from-background dark:via-background/60 dark:to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
         </div>
 
         {/* Content */}
