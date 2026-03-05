@@ -255,209 +255,215 @@ export default function CarsManagement() {
               <Plus className="w-5 h-5" /> Add New Vehicle
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-xl rounded-2xl p-0 overflow-hidden border-none shadow-2xl">
+          <DialogContent className="max-w-[95vw] lg:max-w-[1000px] xl:max-w-[1200px] rounded-2xl p-0 overflow-hidden border-none shadow-2xl">
             <DialogHeader className="p-6 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800">
               <DialogTitle className="text-xl font-bold">{editId ? 'Modify Vehicle Details' : 'Register New Vehicle'}</DialogTitle>
               <DialogDescription>Input all specifications for the new addition to your fleet.</DialogDescription>
             </DialogHeader>
-            <div className="p-6 max-h-[70vh] overflow-y-auto space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-6 max-h-[75vh] overflow-y-auto space-y-8">
+              {/* Row 1: Brand, Type and Rates */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Brand & Model</Label>
-                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Toyota Land Cruiser" className="h-11 rounded-lg" />
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Brand & Model</Label>
+                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Toyota Land Cruiser" className="h-10 rounded-lg" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Vehicle Type</Label>
-                  <Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="e.g. Premium SUV" className="h-11 rounded-lg" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Daily Rate (RWF)</Label>
-                  <Input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="30,000" className="h-11 rounded-lg" />
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Vehicle Type</Label>
+                  <Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="e.g. Premium SUV" className="h-10 rounded-lg" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Hourly Rate (RWF)</Label>
-                  <Input value={form.pricePerHour} onChange={(e) => setForm({ ...form, pricePerHour: e.target.value })} placeholder="5,000" className="h-11 rounded-lg" />
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Daily (RWF)</Label>
+                  <Input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="30,000" className="h-10 rounded-lg" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Trip Rate (RWF)</Label>
-                  <Input value={form.pricePerTrip} onChange={(e) => setForm({ ...form, pricePerTrip: e.target.value })} placeholder="15,000" className="h-11 rounded-lg" />
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Hourly (RWF)</Label>
+                  <Input value={form.pricePerHour} onChange={(e) => setForm({ ...form, pricePerHour: e.target.value })} placeholder="5,000" className="h-10 rounded-lg" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Trip (RWF)</Label>
+                  <Input value={form.pricePerTrip} onChange={(e) => setForm({ ...form, pricePerTrip: e.target.value })} placeholder="15,000" className="h-10 rounded-lg" />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Seating Capacity</Label>
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-slate-400" />
-                    <Input type="number" value={form.seats} onChange={(e) => setForm({ ...form, seats: parseInt(e.target.value) || 5 })} className="h-11 rounded-lg" />
+              {/* Row 2: Status, Seats and Description */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-3 space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Fleet Status</Label>
+                    <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+                      <SelectTrigger className="h-10 rounded-lg">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="available">Available for Bookings</SelectItem>
+                        <SelectItem value="garage">In Maintenance / Garage</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Seating Capacity</Label>
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-slate-400" />
+                      <Input type="number" value={form.seats} onChange={(e) => setForm({ ...form, seats: parseInt(e.target.value) || 5 })} className="h-10 rounded-lg" />
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Fleet Status</Label>
-                  <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-                    <SelectTrigger className="h-11 rounded-lg">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="available">Available for Bookings</SelectItem>
-                      <SelectItem value="garage">In Maintenance / Garage</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="lg:col-span-9 space-y-2">
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">General Information</Label>
+                  <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Write a brief overview of the vehicle specifications..." className="min-h-[105px] rounded-lg resize-none" />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">General Information</Label>
-                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Write a brief overview of the vehicle specifications..." className="min-h-[100px] rounded-lg resize-none" />
-              </div>
-
-              <div className="space-y-3">
-                <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Standard Features</Label>
-                <div className="grid grid-cols-2 gap-3 p-4 bg-zinc-50 dark:bg-zinc-800/30 rounded-xl border border-zinc-100 dark:border-zinc-800">
-                  {STANDARD_FEATURES.map((feature) => {
-                    const isChecked = form.features.split(',').map(f => f.trim()).includes(feature.label);
-                    return (
-                      <div key={feature.id} className="flex items-center space-x-3">
-                        <Checkbox
-                          id={feature.id}
-                          checked={isChecked}
-                          onCheckedChange={(checked) => {
-                            let featuresArr = form.features.split(',').map(f => f.trim()).filter(Boolean);
-                            if (checked) {
-                              if (!featuresArr.includes(feature.label)) featuresArr.push(feature.label);
-                            } else {
-                              featuresArr = featuresArr.filter(f => f !== feature.label);
-                            }
-                            setForm({ ...form, features: featuresArr.join(', ') });
-                          }}
-                        />
-                        <label
-                          htmlFor={feature.id}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2 cursor-pointer"
-                        >
-                          <feature.icon className="w-3.5 h-3.5 text-slate-400" />
-                          {feature.label}
-                        </label>
-                      </div>
-                    );
-                  })}
-                </div>
-                <Input
-                  value={form.features}
-                  onChange={(e) => setForm({ ...form, features: e.target.value })}
-                  placeholder="Additional features (comma separated)..."
-                  className="h-10 rounded-lg text-xs"
-                />
-              </div>
-
-              <div className="space-y-3">
-                <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Media & Photography</Label>
-                <Tabs defaultValue="upload" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 rounded-lg p-1 bg-zinc-100 dark:bg-zinc-800">
-                    <TabsTrigger value="upload" className="rounded-md">Direct Upload</TabsTrigger>
-                    <TabsTrigger value="url" className="rounded-md">External URL</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="upload" className="space-y-4 pt-4">
-                    <div className="border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl p-8 flex flex-col items-center justify-center bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all cursor-pointer relative overflow-hidden group min-h-[160px]">
-                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" multiple onChange={handleFileUpload} disabled={uploading} />
-                      {uploading ? (
-                        <div className="flex flex-col items-center gap-4 w-full max-w-[200px]">
-                          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                          <div className="w-full text-center">
-                            <p className="text-xs font-semibold mb-1">Transferring image...</p>
-                            <Progress value={45} className="h-1" />
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                            <Upload className="w-5 h-5 text-primary" />
-                          </div>
-                          <p className="text-sm font-bold text-slate-900 dark:text-white">Upload Gallery Photos</p>
-                          <p className="text-xs text-slate-500 mt-1">Select one or more (Max 5MB each)</p>
-                        </>
-                      )}
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="url" className="pt-4">
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <Input
-                          id="url-input"
-                          placeholder="https://external-storage.com/image.jpg"
-                          className="h-11 pl-10 rounded-lg"
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        onClick={() => {
-                          const input = document.getElementById('url-input') as HTMLInputElement;
-                          if (input.value) {
-                            setForm({
-                              ...form,
-                              image: form.image || input.value,
-                              images: [...form.images, input.value]
-                            });
-                            input.value = '';
-                          }
-                        }}
-                      >
-                        Add
-                      </Button>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </div>
-
-              {form.images && form.images.length > 0 && (
-                <div className="space-y-3">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Image Gallery ({form.images.length})</Label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {form.images.map((img, i) => (
-                      <div key={i} className="group relative aspect-video rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-zinc-50">
-                        <img src={img} alt={`Preview ${i}`} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-white hover:text-rose-500"
-                            onClick={() => {
-                              const newImages = [...form.images];
-                              newImages.splice(i, 1);
-                              setForm({
-                                ...form,
-                                images: newImages,
-                                image: form.image === img ? (newImages[0] || '') : form.image
-                              });
+              {/* Row 3: Features and Media */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Standard Features</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-zinc-50 dark:bg-zinc-800/30 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                    {STANDARD_FEATURES.map((feature) => {
+                      const isChecked = form.features.split(',').map(f => f.trim()).includes(feature.label);
+                      return (
+                        <div key={feature.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={feature.id}
+                            checked={isChecked}
+                            onCheckedChange={(checked) => {
+                              let featuresArr = form.features.split(',').map(f => f.trim()).filter(Boolean);
+                              if (checked) {
+                                if (!featuresArr.includes(feature.label)) featuresArr.push(feature.label);
+                              } else {
+                                featuresArr = featuresArr.filter(f => f !== feature.label);
+                              }
+                              setForm({ ...form, features: featuresArr.join(', ') });
                             }}
+                          />
+                          <label
+                            htmlFor={feature.id}
+                            className="text-[11px] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-1.5 cursor-pointer"
                           >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                          {form.image !== img && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-[10px] text-white hover:text-accent font-bold"
-                              onClick={() => setForm({ ...form, image: img })}
-                            >
-                              Set Main
-                            </Button>
-                          )}
+                            <feature.icon className="w-3 h-3 text-slate-400" />
+                            {feature.label}
+                          </label>
                         </div>
-                        {form.image === img && (
-                          <div className="absolute top-1 left-1">
-                            <Badge className="bg-accent text-[8px] h-4">Main</Badge>
+                      );
+                    })}
+                  </div>
+                  <Input
+                    value={form.features}
+                    onChange={(e) => setForm({ ...form, features: e.target.value })}
+                    placeholder="Additional features (comma separated)..."
+                    className="h-9 rounded-lg text-[11px]"
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Media & Photography</Label>
+                  <Tabs defaultValue="upload" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 rounded-lg p-1 bg-zinc-100 dark:bg-zinc-800">
+                      <TabsTrigger value="upload" className="rounded-md text-[11px]">Direct Upload</TabsTrigger>
+                      <TabsTrigger value="url" className="rounded-md text-[11px]">External URL</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="upload" className="space-y-4 pt-2">
+                      <div className="border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl p-4 flex flex-col items-center justify-center bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all cursor-pointer relative overflow-hidden group min-h-[140px]">
+                        <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" multiple onChange={handleFileUpload} disabled={uploading} />
+                        {uploading ? (
+                          <div className="flex flex-col items-center gap-4 w-full max-w-[200px]">
+                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                            <div className="w-full text-center">
+                              <p className="text-[10px] font-semibold mb-1">Transferring image...</p>
+                              <Progress value={45} className="h-1" />
+                            </div>
                           </div>
+                        ) : (
+                          <>
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                              <Upload className="w-4 h-4 text-primary" />
+                            </div>
+                            <p className="text-[11px] font-bold text-slate-900 dark:text-white">Upload Gallery Photos</p>
+                            <p className="text-[10px] text-slate-500 mt-0.5">Select one or more (Max 5MB each)</p>
+                          </>
                         )}
                       </div>
-                    ))}
-                  </div>
+                    </TabsContent>
+                    <TabsContent value="url" className="pt-2">
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                          <Input
+                            id="url-input"
+                            placeholder="https://external-storage.com/image.jpg"
+                            className="h-10 pl-9 rounded-lg text-[11px]"
+                          />
+                        </div>
+                        <Button
+                          size="sm"
+                          type="button"
+                          onClick={() => {
+                            const input = document.getElementById('url-input') as HTMLInputElement;
+                            if (input.value) {
+                              setForm({
+                                ...form,
+                                image: form.image || input.value,
+                                images: [...form.images, input.value]
+                              });
+                              input.value = '';
+                            }
+                          }}
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+
+                  {form.images && form.images.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Image Gallery ({form.images.length})</Label>
+                      </div>
+                      <div className="grid grid-cols-4 gap-2">
+                        {form.images.map((img, i) => (
+                          <div key={i} className="group relative aspect-video rounded-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-zinc-50">
+                            <img src={img} alt={`Preview ${i}`} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-white hover:text-rose-500 p-0"
+                                onClick={() => {
+                                  const newImages = [...form.images];
+                                  newImages.splice(i, 1);
+                                  setForm({
+                                    ...form,
+                                    images: newImages,
+                                    image: form.image === img ? (newImages[0] || '') : form.image
+                                  });
+                                }}
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                              {form.image !== img && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 px-1 !text-[8px] text-white hover:text-accent font-black uppercase"
+                                  onClick={() => setForm({ ...form, image: img })}
+                                >
+                                  Main
+                                </Button>
+                              )}
+                            </div>
+                            {form.image === img && (
+                              <div className="absolute top-0.5 left-0.5">
+                                <Badge className="bg-accent text-[6px] h-3 px-1 leading-none">Main</Badge>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
             <DialogFooter className="p-6 bg-zinc-50/80 dark:bg-zinc-800/80 border-t border-zinc-100 dark:border-zinc-800 backdrop-blur-md">
               <Button variant="ghost" onClick={() => setOpen(false)} className="rounded-lg h-11 px-6">Cancel</Button>
