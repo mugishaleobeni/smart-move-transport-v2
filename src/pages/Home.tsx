@@ -8,9 +8,9 @@ import { Layout } from '@/components/layout/Layout';
 import { carsApi } from '@/lib/api';
 
 const defaultHeroImages = [
-  'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1200&q=80&auto=format',
-  'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1200&q=80&auto=format',
-  'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=1200&q=80&auto=format',
+  'https://images.unsplash.com/photo-1550355291-bbee04a92027?w=1600&q=80', // Luxury car luxury setting
+  'https://images.unsplash.com/photo-1485291571150-772bcfc10da5?w=1600&q=80', // Car keys handover vibe
+  'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=1600&q=80', // Luxury SUV airport/hotel vibe
 ];
 
 export default function Home() {
@@ -92,10 +92,19 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="max-w-2xl"
           >
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-4 leading-tight text-white drop-shadow-[0_2px_15px_rgba(0,0,0,0.6)] uppercase tracking-tighter">
+            <div className="flex items-center gap-2 mb-6">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 border border-accent/30 text-accent text-[8px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                Fleet Available Now
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-[8px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
+                Instant Confirmation
+              </span>
+            </div>
+            <h1 className="text-4xl md:text-6xl lg:text-8xl font-black mb-6 leading-[0.9] text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)] uppercase tracking-tighter">
               {t('home.heroTitle')}
             </h1>
-            <p className="text-lg md:text-xl text-white/90 max-w-lg drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)] mb-8 font-medium italic">
+            <p className="text-lg md:text-xl text-white/90 max-w-lg drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)] mb-10 font-medium italic border-l-2 border-accent pl-6">
               {t('home.heroSubtitle')}
             </p>
             <div className="flex flex-wrap gap-4">
