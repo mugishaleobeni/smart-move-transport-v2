@@ -92,29 +92,29 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="max-w-2xl"
           >
-            <div className="flex items-center gap-2 mb-6">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 border border-accent/30 text-accent text-[8px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+            <div className="flex items-center gap-2 mb-4">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/20 border border-accent/30 text-accent text-[7px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
+                <span className="w-1 h-1 rounded-full bg-accent animate-pulse" />
                 Fleet Available Now
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-[8px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-white text-[7px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
                 Instant Confirmation
               </span>
             </div>
-            <h1 className="text-4xl md:text-6xl lg:text-8xl font-black mb-6 leading-[0.9] text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)] uppercase tracking-tighter">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-4 leading-[1] text-white drop-shadow-[0_2px_15px_rgba(0,0,0,0.8)] uppercase tracking-tighter">
               {t('home.heroTitle')}
             </h1>
-            <p className="text-lg md:text-xl text-white/90 max-w-lg drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)] mb-10 font-medium italic border-l-2 border-accent pl-6">
+            <p className="text-sm md:text-base text-white/90 max-w-md drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)] mb-8 font-medium italic border-l-2 border-accent pl-4">
               {t('home.heroSubtitle')}
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-3">
               <Link to="/booking">
-                <Button size="lg" className="btn-accent text-white text-[10px] font-black uppercase tracking-[0.2em] px-10 h-14 rounded-xl shadow-2xl">
+                <Button size="default" className="btn-accent text-white text-[9px] font-black uppercase tracking-widest px-8 h-12 rounded-lg shadow-xl">
                   {t('home.bookNow')}
                 </Button>
               </Link>
               <Link to="/cars">
-                <Button size="lg" variant="outline" className="text-[10px] font-black uppercase tracking-[0.2em] px-10 h-14 glass rounded-xl text-white border-white/40">
+                <Button size="default" variant="outline" className="text-[9px] font-black uppercase tracking-widest px-8 h-12 glass rounded-lg text-white border-white/30">
                   {t('home.viewCars')}
                 </Button>
               </Link>
