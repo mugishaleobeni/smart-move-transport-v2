@@ -311,6 +311,53 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* SEO Content Section / Local Context */}
+      <section className="py-20 bg-background relative overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="prose prose-zinc dark:prose-invert max-w-none"
+            >
+              <h2 className="text-2xl md:text-3xl font-bold mb-6 text-foreground uppercase tracking-tight">
+                Premium Car Rental Kigali & Rwanda Travel Services
+              </h2>
+              <div className="grid md:grid-cols-2 gap-8 text-sm text-balance text-muted-foreground leading-relaxed">
+                <div>
+                  <p className="mb-4">
+                    Welcome to <strong>Smart Move Transport</strong>, your premier provider for <strong>car rental in Kigali</strong>. Whether you are a business traveler, a tourist on safari, or an expat living in Rwanda, we offer a specialized fleet to meet every need. From <strong>Kigali International Airport car rentals</strong> with instant pickup to long-term corporate leases, we ensure your mobility in the "Land of a Thousand Hills" is seamless and stylish.
+                  </p>
+                  <p>
+                    Our <strong>Rwanda car hire</strong> services focus on reliability and safety. Every vehicle in our <strong>Kigali fleet</strong>—including rugged <strong>4x4 Toyota Land Cruisers</strong> perfect for gorilla trekking in Volcanoes National Park—undergoes rigorous maintenance to guarantee a professional experience.
+                  </p>
+                </div>
+                <div>
+                  <p className="mb-4">
+                    Looking for <strong>affordable car rental in Rwanda</strong>? We pride ourselves on transparent pricing with <strong>no hidden fees</strong>. Choose between self-drive freedom or the convenience of our <strong>chauffeur-driven services</strong> for city tours or cross-border travel.
+                  </p>
+                  <ul className="list-none space-y-2 mt-4 font-medium text-accent">
+                    <li className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+                      Kigali Airport VIP Transfers (KGL)
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+                      4x4 Safari & Tour Vehicle Hire
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+                      Monthly & Long-term Corporate Rental
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
     </Layout>
   );
 }

@@ -72,9 +72,11 @@ export default function Cars() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-12"
           >
-            <h1 className="text-3xl md:text-5xl font-bold mb-4">{t('cars.title')}</h1>
+            <h1 className="text-3xl md:text-5xl font-bold mb-4">
+              Best Car Rental Kigali - Our Premium Fleet
+            </h1>
             <p className="text-muted-foreground max-w-lg mx-auto">
-              {t('cars.subtitle')}
+              Explore our diverse selection of <strong>car hire in Rwanda</strong>. From luxury SUVs for business to rugged 4x4s for safari, we provide the best <strong>Kigali car rental</strong> experience.
             </p>
           </motion.div>
 

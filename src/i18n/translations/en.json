@@ -8,21 +8,21 @@
     "logout": "Logout"
   },
   "home": {
-    "heroTitle": "Premium Car Rental",
-    "heroSubtitle": "Experience luxury and comfort with Smart Move Transport",
+    "heroTitle": "Best Car Rental in Kigali",
+    "heroSubtitle": "Experience premium luxury and affordable Rwanda car hire with Smart Move Transport. Your trusted partner for Kigali airport transfers and 4x4 rentals.",
     "bookNow": "Book Now",
-    "viewCars": "View Cars",
-    "whyChooseUs": "Why Choose Us",
-    "premium": "Premium Fleet",
-    "premiumDesc": "Top-quality vehicles maintained to the highest standards",
-    "affordable": "Affordable Rates",
-    "affordableDesc": "Competitive pricing with no hidden fees",
-    "support": "24/7 Support",
-    "supportDesc": "Round-the-clock assistance for all your needs"
+    "viewCars": "View Our Fleet",
+    "whyChooseUs": "Why Choose Our Kigali Car Rental?",
+    "premium": "Premium Rwanda Fleet",
+    "premiumDesc": "Top-quality 4x4s, SUVs, and luxury sedans maintained to the highest standards.",
+    "affordable": "Affordable Kigali Rates",
+    "affordableDesc": "Transparent pricing for car hire in Rwanda with no hidden fees.",
+    "support": "24/7 Rwanda Support",
+    "supportDesc": "Round-the-clock assistance for all your travel needs in Kigali and beyond."
   },
   "cars": {
-    "title": "Our Fleet",
-    "subtitle": "Choose from our premium selection of vehicles",
+    "title": "Rent a Car in Kigali - Our Fleet",
+    "subtitle": "Choose from our premium selection of 4x4s and luxury vehicles for your Rwanda journey.",
     "seats": "seats",
     "perDay": "/day",
     "perHour": "/hour",
