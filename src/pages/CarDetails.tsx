@@ -54,9 +54,19 @@ export default function CarDetails() {
     );
   }
 
-  const images = Array.isArray(car.images) ? car.images : [car.image || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200'];
-  const nextImage = () => setCurrentImage((prev) => (prev + 1) % images.length);
-  const prevImage = () => setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
+  const images = Array.isArray(car.images) && car.images.length > 0
+    ? car.images
+    : [car.image || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200'];
+
+  const nextImage = () => {
+    if (images.length <= 1) return;
+    setCurrentImage((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    if (images.length <= 1) return;
+    setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   return (
     <Layout>

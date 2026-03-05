@@ -91,12 +91,14 @@ export default function CarsManagement() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    console.log('Starting upload for files:', files.length);
     setUploading(true);
-    let newImages = [...(form.images || [])];
+    let currentGallery = [...(form.images || [])];
 
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
+        console.log(`Uploading file ${i + 1}/${files.length}:`, file.name);
         const formData = new FormData();
         formData.append('file', file);
 
@@ -104,22 +106,30 @@ export default function CarsManagement() {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
 
-        const url = response.data.url;
-        newImages.push(url);
+        if (response.data && response.data.url) {
+          const url = response.data.url;
+          currentGallery.push(url);
+          console.log('Upload success:', url);
+        }
       }
 
-      setForm({
-        ...form,
-        image: form.image || newImages[0],
-        images: newImages
-      });
+      setForm(prev => ({
+        ...prev,
+        image: prev.image || currentGallery[0],
+        images: currentGallery
+      }));
       toast({ title: 'Success', description: `${files.length} images added to gallery` });
     } catch (error: any) {
-      toast({ title: 'Upload failed', description: error.message, variant: 'destructive' });
+      console.error('Upload sequence error:', error);
+      toast({
+        title: 'Upload failed',
+        description: error.response?.data?.error || error.message || 'Check your connection or backend logs.',
+        variant: 'destructive'
+      });
     } finally {
       setUploading(false);
       // Reset input
-      e.target.value = '';
+      if (e.target) e.target.value = '';
     }
   };
 
