@@ -15,6 +15,8 @@ interface OfflineContextType {
     queueLength: number;
     syncing: boolean;
     queueAction: (action: Omit<QueuedAction, 'id' | 'timestamp'>) => void;
+    isBannerDismissed: boolean;
+    setBannerDismissed: (dismissed: boolean) => void;
 }
 
 const OfflineContext = createContext<OfflineContextType | undefined>(undefined);
@@ -25,6 +27,7 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [queue, setQueue] = useState<QueuedAction[]>([]);
     const [syncing, setSyncing] = useState(false);
+    const [isBannerDismissed, setIsBannerDismissed] = useState(false);
 
     // Load queue from localStorage on mount
     useEffect(() => {
@@ -55,13 +58,19 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
         if (queue.length === 0 || syncing || !navigator.onLine) return;
 
         setSyncing(true);
-        toast.loading(`Syncing ${queue.length} offline actions...`);
+        const toastId = toast.loading(`Uploading ${queue.length} updates...`);
 
         const updatedQueue = [...queue];
         const failedActions: QueuedAction[] = [];
 
         for (const action of updatedQueue) {
             try {
+                // Ensure we are still online before each request
+                if (!navigator.onLine) {
+                    failedActions.push(action);
+                    continue;
+                }
+
                 await api({
                     url: action.url,
                     method: action.method,
@@ -76,24 +85,26 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
 
         setQueue(failedActions);
         setSyncing(false);
-        toast.dismiss();
+        toast.dismiss(toastId);
 
         if (failedActions.length === 0) {
-            toast.success("All actions synced successfully!");
-        } else {
-            toast.error(`Failed to sync ${failedActions.length} actions. Will retry later.`);
+            toast.success("System updated successfully!");
+        } else if (failedActions.length < updatedQueue.length) {
+            toast.error(`Partial success. ${failedActions.length} updates pending.`);
         }
     }, [queue, syncing]);
 
     useEffect(() => {
         const handleOnline = () => {
             setIsOnline(true);
-            toast.success("You're back online!");
-            syncQueue();
+            setIsBannerDismissed(false); // Reset dismissal on reconnect
+            toast.success("Connected to system");
+            // Automatic sync removed as requested
         };
         const handleOffline = () => {
             setIsOnline(false);
-            toast.error("You're offline. Changes will be saved locally.");
+            setIsBannerDismissed(false); // Show banner when going offline
+            toast.error("Entering offline mode");
         };
 
         window.addEventListener('online', handleOnline);
@@ -105,20 +116,23 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
         };
         window.addEventListener('smartmove_offline_action', handleOfflineAction);
 
-        // Initial sync attempt if online
-        if (navigator.onLine) {
-            syncQueue();
-        }
-
         return () => {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
             window.removeEventListener('smartmove_offline_action', handleOfflineAction);
         };
-    }, [syncQueue]);
+    }, [queueAction]);
 
     return (
-        <OfflineContext.Provider value={{ isOnline, queueLength: queue.length, syncing, queueAction }}>
+        <OfflineContext.Provider value={{
+            isOnline,
+            queueLength: queue.length,
+            syncing,
+            queueAction,
+            isBannerDismissed,
+            setBannerDismissed: setIsBannerDismissed,
+            syncQueue // Exporting for manual trigger
+        }}>
             {children}
         </OfflineContext.Provider>
     );
