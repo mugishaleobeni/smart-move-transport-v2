@@ -14,7 +14,8 @@ import {
   Check,
   Ban,
   Plus,
-  Banknote
+  Banknote,
+  Trash
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -91,7 +92,7 @@ export default function BookingsManagement() {
   };
 
   const handleStatusUpdate = (id: string, status: string, label: string) => {
-    if (status === 'rejected' || status === 'cancelled') {
+    if (status === 'rejected' || status === 'cancelled' || status === 'delete') {
       setPendingAction({ id, status, label });
       setConfirmOpen(true);
     } else {
@@ -101,11 +102,16 @@ export default function BookingsManagement() {
 
   const updateStatus = async (id: string, status: string) => {
     try {
-      await bookingsApi.updateStatus(id, status);
-      toast({ title: `Booking ${status}` });
+      if (status === 'delete') {
+        await bookingsApi.delete(id);
+        toast({ title: 'Booking Deleted' });
+      } else {
+        await bookingsApi.updateStatus(id, status);
+        toast({ title: `Booking ${status}` });
+      }
       fetchBookings();
     } catch (error: any) {
-      toast({ title: 'Status update failed', description: error.message, variant: 'destructive' });
+      toast({ title: 'Action failed', description: error.message, variant: 'destructive' });
     }
   };
 
@@ -395,6 +401,13 @@ export default function BookingsManagement() {
                         >
                           <User className="w-4 h-4" /> View Details
                         </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          onClick={() => handleStatusUpdate((b._id || b.id)!, 'delete', 'Delete')}
+                          className="gap-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer font-bold"
+                        >
+                          <Trash className="w-4 h-4" /> Delete Booking
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -425,9 +438,9 @@ export default function BookingsManagement() {
         onClose={() => setConfirmOpen(false)}
         onConfirm={() => pendingAction && updateStatus(pendingAction.id, pendingAction.status)}
         title={`${pendingAction?.label} Booking`}
-        description={`Are you sure you want to ${pendingAction?.label.toLowerCase()} this booking? This action might be permanent.`}
+        description={`Are you sure you want to ${pendingAction?.label.toLowerCase()} this booking? ${pendingAction?.status === 'delete' ? 'This will permanently remove the record.' : 'This action might be permanent.'}`}
         confirmText={pendingAction?.label}
-        variant={pendingAction?.status === 'rejected' ? 'destructive' : 'default'}
+        variant={(pendingAction?.status === 'rejected' || pendingAction?.status === 'delete') ? 'destructive' : 'default'}
       />
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
