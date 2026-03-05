@@ -14,7 +14,16 @@ import {
   Search,
   Grid,
   List,
-  Filter
+  Filter,
+  Bluetooth,
+  Wind,
+  Usb,
+  Camera,
+  CircleDot,
+  Shield,
+  Zap,
+  Smartphone,
+  Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +33,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { carsApi } from '@/lib/api';
 import api from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
@@ -48,6 +58,19 @@ interface CarRow {
   pricePerHour?: string | number;
   pricePerTrip?: string | number;
 }
+
+const STANDARD_FEATURES = [
+  { id: 'bluetooth', label: 'Bluetooth', icon: Bluetooth },
+  { id: 'ac', label: 'Air Conditioning', icon: Wind },
+  { id: 'usb', label: 'USB Port', icon: Usb },
+  { id: 'camera', label: 'Rear Camera', icon: Camera },
+  { id: 'parking', label: 'Parking Sensors', icon: CircleDot },
+  { id: 'airbags', label: 'Airbags', icon: Shield },
+  { id: 'abs', label: 'ABS', icon: Zap },
+  { id: 'windows', label: 'Power Windows', icon: Zap },
+  { id: 'android', label: 'Android Auto', icon: Smartphone },
+  { id: 'apple', label: 'Apple CarPlay', icon: Smartphone },
+];
 
 const emptyForm = {
   name: '',
@@ -291,9 +314,43 @@ export default function CarsManagement() {
                 <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Write a brief overview of the vehicle specifications..." className="min-h-[100px] rounded-lg resize-none" />
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Standard Features (comma separated)</Label>
-                <Input value={form.features} onChange={(e) => setForm({ ...form, features: e.target.value })} placeholder="4WD, AC, Leather Seats, GPS..." className="h-11 rounded-lg" />
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Standard Features</Label>
+                <div className="grid grid-cols-2 gap-3 p-4 bg-zinc-50 dark:bg-zinc-800/30 rounded-xl border border-zinc-100 dark:border-zinc-800">
+                  {STANDARD_FEATURES.map((feature) => {
+                    const isChecked = form.features.split(',').map(f => f.trim()).includes(feature.label);
+                    return (
+                      <div key={feature.id} className="flex items-center space-x-3">
+                        <Checkbox
+                          id={feature.id}
+                          checked={isChecked}
+                          onCheckedChange={(checked) => {
+                            let featuresArr = form.features.split(',').map(f => f.trim()).filter(Boolean);
+                            if (checked) {
+                              if (!featuresArr.includes(feature.label)) featuresArr.push(feature.label);
+                            } else {
+                              featuresArr = featuresArr.filter(f => f !== feature.label);
+                            }
+                            setForm({ ...form, features: featuresArr.join(', ') });
+                          }}
+                        />
+                        <label
+                          htmlFor={feature.id}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2 cursor-pointer"
+                        >
+                          <feature.icon className="w-3.5 h-3.5 text-slate-400" />
+                          {feature.label}
+                        </label>
+                      </div>
+                    );
+                  })}
+                </div>
+                <Input
+                  value={form.features}
+                  onChange={(e) => setForm({ ...form, features: e.target.value })}
+                  placeholder="Additional features (comma separated)..."
+                  className="h-10 rounded-lg text-xs"
+                />
               </div>
 
               <div className="space-y-3">
