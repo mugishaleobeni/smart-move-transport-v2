@@ -25,6 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ActionConfirmation } from '@/components/dashboard/ActionConfirmation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 interface Expense { _id?: string; id?: string; car_id: string | null; amount: number; description: string; expense_date: string; }
 interface CarOption { _id: string; id?: string; name: string; }
@@ -37,9 +38,9 @@ export default function ExpensesManagement() {
   const [form, setForm] = useState({ car_id: '', amount: 0, description: '', expense_date: new Date().toISOString().split('T')[0] });
   const [editId, setEditId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   useEffect(() => {
     fetchExpenses();
@@ -51,13 +52,13 @@ export default function ExpensesManagement() {
       const response = await expensesApi.getAll();
       setExpenses(response.data);
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     }
   };
 
   const handleSave = async () => {
     if (form.amount <= 0 || !form.description) {
-      toast({ title: "Required Fields", description: "Please enter a valid amount and description.", variant: "destructive" });
+      toast({ title: t('admin.bookings.toast.missingInfo'), description: t('admin.bookings.toast.fillRequired'), variant: "destructive" });
       return;
     }
 
@@ -74,7 +75,7 @@ export default function ExpensesManagement() {
         toast({ title: 'Update not yet implemented on backend', variant: 'default' });
       } else {
         await expensesApi.create(payload);
-        toast({ title: 'Expense added', description: "New operational cost logged." });
+        toast({ title: t('admin.expenses.toast.saveSuccess'), description: t('admin.expenses.logNew') });
       }
       setOpen(false);
       setEditId(null);
@@ -94,14 +95,14 @@ export default function ExpensesManagement() {
     if (!expenseToDelete) return;
     try {
       await expensesApi.delete(expenseToDelete);
-      toast({ title: 'Expense deleted', variant: "destructive" });
+      toast({ title: t('admin.expenses.toast.deleteSuccess'), variant: "destructive" });
       fetchExpenses();
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     }
   };
 
-  const carName = (carId: string | null) => cars.find((c) => (c._id === carId || c.id === carId))?.name || 'General Operations';
+  const carName = (carId: string | null) => cars.find((c) => (c._id === carId || c.id === carId))?.name || t('admin.expenses.categories.other');
   const filtered = expenses.filter((e) => {
     const matchesCar = filterCar === 'all' ? true : (filterCar === 'general' ? e.car_id === null : e.car_id === filterCar);
     const matchesSearch = e.description.toLowerCase().includes(search.toLowerCase());
@@ -115,44 +116,44 @@ export default function ExpensesManagement() {
     <div className="space-y-8 pb-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Operation Expenses</h1>
-          <p className="text-slate-500 dark:text-zinc-400">Track and categorize maintenance and operational costs.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t('admin.expenses.title')}</h1>
+          <p className="text-slate-500 dark:text-zinc-400">{t('admin.expenses.subtitle')}</p>
         </div>
         <div className="flex gap-3">
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditId(null); }}>
             <DialogTrigger asChild>
               <Button className="gap-2 px-6 h-11 rounded-xl shadow-lg shadow-primary/20">
-                <Plus className="w-5 h-5" /> Log New Expense
+                <Plus className="w-5 h-5" /> {t('admin.expenses.addExpense')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md rounded-2xl overflow-hidden border-none shadow-2xl p-0">
               <DialogHeader className="p-6 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800">
-                <DialogTitle className="text-xl font-bold">{editId ? 'Verify Expense' : 'Log Operational Cost'}</DialogTitle>
-                <DialogDescription>Document business costs for financial transparency.</DialogDescription>
+                <DialogTitle className="text-xl font-bold">{editId ? t('common.edit') : t('admin.expenses.logNew')}</DialogTitle>
+                <DialogDescription>{t('admin.expenses.logNew')}</DialogDescription>
               </DialogHeader>
               <div className="p-6 space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Associate with Vehicle</Label>
+                  <Label className="text-sm font-semibold">{t('admin.expenses.labels.vehicle')}</Label>
                   <Select value={form.car_id} onValueChange={(v) => setForm({ ...form, car_id: v })}>
                     <SelectTrigger className="h-11 rounded-lg">
-                      <SelectValue placeholder="General (Office/Admin)" />
+                      <SelectValue placeholder={t('admin.expenses.categories.other')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="general">General Operations</SelectItem>
+                      <SelectItem value="general">{t('admin.expenses.categories.other')}</SelectItem>
                       {cars.map((c) => <SelectItem key={c._id || c.id} value={(c._id || c.id)!}>{c.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold">Amount (RWF)</Label>
+                    <Label className="text-sm font-semibold">{t('admin.expenses.labels.amount')}</Label>
                     <div className="relative">
                       <Receipt className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: parseFloat(e.target.value) || 0 })} className="h-11 pl-9 rounded-lg" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold">Expense Date</Label>
+                    <Label className="text-sm font-semibold">{t('admin.expenses.labels.date')}</Label>
                     <div className="relative">
                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <Input type="date" value={form.expense_date} onChange={(e) => setForm({ ...form, expense_date: e.target.value })} className="h-11 pl-9 rounded-lg" />
@@ -160,17 +161,17 @@ export default function ExpensesManagement() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Charge Description</Label>
+                  <Label className="text-sm font-semibold">{t('admin.expenses.labels.description')}</Label>
                   <div className="relative">
                     <FileText className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                    <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="e.g. Fuel, Oil change, Insurance..." className="h-11 pl-9 rounded-lg" />
+                    <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t('admin.expenses.labels.descPlaceholder')} className="h-11 pl-9 rounded-lg" />
                   </div>
                 </div>
               </div>
               <DialogFooter className="p-6 bg-zinc-50 dark:bg-zinc-800 border-t border-zinc-100 dark:border-zinc-800">
-                <Button variant="ghost" onClick={() => setOpen(false)} className="h-11 px-6 rounded-lg">Cancel</Button>
+                <Button variant="ghost" onClick={() => setOpen(false)} className="h-11 px-6 rounded-lg">{t('common.cancel')}</Button>
                 <Button onClick={handleSave} className="h-11 px-8 rounded-lg shadow-lg shadow-primary/20">
-                  {editId ? 'Confirm Updates' : 'Register Expense'}
+                  {editId ? t('common.save') : t('admin.bookings.completeRegistration')}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -200,7 +201,7 @@ export default function ExpensesManagement() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
-              placeholder="Search by description..."
+              placeholder={t('admin.expenses.recordsDesc')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 h-10 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border-none focus-visible:ring-1"
@@ -210,12 +211,12 @@ export default function ExpensesManagement() {
             <SelectTrigger className="w-44 rounded-xl h-10 bg-slate-50 dark:bg-zinc-800/50 border-none focus:ring-1">
               <div className="flex items-center gap-2">
                 <Filter className="w-3.5 h-3.5" />
-                <SelectValue placeholder="All Categories" />
+                <SelectValue placeholder={t('admin.bookings.allStatus')} />
               </div>
             </SelectTrigger>
             <SelectContent className="rounded-xl overflow-hidden">
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="general">General Only</SelectItem>
+              <SelectItem value="all">{t('admin.bookings.allStatus')}</SelectItem>
+              <SelectItem value="general">{t('admin.expenses.categories.other')}</SelectItem>
               {cars.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
@@ -226,11 +227,11 @@ export default function ExpensesManagement() {
         <Table>
           <TableHeader className="bg-zinc-50/10 dark:bg-zinc-800/50">
             <TableRow className="border-zinc-100 dark:border-zinc-800">
-              <TableHead className="font-bold text-xs uppercase px-6 py-4">Filing Date</TableHead>
-              <TableHead className="font-bold text-xs uppercase">Cost Group</TableHead>
-              <TableHead className="font-bold text-xs uppercase">Reference / Description</TableHead>
-              <TableHead className="font-bold text-xs uppercase text-rose-500">Expenditure</TableHead>
-              <TableHead className="font-bold text-xs uppercase text-right px-6">Actions</TableHead>
+              <TableHead className="font-bold text-xs uppercase px-6 py-4">{t('admin.expenses.table.date')}</TableHead>
+              <TableHead className="font-bold text-xs uppercase">{t('admin.expenses.table.category')}</TableHead>
+              <TableHead className="font-bold text-xs uppercase">{t('admin.expenses.labels.description')}</TableHead>
+              <TableHead className="font-bold text-xs uppercase text-rose-500">{t('admin.expenses.table.amount')}</TableHead>
+              <TableHead className="font-bold text-xs uppercase text-right px-6">{t('admin.expenses.table.item')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -286,8 +287,8 @@ export default function ExpensesManagement() {
                     <div className="w-12 h-12 rounded-full bg-slate-50 dark:bg-zinc-800 flex items-center justify-center mb-2">
                       <BarChart3 className="w-6 h-6 text-slate-300" />
                     </div>
-                    <p className="text-sm font-bold text-slate-500">No expenditure data found</p>
-                    <p className="text-xs text-slate-400">Your fleet operations are currently showing zero logged costs.</p>
+                    <p className="text-sm font-bold text-slate-500">{t('admin.analytics.noExpenseData')}</p>
+                    <p className="text-xs text-slate-400">{t('admin.analytics.noExpenseData')}</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -299,9 +300,9 @@ export default function ExpensesManagement() {
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={confirmDelete}
-        title="Delete Expense"
-        description="Are you sure you want to remove this expense record? This action cannot be undone."
-        confirmText="Delete record"
+        title={t('admin.expenses.toast.deleteSuccess')}
+        description={t('admin.bookings.confirmation.description').replace('{{action}}', t('admin.status.delete').toLowerCase()).replace('{{extra}}', t('admin.bookings.confirmation.deleteExtra'))}
+        confirmText={t('admin.status.delete')}
         variant="destructive"
       />
     </div >

@@ -5,7 +5,13 @@
     "booking": "Booking",
     "login": "Login",
     "register": "Register",
-    "logout": "Logout"
+    "logout": "Logout",
+    "logoutConfirm": "Are you sure you want to log out?",
+    "logoutDescription": "Any unsaved changes might be lost. You will need to sign in again to access your dashboard.",
+    "admin": "Admin",
+    "activity": "Activity",
+    "administrator": "Administrator",
+    "client": "Client"
   },
   "home": {
     "heroTitle": "Best Car Rental in Kigali",
@@ -18,7 +24,30 @@
     "affordable": "Affordable Kigali Rates",
     "affordableDesc": "Transparent pricing for car hire in Rwanda with no hidden fees.",
     "support": "24/7 Rwanda Support",
-    "supportDesc": "Round-the-clock assistance for all your travel needs in Kigali and beyond."
+    "supportDesc": "Round-the-clock assistance for all your travel needs in Kigali and beyond.",
+    "badges": {
+      "available": "Fleet Available Now",
+      "instant": "Instant Confirmation"
+    },
+    "express": {
+      "title": "Express Access",
+      "subtitle": "Quick Reserve",
+      "planTitle": "Select Plan",
+      "planSub": "Choose Your Rate",
+      "fleetTitle": "Elite Fleet",
+      "fleetSub": "Pick A Vehicle",
+      "cta": "Start Reservation Now",
+      "guarantee": "Premium Service Guaranteed"
+    },
+    "about": {
+      "title": "Premium Car Rental Kigali & Rwanda Travel Services",
+      "text1": "Welcome to Smart Move Transport, your premier provider for car rental in Kigali. Whether you are a business traveler, a tourist on safari, or an expat living in Rwanda, we offer a specialized fleet to meet every need. From Kigali International Airport car rentals with instant pickup to long-term corporate leases, we ensure your mobility in the \"Land of a Thousand Hills\" is seamless and stylish.",
+      "text2": "Our Rwanda car hire services focus on reliability and safety. Every vehicle in our Kigali fleet—including rugged 4x4 Toyota Land Cruisers perfect for gorilla trekking in Volcanoes National Park—undergoes rigorous maintenance to guarantee a professional experience.",
+      "text3": "Looking for affordable car rental in Rwanda? We pride ourselves on transparent pricing with no hidden fees. Choose between self-drive freedom or the convenience of our chauffeur-driven services for city tours or cross-border travel.",
+      "service1": "Kigali Airport VIP Transfers (KGL)",
+      "service2": "4x4 Safari & Tour Vehicle Hire",
+      "service3": "Monthly & Long-term Corporate Rental"
+    }
   },
   "cars": {
     "title": "Rent a Car in Kigali - Our Fleet",
@@ -27,13 +56,18 @@
     "perDay": "/day",
     "perHour": "/hour",
     "perTrip": "/trip",
+    "startingFrom": "Starting from",
     "viewDetails": "View Details",
     "bookNow": "Book Now",
     "call": "Call",
     "whatsapp": "WhatsApp",
     "features": "Features",
     "pricing": "Pricing",
-    "description": "Description"
+    "description": "Description",
+    "seoTitle": "Best Car Rental Kigali - Our Premium Fleet",
+    "seoDescription": "Explore our diverse selection of car hire in Rwanda. From luxury SUVs for business to rugged 4x4s for safari, we provide the best Kigali car rental experience.",
+    "galleryTitle": "Vehicle Gallery",
+    "photos": "Photos"
   },
   "booking": {
     "title": "Book Your Ride",
@@ -53,7 +87,60 @@
     "previous": "Previous",
     "success": "Booking Confirmed!",
     "successMessage": "Your booking has been confirmed. We will contact you shortly.",
-    "offlineMessage": "You are offline. Your booking will be submitted when you reconnect."
+    "offlineMessage": "You are offline. Your booking will be submitted when you reconnect.",
+    "flowTitle": "Reservation Flow",
+    "steps": {
+      "selectCar": "Select Your Vehicle",
+      "clientInfo": "Personal Details",
+      "selectDateTime": "Schedule & Plan",
+      "confirm": "Final Confirmation"
+    },
+    "stepDesc": {
+      "selectCar": "Choose the perfect companion for your journey from our elite fleet.",
+      "clientInfo": "Provide your contact information for a seamless pickup coordination.",
+      "selectDateTime": "Fine-tune your booking duration and timing for maximum efficiency.",
+      "confirm": "Please verify your reservation details below before finalizing."
+    },
+    "labels": {
+      "name": "Full Name",
+      "phone": "Phone Number",
+      "email": "Email (Optional)",
+      "pickup": "Pickup Location",
+      "dropoff": "Dropoff Point",
+      "pricing": "Select A Pricing Architecture",
+      "date": "Date",
+      "time": "Departure Time",
+      "duration": "Duration"
+    },
+    "summary": {
+      "title": "Booking Summary",
+      "active": "Active Selection",
+      "financial": "Financial Architecture",
+      "finalAmount": "Final Amount",
+      "awaiting": "Awaiting Vehicle Selection",
+      "rate": "Standard Rate"
+    },
+    "status": {
+      "online": "Live Sync Status: Online",
+      "automatic": "Automatic"
+    },
+    "badges": {
+      "approval": "Instant Approval",
+      "secure": "Safe & Secure"
+    },
+    "support": {
+      "title": "Need Direct Support?"
+    },
+    "fetching": "Fetching excellence...",
+    "notFound": "Car not found",
+    "placeholders": {
+      "name": "E.g. John Doe",
+      "phone": "+250 788 123 456",
+      "email": "you@example.com",
+      "pickup": "Where to pick you up?",
+      "dropoff": "Final destination (optional)",
+      "selectTime": "Select Time..."
+    }
   },
   "auth": {
     "login": "Login",
@@ -70,7 +157,33 @@
     "hasAccount": "Already have an account?",
     "signUp": "Sign Up",
     "signIn": "Sign In",
-    "forgotPassword": "Forgot password?"
+    "forgotPassword": "Forgot password?",
+    "welcomeBack": "Welcome Back",
+    "loginSubtitle": "Enter your credentials to access your account",
+    "googleSignIn": "Sign in with Google",
+    "authenticating": "Authenticating...",
+    "orLoginWithEmail": "Or login with email",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "••••••••",
+    "createAccount": "Create Account",
+    "joinTitle": "Join Smart Move",
+    "joinSubtitle": "Get started with your premium journey",
+    "googleSignUp": "Continue with Google",
+    "connecting": "Connecting...",
+    "orSignUpWithMail": "Or continue with mail",
+    "signInHere": "Sign In here",
+    "welcomeBackTitle": "Welcome back!",
+    "redirectDashboard": "Redirecting to your dashboard.",
+    "loginSuccess": "Log in successful!",
+    "welcomeTitle": "Welcome!",
+    "accountReady": "Your account is ready.",
+    "passwordsNoMatch": "Passwords do not match",
+    "registerSuccess": "Account created! Please login.",
+    "pleaseWait": "Please wait...",
+    "creatingAccount": "Creating account...",
+    "joinElite": "Join the Elite",
+    "joinEliteDesc": "Experience the best transport services in Rwanda with Smart Move.",
+    "premiumTravel": "Premium travel experiences Redefined. Every trip is a statement of elegance."
   },
   "ai": {
     "title": "Smart Assistant",
@@ -81,6 +194,7 @@
   },
   "common": {
     "loading": "Loading...",
+    "systemSync": "System Sync",
     "error": "Error",
     "success": "Success",
     "close": "Close",
@@ -97,7 +211,13 @@
   },
   "offline": {
     "banner": "You are currently offline",
-    "pendingBookings": "Pending bookings will be submitted when you reconnect"
+    "pendingBookings": "Pending bookings will be submitted when you reconnect",
+    "actionSaved": "Action saved offline. It will sync automatically when you're back online.",
+    "syncing": "Uploading {{count}} updates...",
+    "syncSuccess": "System updated successfully!",
+    "partialSuccess": "Partial success. {{count}} updates pending.",
+    "connected": "Connected to system",
+    "enteringOffline": "Entering offline mode"
   },
   "contact": {
     "title": "Contact Us",
@@ -111,5 +231,326 @@
     "hours": "Working Hours",
     "hoursValue": "Mon – Sat: 6:00 AM – 9:00 PM",
     "successMessage": "Your message has been sent. We'll get back to you soon!"
+  },
+  "admin": {
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "delete": "Delete"
+    },
+    "dashboard": {
+      "title": "Overview",
+      "subtitle": "Monitor your business performance and manage fleet operations.",
+      "viewAllBookings": "View all bookings",
+      "addVehicle": "Add Vehicle",
+      "stats": {
+        "activeFleet": "Active Fleet",
+        "activeFleetSub": "Total vehicles",
+        "currentBookings": "Current Bookings",
+        "currentBookingsSub": "Reservations",
+        "grossRevenue": "Gross Revenue",
+        "grossRevenueSub": "Total earnings",
+        "monthlyExpenses": "Monthly Expenses",
+        "monthlyExpensesSub": "Operation costs",
+        "netProfit": "Net Profit",
+        "netProfitSub": "Total margin"
+      },
+      "financial": {
+        "title": "Financial Performance",
+        "subtitle": "Income and operation costs for the last few months.",
+        "income": "Income",
+        "expense": "Expense",
+        "noData": "No financial data recorded yet"
+      },
+      "recent": {
+        "title": "Recent Bookings",
+        "subtitle": "Latest client reservations this week.",
+        "noBookings": "No bookings found",
+        "viewFullHistory": "View full history"
+      }
+    },
+    "analytics": {
+      "title": "Business Intelligence",
+      "subtitle": "Deep dive into fleet profitability and resource allocation.",
+      "loading": "Compiling statistics...",
+      "topPerformer": "Monthly Top Performer",
+      "earnedMonth": "Earned RWF {{amount}} this month",
+      "mostProfitable": "Most Profitable Car",
+      "highMargin": "Highest net margin",
+      "highCost": "Highest Cost Vehicle",
+      "maintenanceReview": "Needs maintenance review",
+      "totalReservations": "Total Reservations",
+      "acrossModels": "Across all models",
+      "revenueGen": "Revenue Generation",
+      "incomeDistribution": "Income distribution across specific vehicle models.",
+      "awaitingData": "Awaiting reservation data...",
+      "costLoad": "Operational Cost Load",
+      "expenseDispersion": "Visualizing how expenses are dispersed among the fleet.",
+      "totalLoad": "Total Load",
+      "noExpenseData": "No expense distribution recorded"
+    },
+    "bookings": {
+      "title": "Bookings",
+      "subtitle": "Manage and track all client vehicle reservations.",
+      "registerTrip": "Register Trip",
+      "manualRegistration": "Manual Trip Registration",
+      "registrationDesc": "Enter client and trip details to secure a vehicle.",
+      "clientName": "Client Name",
+      "customerName": "Customer Full Name",
+      "phoneNumber": "Phone Number",
+      "selectVehicle": "Select Vehicle",
+      "chooseCar": "Choose car",
+      "pickupDate": "Pickup Date",
+      "tripTotal": "Trip Total (RWF)",
+      "pickupLocation": "Pickup Location",
+      "addressPlaceholder": "Address or Airport",
+      "completeRegistration": "Complete Registration",
+      "stats": {
+        "total": "Total Reservations",
+        "pending": "Pending Approval",
+        "completed": "Successful Trips"
+      },
+      "searchPlaceholder": "Search bookings...",
+      "allStatus": "All Status",
+      "table": {
+        "client": "Client Details",
+        "vehicle": "Vehicle",
+        "schedule": "Schedule",
+        "payment": "Payment",
+        "status": "Status",
+        "attendant": "Attendant",
+        "actions": "Actions"
+      },
+      "assignDriver": "Assign driver...",
+      "actions": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "finalize": "Finalize Trip",
+        "complete": "Mark Completed",
+        "viewDetails": "View Details",
+        "delete": "Delete Booking"
+      },
+      "noBookings": "No matching bookings found",
+      "clearFilters": "Clear filters",
+      "confirmation": {
+        "title": "{{label}} Booking",
+        "description": "Are you sure you want to {{action}} this booking? {{extra}}",
+        "deleteExtra": "This will permanently remove the record.",
+        "defaultExtra": "This action might be permanent."
+      },
+      "details": {
+        "title": "Reservation Details",
+        "close": "Close Details"
+      },
+      "toast": {
+        "fetchError": "Error fetching bookings",
+        "deleteSuccess": "Booking Deleted",
+        "statusUpdate": "Booking {{status}}",
+        "actionFailed": "Action failed",
+        "missingInfo": "Missing Info",
+        "fillRequired": "Please fill in client name, car, and date.",
+        "registerSuccess": "Booking Registered",
+        "tripConfirmed": "Trip for {{name}} confirmed.",
+        "registerFailed": "Registration failed",
+        "driverAssigned": "Driver assigned",
+        "assignFailed": "Assignment failed"
+      }
+    },
+    "cars": {
+      "title": "Cars",
+      "subtitle": "Manage and track all company vehicle assets.",
+      "addCar": "Add Car",
+      "manualAddition": "Manual Fleet Addition",
+      "additionDesc": "Enter vehicle specifications to expand your catalog.",
+      "carName": "Car Name",
+      "namePlaceholder": "e.g., Toyota Land Cruiser",
+      "modelYear": "Model Year",
+      "dailyRate": "Daily Rate (RWF)",
+      "seats": "Seats",
+      "transmission": "Transmission",
+      "fuelType": "Fuel Type",
+      "category": "Category",
+      "description": "Description",
+      "features": "Features (Comma separated)",
+      "featuresPlaceholder": "AC, GPS, 4x4...",
+      "imageUrl": "Add Image URL (Optional)",
+      "submit": "Submit New Vehicle",
+      "stats": {
+        "active": "Active Vehicles",
+        "maintenance": "Off-fleet/Maintenance"
+      },
+      "searchPlaceholder": "Search fleet...",
+      "perDay": "/day",
+      "actions": {
+        "edit": "Edit Vehicle",
+        "delete": "Delete Vehicle"
+      },
+      "noCars": "No vehicles found matching your criteria",
+      "toast": {
+        "fetchError": "Error fetching cars",
+        "deleteSuccess": "Car Deleted",
+        "addSuccess": "Car Added",
+        "addMessage": "{{name}} added to fleet.",
+        "addFailed": "Failed to add car"
+      },
+      "labels": {
+        "hourly": "Hourly (RWF)",
+        "trip": "Trip (RWF)",
+        "seating": "Seating Capacity",
+        "standardFeatures": "Standard Features",
+        "media": "Media & Photography",
+        "directUpload": "Direct Upload",
+        "externalUrl": "External URL",
+        "transferring": "Transferring image...",
+        "uploadPhotos": "Upload Gallery Photos",
+        "uploadLimits": "Select one or more (Max 5MB each)",
+        "main": "Main",
+        "noImage": "No Image"
+      },
+      "table": {
+        "info": "Vehicle Info",
+        "typeSpace": "Type & Space",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "placeholders": {
+        "type": "e.g. Premium SUV",
+        "description": "Write a brief overview of the vehicle specifications...",
+        "imageUrl": "https://external-storage.com/image.jpg"
+      }
+    },
+    "expenses": {
+      "title": "Expenses",
+      "subtitle": "Monitor operational costs and maintenance spending.",
+      "addExpense": "Add Expense",
+      "logNew": "Log a new business cost item.",
+      "distribution": "Vehicle Distribution",
+      "distributionDesc": "Expense allocation across fleet.",
+      "records": "Records",
+      "recordsDesc": "All operational costs logged.",
+      "labels": {
+        "description": "Description",
+        "descPlaceholder": "e.g., Oil Change",
+        "vehicle": "Vehicle (Optional)",
+        "amount": "Amount (RWF)",
+        "date": "Date",
+        "category": "Category"
+      },
+      "categories": {
+        "maintenance": "Maintenance",
+        "fuel": "Fuel",
+        "insurance": "Insurance",
+        "salary": "Salary",
+        "other": "Other"
+      },
+      "table": {
+        "item": "Item",
+        "vehicle": "Vehicle",
+        "date": "Date",
+        "amount": "Amount",
+        "category": "Category"
+      },
+      "toast": {
+        "fetchError": "Error fetching data",
+        "saveSuccess": "Expense saved",
+        "deleteSuccess": "Expense deleted",
+        "actionFailed": "Action failed"
+      }
+    },
+    "pricing": {
+      "title": "Pricing Architecture",
+      "subtitle": "Configure dynamic rates for different vehicle architectures.",
+      "newComponent": "New Component",
+      "addComponent": "Add a new pricing tier or service.",
+      "activeModels": "Active Pricing Models",
+      "modelsDesc": "Current rates applied to reservations.",
+      "placeholders": {
+        "location": "e.g. Kigali Airport",
+        "notes": "e.g. Weekend special rate..."
+      },
+      "labels": {
+        "name": "Component Name",
+        "namePlaceholder": "e.g., Luxury Daily",
+        "baseRate": "Base Rate (RWF)",
+        "unit": "Unit",
+        "category": "Category",
+        "description": "Description",
+        "location": "Origin / Destination (Optional)",
+        "notes": "Internal Notes",
+        "units": {
+          "hour": "Hourly Rate",
+          "day": "Daily Rate",
+          "trip": "Fixed Trip Cost",
+          "hourShort": "/ hour",
+          "dayShort": "/ day",
+          "tripShort": "/ trip"
+        },
+        "planTitle": "Plan Details",
+        "planSubtitle": "Plan Subtitle"
+      },
+      "toast": {
+        "fetchError": "Error fetching components",
+        "saveSuccess": "Component saved",
+        "deleteSuccess": "Component deleted"
+      }
+    },
+    "reports": {
+      "title": "Fleet Performance Reports",
+      "subtitle": "Generate detailed financial logs and vehicle profitability statements.",
+      "exportStatement": "Export Statement",
+      "more": "More",
+      "exportCompleted": "Export Completed Trips",
+      "exportFleet": "Export Fleet List",
+      "periodStart": "Reporting Period (Start)",
+      "periodEnd": "Reporting Period (End)",
+      "periodActive": "Period active",
+      "stats": {
+        "processed": "Reservations Processed",
+        "processedNote": "During selected dates",
+        "grossIncome": "Gross Period Income",
+        "grossIncomeNote": "Pre-expense total",
+        "netProfit": "Calculated Net Profit",
+        "netProfitNote": "After operational costs"
+      },
+      "matrix": {
+        "title": "Fleet Performance Matrix",
+        "subtitle": "Detailed profitability analysis per vehicle for the defined duration.",
+        "vehicle": "Vehicle Designation",
+        "income": "Generated Income",
+        "expenses": "Log Expenses",
+        "net": "Net Performance",
+        "loading": "Recalculating fleet metrics...",
+        "noData": "Insufficient data for this reporting window"
+      }
+    }
+  },
+  "footer": {
+    "desc": "Premium transportation services in Rwanda. We offer luxury car rentals, airport transfers, and professional chauffeur services for your every need.",
+    "newsletterTitle": "Newsletter",
+    "newsletterSub": "Subscribe to get latest updates and offers.",
+    "emailPlaceholder": "Your email address",
+    "spamNote": "* We hate spam as much as you do.",
+    "features": {
+      "payment": "Secure Payment",
+      "support": "24/7 Support",
+      "price": "Best Price",
+      "booking": "Fast Booking"
+    },
+    "appTitle": "Experience more with our mobile app",
+    "appleDownload": "Download on the",
+    "googleDownload": "GET IT ON",
+    "rights": "All rights reserved.",
+    "links": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "cookies": "Cookies Settings"
+    }
+  },
+  "notFound": {
+    "title": "Oops! Page not found",
+    "backHome": "Return to Home"
   }
 }

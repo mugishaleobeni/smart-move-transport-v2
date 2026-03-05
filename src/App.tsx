@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { LanguageProvider } from "@/i18n/LanguageContext";
+import { LanguageProvider, useLanguage } from "@/i18n/LanguageContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { lazy, Suspense } from "react";
@@ -31,11 +31,9 @@ const ExpensesManagement = lazy(() => import("./pages/admin/ExpensesManagement")
 const Analytics = lazy(() => import("./pages/admin/Analytics"));
 const Reports = lazy(() => import("./pages/admin/Reports"));
 
-
-
 const queryClient = new QueryClient();
 
-const Loading = () => (
+const Loading = ({ t }: { t: any }) => (
   <div className="flex items-center justify-center min-h-[400px]">
     <div className="flex flex-col items-center gap-4">
       <div className="w-16 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
@@ -49,11 +47,38 @@ const Loading = () => (
         />
       </div>
       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 animate-pulse">
-        System Sync
+        {t('common.systemSync')}
       </span>
     </div>
   </div>
 );
+
+const AppContent = () => {
+  const { t } = useLanguage();
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/cars" element={<Cars />} />
+      <Route path="/cars/:id" element={<CarDetails />} />
+      <Route path="/booking" element={<Booking />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route element={<ProtectedRoute adminOnly />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Suspense fallback={<Loading t={t} />}><Dashboard /></Suspense>} />
+          <Route path="cars" element={<Suspense fallback={<Loading t={t} />}><CarsManagement /></Suspense>} />
+          <Route path="pricing" element={<Suspense fallback={<Loading t={t} />}><PricingManagement /></Suspense>} />
+          <Route path="bookings" element={<Suspense fallback={<Loading t={t} />}><BookingsManagement /></Suspense>} />
+          <Route path="expenses" element={<Suspense fallback={<Loading t={t} />}><ExpensesManagement /></Suspense>} />
+          <Route path="analytics" element={<Suspense fallback={<Loading t={t} />}><Analytics /></Suspense>} />
+          <Route path="reports" element={<Suspense fallback={<Loading t={t} />}><Reports /></Suspense>} />
+        </Route>
+      </Route>
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -67,27 +92,7 @@ const App = () => (
               <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                 <NavProgressBar />
                 <ScrollToTop />
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/cars" element={<Cars />} />
-                  <Route path="/cars/:id" element={<CarDetails />} />
-                  <Route path="/booking" element={<Booking />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route element={<ProtectedRoute adminOnly />}>
-                    <Route path="/admin" element={<AdminLayout />}>
-                      <Route index element={<Suspense fallback={<Loading />}><Dashboard /></Suspense>} />
-                      <Route path="cars" element={<Suspense fallback={<Loading />}><CarsManagement /></Suspense>} />
-                      <Route path="pricing" element={<Suspense fallback={<Loading />}><PricingManagement /></Suspense>} />
-                      <Route path="bookings" element={<Suspense fallback={<Loading />}><BookingsManagement /></Suspense>} />
-                      <Route path="expenses" element={<Suspense fallback={<Loading />}><ExpensesManagement /></Suspense>} />
-                      <Route path="analytics" element={<Suspense fallback={<Loading />}><Analytics /></Suspense>} />
-                      <Route path="reports" element={<Suspense fallback={<Loading />}><Reports /></Suspense>} />
-                    </Route>
-                  </Route>
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
+                <AppContent />
                 <NetworkStatusIndicator />
               </BrowserRouter>
             </TooltipProvider>

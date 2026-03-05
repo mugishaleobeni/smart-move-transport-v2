@@ -54,10 +54,10 @@ export default function Login() {
     setLoading(true);
     try {
       await signInWithGoogle();
-      toast({ title: 'Welcome back!', description: 'Redirecting to your dashboard.' });
+      toast({ title: t('auth.welcomeBackTitle'), description: t('auth.redirectDashboard') });
       navigate('/admin');
     } catch (error: any) {
-      toast({ title: 'Login failed', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -68,11 +68,11 @@ export default function Login() {
     setLoading(true);
     try {
       await loginManual({ email, password });
-      toast({ title: 'Success', description: 'Log in successful!' });
+      toast({ title: t('common.success'), description: t('auth.loginSuccess') });
       navigate('/admin');
     } catch (error: any) {
       toast({
-        title: 'Login failed',
+        title: t('common.error'),
         description: error.response?.data?.error || 'Invalid credentials',
         variant: 'destructive'
       });
@@ -93,9 +93,9 @@ export default function Login() {
             {/* Left Side: Form */}
             <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center overflow-y-auto">
               <div className="mb-8">
-                <h1 className="text-3xl font-black mb-2 tracking-tight">Welcome Back</h1>
+                <h1 className="text-3xl font-black mb-2 tracking-tight">{t('auth.welcomeBack')}</h1>
                 <p className="text-muted-foreground font-medium">
-                  Enter your credentials to access your account
+                  {t('auth.loginSubtitle')}
                 </p>
               </div>
 
@@ -108,7 +108,7 @@ export default function Login() {
                   disabled={loading}
                 >
                   <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
-                  {loading ? 'Authenticating...' : 'Sign in with Google'}
+                  {loading ? t('auth.authenticating') : t('auth.googleSignIn')}
                 </Button>
 
                 <div className="relative">
@@ -116,13 +116,13 @@ export default function Login() {
                     <span className="w-full border-t border-zinc-100 dark:border-zinc-800"></span>
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-4 text-muted-foreground font-bold tracking-widest relative z-10">Or login with email</span>
+                    <span className="bg-background px-4 text-muted-foreground font-bold tracking-widest relative z-10">{t('auth.orLoginWithEmail')}</span>
                   </div>
                 </div>
 
                 <form onSubmit={handleManualLogin} className="space-y-4">
                   <div>
-                    <Label htmlFor="email" className="font-bold text-xs uppercase tracking-widest text-zinc-500 mb-2 block">Email Address</Label>
+                    <Label htmlFor="email" className="font-bold text-xs uppercase tracking-widest text-zinc-500 mb-2 block">{t('auth.email')}</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                       <Input
@@ -131,14 +131,14 @@ export default function Login() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="pl-10 h-12 bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800 focus:ring-accent"
-                        placeholder="you@example.com"
+                        placeholder={t('auth.emailPlaceholder')}
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="password" title="Password" className="font-bold text-xs uppercase tracking-widest text-zinc-500 mb-2 block">Password</Label>
+                    <Label htmlFor="password" title="Password" className="font-bold text-xs uppercase tracking-widest text-zinc-500 mb-2 block">{t('auth.password')}</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                       <Input
@@ -147,7 +147,7 @@ export default function Login() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="pl-10 pr-10 h-12 bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800 focus:ring-accent"
-                        placeholder="••••••••"
+                        placeholder={t('auth.passwordPlaceholder')}
                         required
                       />
                       <button
@@ -161,15 +161,15 @@ export default function Login() {
                   </div>
 
                   <Button type="submit" size="lg" className="w-full btn-accent text-accent-foreground h-12 font-black uppercase tracking-widest text-xs shadow-lg shadow-accent/20" disabled={loading}>
-                    {loading ? 'Please wait...' : 'Sign In'}
+                    {loading ? t('auth.pleaseWait') : t('auth.signIn')}
                   </Button>
                 </form>
 
                 <div className="text-center pt-2">
                   <p className="text-sm text-muted-foreground">
-                    Don't have an account?{' '}
+                    {t('auth.noAccount')}{' '}
                     <button onClick={() => navigate('/register')} className="text-accent font-black hover:underline tracking-tight">
-                      Create Account
+                      {t('auth.createAccount')}
                     </button>
                   </p>
                 </div>
@@ -188,7 +188,7 @@ export default function Login() {
               <div className="absolute bottom-12 left-12 right-12 text-white z-10">
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
                   <h3 className="text-4xl font-black mb-4 uppercase tracking-tighter leading-none">Smart<span className="text-accent">Move</span></h3>
-                  <p className="text-lg text-white/80 font-medium italic">Premium travel experiences Redefined. Every trip is a statement of elegance.</p>
+                  <p className="text-lg text-white/80 font-medium italic">{t('auth.premiumTravel')}</p>
                 </motion.div>
               </div>
             </div>

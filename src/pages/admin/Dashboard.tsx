@@ -14,6 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { carsApi, bookingsApi, expensesApi } from '@/lib/api';
+import { useLanguage } from '@/i18n/LanguageContext';
 import {
   AreaChart,
   Area,
@@ -46,6 +47,7 @@ interface RecentBooking {
 }
 
 export default function Dashboard() {
+  const { t } = useLanguage();
   const [stats, setStats] = useState<Stats>({ totalCars: 0, totalBookings: 0, totalIncome: 0, totalExpenses: 0 });
   const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
@@ -169,36 +171,36 @@ export default function Dashboard() {
 
   const statCards = [
     {
-      title: 'Active Fleet',
-      subtitle: 'Total vehicles',
+      title: t('admin.dashboard.stats.activeFleet'),
+      subtitle: t('admin.dashboard.stats.activeFleetSub'),
       value: stats.totalCars,
       icon: Car,
       color: 'bg-blue-500/10 text-blue-600',
     },
     {
-      title: 'Current Bookings',
-      subtitle: 'Reservations',
+      title: t('admin.dashboard.stats.currentBookings'),
+      subtitle: t('admin.dashboard.stats.currentBookingsSub'),
       value: stats.totalBookings,
       icon: CalendarCheck,
       color: 'bg-amber-500/10 text-amber-600',
     },
     {
-      title: 'Gross Revenue',
-      subtitle: 'Total earnings',
+      title: t('admin.dashboard.stats.grossRevenue'),
+      subtitle: t('admin.dashboard.stats.grossRevenueSub'),
       value: `RWF ${stats.totalIncome.toLocaleString()}`,
       icon: Banknote,
       color: 'bg-emerald-500/10 text-emerald-600',
     },
     {
-      title: 'Monthly Expenses',
-      subtitle: 'Operation costs',
+      title: t('admin.dashboard.stats.monthlyExpenses'),
+      subtitle: t('admin.dashboard.stats.monthlyExpensesSub'),
       value: `RWF ${stats.totalExpenses.toLocaleString()}`,
       icon: Receipt,
       color: 'bg-rose-500/10 text-rose-600',
     },
     {
-      title: 'Net Profit',
-      subtitle: 'Total margin',
+      title: t('admin.dashboard.stats.netProfit'),
+      subtitle: t('admin.dashboard.stats.netProfitSub'),
       value: `RWF ${(stats.totalIncome - stats.totalExpenses).toLocaleString()}`,
       icon: TrendingUp,
       color: 'bg-indigo-500/10 text-indigo-600',
@@ -206,11 +208,11 @@ export default function Dashboard() {
   ];
 
   const statusMap: Record<string, { label: string; color: string }> = {
-    pending: { label: 'Pending', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
-    approved: { label: 'Approved', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-    rejected: { label: 'Rejected', color: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' },
-    completed: { label: 'Completed', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-    cancelled: { label: 'Cancelled', color: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400' },
+    pending: { label: t('admin.status.pending'), color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+    approved: { label: t('admin.status.approved'), color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+    rejected: { label: t('admin.status.rejected'), color: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' },
+    completed: { label: t('admin.status.completed'), color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+    cancelled: { label: t('admin.status.cancelled'), color: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400' },
   };
 
   // Removed full-page loading to allow partial skeleton loading
@@ -219,16 +221,16 @@ export default function Dashboard() {
     <div className="space-y-8 pb-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
-          <p className="text-muted-foreground">Monitor your business performance and manage fleet operations.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('admin.dashboard.title')}</h1>
+          <p className="text-muted-foreground">{t('admin.dashboard.subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           <Link to="/admin/bookings">
-            <Button variant="outline" className="hidden sm:flex">View all bookings</Button>
+            <Button variant="outline" className="hidden sm:flex">{t('admin.dashboard.viewAllBookings')}</Button>
           </Link>
           <Link to="/admin/cars">
             <Button className="gap-2">
-              <Plus className="w-4 h-4" /> Add Vehicle
+              <Plus className="w-4 h-4" /> {t('admin.dashboard.addVehicle')}
             </Button>
           </Link>
         </div>
@@ -278,17 +280,17 @@ export default function Dashboard() {
           <CardHeader className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-lg">Financial Performance</CardTitle>
-                <CardDescription>Income and operation costs for the last few months.</CardDescription>
+                <CardTitle className="text-lg">{t('admin.dashboard.financial.title')}</CardTitle>
+                <CardDescription>{t('admin.dashboard.financial.subtitle')}</CardDescription>
               </div>
               <div className="flex gap-4">
                 <div className="flex items-center gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                  <span className="text-xs font-medium">Income</span>
+                  <span className="text-xs font-medium">{t('admin.dashboard.financial.income')}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                  <span className="text-xs font-medium">Expense</span>
+                  <span className="text-xs font-medium">{t('admin.dashboard.financial.expense')}</span>
                 </div>
               </div>
             </div>
@@ -351,7 +353,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="h-[300px] flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-xl">
-                No financial data recorded yet
+                {t('admin.dashboard.financial.noData')}
               </div>
             )}
           </CardContent>
@@ -359,8 +361,8 @@ export default function Dashboard() {
 
         <Card className="border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 h-full flex flex-col overflow-hidden">
           <CardHeader className="bg-zinc-50/50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800">
-            <CardTitle className="text-lg text-black dark:text-white">Recent Bookings</CardTitle>
-            <CardDescription>Latest client reservations this week.</CardDescription>
+            <CardTitle className="text-lg text-black dark:text-white">{t('admin.dashboard.recent.title')}</CardTitle>
+            <CardDescription>{t('admin.dashboard.recent.subtitle')}</CardDescription>
           </CardHeader>
           <CardContent className="p-4 flex-1">
             <div className="space-y-4">
@@ -384,7 +386,7 @@ export default function Dashboard() {
                 <>
                   {recentBookings.length === 0 ? (
                     <div className="py-12 text-center text-sm text-muted-foreground italic">
-                      No bookings found
+                      {t('admin.dashboard.recent.noBookings')}
                     </div>
                   ) : (
                     recentBookings.map((b) => (
@@ -413,7 +415,7 @@ export default function Dashboard() {
             {!loading && recentBookings.length > 0 && (
               <Link to="/admin/bookings" className="block mt-6">
                 <Button variant="ghost" className="w-full text-xs text-primary font-bold hover:bg-primary/5">
-                  View full history
+                  {t('admin.dashboard.recent.viewFullHistory')}
                 </Button>
               </Link>
             )}

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import api from '@/lib/api';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 interface QueuedAction {
     id: string;
@@ -29,6 +30,7 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
     const [queue, setQueue] = useState<QueuedAction[]>([]);
     const [syncing, setSyncing] = useState(false);
     const [isBannerDismissed, setIsBannerDismissed] = useState(false);
+    const { t } = useLanguage();
 
     // Load queue from localStorage on mount
     useEffect(() => {
@@ -50,7 +52,7 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
             const timer = setTimeout(() => {
                 console.log('Online detected, auto-syncing queue...');
                 syncQueue();
-                setBannerDismissed(false); // Show status during sync
+                setIsBannerDismissed(false); // Show status during sync
             }, 3000);
             return () => clearTimeout(timer);
         }
@@ -63,16 +65,16 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
             timestamp: Date.now(),
         };
         setQueue((prev) => [...prev, newAction]);
-        toast.info("Action saved offline. It will sync automatically when you're back online.", {
+        toast.info(t('offline.actionSaved'), {
             description: `${action.method} ${action.url.split('/').pop()}`,
         });
-    }, []);
+    }, [t]);
 
     const syncQueue = useCallback(async () => {
         if (queue.length === 0 || syncing || !navigator.onLine) return;
 
         setSyncing(true);
-        const toastId = toast.loading(`Uploading ${queue.length} updates...`);
+        const toastId = toast.loading(t('offline.syncing').replace('{{count}}', String(queue.length)));
 
         const updatedQueue = [...queue];
         const failedActions: QueuedAction[] = [];
@@ -102,23 +104,23 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
         toast.dismiss(toastId);
 
         if (failedActions.length === 0) {
-            toast.success("System updated successfully!");
+            toast.success(t('offline.syncSuccess'));
         } else if (failedActions.length < updatedQueue.length) {
-            toast.error(`Partial success. ${failedActions.length} updates pending.`);
+            toast.error(t('offline.partialSuccess').replace('{{count}}', String(failedActions.length)));
         }
-    }, [queue, syncing]);
+    }, [queue, syncing, t]);
 
     useEffect(() => {
         const handleOnline = () => {
             setIsOnline(true);
             setIsBannerDismissed(false); // Reset dismissal on reconnect
-            toast.success("Connected to system");
+            toast.success(t('offline.connected'));
             // Automatic sync removed as requested
         };
         const handleOffline = () => {
             setIsOnline(false);
             setIsBannerDismissed(false); // Show banner when going offline
-            toast.error("Entering offline mode");
+            toast.error(t('offline.enteringOffline'));
         };
 
         window.addEventListener('online', handleOnline);

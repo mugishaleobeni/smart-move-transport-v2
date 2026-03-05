@@ -110,21 +110,21 @@ export function Navbar() {
                       {user.name || user.email?.split('@')[0]}
                     </span>
                     <span className="text-[10px] text-muted-foreground leading-none">
-                      {isAdmin ? 'Administrator' : 'Client'}
+                      {isAdmin ? t('nav.administrator') : t('nav.client')}
                     </span>
                   </div>
                   {isAdmin ? (
                     <Link to="/admin">
                       <Button variant="ghost" size="sm" className="gap-1 h-9 px-3">
                         <Shield className="w-4 h-4 text-accent" />
-                        <span className="hidden lg:inline">Dashboard</span>
+                        <span className="hidden lg:inline">{t('nav.admin')}</span>
                       </Button>
                     </Link>
                   ) : (
                     <Link to="/booking">
                       <Button variant="ghost" size="sm" className="gap-1 h-9 px-3">
                         <Calendar className="w-4 h-4 text-accent" />
-                        <span className="hidden lg:inline">My Activity</span>
+                        <span className="hidden lg:inline">{t('nav.activity')}</span>
                       </Button>
                     </Link>
                   )}
@@ -220,7 +220,7 @@ export function Navbar() {
                     />
                   )}
                   <Shield className="w-5 h-5 text-accent" />
-                  <span className="text-[10px] font-medium text-accent leading-none">Admin</span>
+                  <span className="text-[10px] font-medium text-accent leading-none">{t('nav.admin')}</span>
                 </Link>
               ) : (
                 <Link
@@ -235,7 +235,7 @@ export function Navbar() {
                     />
                   )}
                   <Calendar className="w-5 h-5 text-accent" />
-                  <span className="text-[10px] font-medium text-accent leading-none">Activity</span>
+                  <span className="text-[10px] font-medium text-accent leading-none">{t('nav.activity')}</span>
                 </Link>
               )}
               <button
@@ -280,18 +280,18 @@ export function Navbar() {
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
         <AlertDialogContent className="glass-strong border-accent/20">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-bold">Are you sure you want to log out?</AlertDialogTitle>
+            <AlertDialogTitle className="text-xl font-bold">{t('nav.logoutConfirm')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Any unsaved changes might be lost. You will need to sign in again to access your dashboard.
+              {t('nav.logoutDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-6 gap-3">
-            <AlertDialogCancel className="border-border hover:bg-zinc-100">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="border-border hover:bg-zinc-100">{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleSignOut}
               className="bg-rose-500 hover:bg-rose-600 text-white border-none"
             >
-              Log Out
+              {t('nav.logout')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

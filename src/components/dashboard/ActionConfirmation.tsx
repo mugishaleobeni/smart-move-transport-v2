@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Trash2, X } from 'lucide-react';
+import { useLanguage } from '@/i18n/LanguageContext';
 import { cn } from '@/lib/utils';
 
 interface ActionConfirmationProps {
@@ -22,11 +23,14 @@ export const ActionConfirmation = ({
     onConfirm,
     title,
     description,
-    confirmText = "Confirm",
-    cancelText = "Cancel",
+    confirmText,
+    cancelText,
     variant = 'destructive',
     icon
 }: ActionConfirmationProps) => {
+    const { t } = useLanguage();
+    const finalConfirmText = confirmText || t('common.save');
+    const finalCancelText = cancelText || t('common.cancel');
     return (
         <AnimatePresence>
             {isOpen && (
@@ -97,7 +101,7 @@ export const ActionConfirmation = ({
                                         onClick={onClose}
                                         className="flex-1 h-12 rounded-2xl font-bold bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300 transition-all active:scale-95"
                                     >
-                                        {cancelText}
+                                        {finalCancelText}
                                     </Button>
                                     <Button
                                         variant={variant === 'destructive' ? 'destructive' : 'default'}
@@ -110,7 +114,7 @@ export const ActionConfirmation = ({
                                             variant === 'destructive' ? "shadow-rose-500/20" : "shadow-primary/20"
                                         )}
                                     >
-                                        {confirmText}
+                                        {finalConfirmText}
                                     </Button>
                                 </div>
                             </div>

@@ -16,6 +16,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
+import { useLanguage } from '@/i18n/LanguageContext';
 import {
   TrendingUp,
   AlertTriangle,
@@ -38,6 +39,7 @@ const COLORS = [
 ];
 
 export default function Analytics() {
+  const { t } = useLanguage();
   const [incomePerCar, setIncomePerCar] = useState<any[]>([]);
   const [expensePerCar, setExpensePerCar] = useState<any[]>([]);
   const [insights, setInsights] = useState({
@@ -120,7 +122,7 @@ export default function Analytics() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-pulse flex flex-col items-center gap-2">
           <Zap className="w-8 h-8 text-primary shadow-lg shadow-primary/20" />
-          <p className="text-sm font-semibold text-zinc-400">Compiling statistics...</p>
+          <p className="text-sm font-semibold text-zinc-400">{t('admin.analytics.loading')}</p>
         </div>
       </div>
     );
@@ -130,23 +132,23 @@ export default function Analytics() {
     <div className="space-y-8 pb-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Business Intelligence</h1>
-          <p className="text-slate-500 dark:text-zinc-400">Deep dive into fleet profitability and resource allocation.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t('admin.analytics.title')}</h1>
+          <p className="text-slate-500 dark:text-zinc-400">{t('admin.analytics.subtitle')}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
           {
-            label: 'Monthly Top Performer',
+            label: t('admin.analytics.topPerformer'),
             value: insights.monthlyBest.name,
             icon: Zap,
             color: 'text-amber-600 bg-amber-50',
-            sub: `Earned RWF ${insights.monthlyBest.amount.toLocaleString()} this month`
+            sub: t('admin.analytics.earnedMonth').replace('{{amount}}', insights.monthlyBest.amount.toLocaleString())
           },
-          { label: 'Most Profitable Car', value: insights.mostProfitable, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50', sub: 'Highest net margin' },
-          { label: 'Highest Cost Vehicle', value: insights.highestCost, icon: AlertTriangle, color: 'text-rose-600 bg-rose-50', sub: 'Needs maintenance review' },
-          { label: 'Total Reservations', value: insights.totalBookings, icon: Briefcase, color: 'text-blue-600 bg-blue-50', sub: 'Across all models' },
+          { label: t('admin.analytics.mostProfitable'), value: insights.mostProfitable, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50', sub: t('admin.analytics.highMargin') },
+          { label: t('admin.analytics.highCost'), value: insights.highestCost, icon: AlertTriangle, color: 'text-rose-600 bg-rose-50', sub: t('admin.analytics.maintenanceReview') },
+          { label: t('admin.analytics.totalReservations'), value: insights.totalBookings, icon: Briefcase, color: 'text-blue-600 bg-blue-50', sub: t('admin.analytics.acrossModels') },
         ].map((item, i) => (
           <Card key={i} className="border-none card-premium overflow-hidden group hover:ring-primary/20 transition-all">
             <CardContent className="p-6">
@@ -173,9 +175,9 @@ export default function Analytics() {
           <CardHeader className="bg-zinc-50/50 dark:bg-zinc-800/20 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-primary" />
-              <CardTitle className="text-lg">Revenue Generation</CardTitle>
+              <CardTitle className="text-lg">{t('admin.analytics.revenueGen')}</CardTitle>
             </div>
-            <CardDescription>Income distribution across specific vehicle models.</CardDescription>
+            <CardDescription>{t('admin.analytics.incomeDistribution')}</CardDescription>
           </CardHeader>
           <CardContent className="p-6">
             {incomePerCar.length > 0 ? (
@@ -232,7 +234,7 @@ export default function Analytics() {
               </div>
             ) : (
               <div className="h-[300px] flex items-center justify-center text-zinc-400 border border-dashed rounded-xl border-zinc-200">
-                Awaiting reservation data...
+                {t('admin.analytics.awaitingData')}
               </div>
             )}
           </CardContent>
@@ -242,9 +244,9 @@ export default function Analytics() {
           <CardHeader className="bg-zinc-50/50 dark:bg-zinc-800/20 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2">
               <PieChartIcon className="w-4 h-4 text-primary" />
-              <CardTitle className="text-lg">Operational Cost Load</CardTitle>
+              <CardTitle className="text-lg">{t('admin.analytics.costLoad')}</CardTitle>
             </div>
-            <CardDescription>Visualizing how expenses are dispersed among the fleet.</CardDescription>
+            <CardDescription>{t('admin.analytics.expenseDispersion')}</CardDescription>
           </CardHeader>
           <CardContent className="p-6">
             {expensePerCar.length > 0 ? (
@@ -303,7 +305,7 @@ export default function Analytics() {
                 </ResponsiveContainer>
                 {/* Central Statistics */}
                 <div className="absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-                  <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">Total Load</p>
+                  <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">{t('admin.analytics.totalLoad')}</p>
                   <p className="text-xl font-black text-slate-900 dark:text-white">
                     {Math.round(expensePerCar.reduce((s, e) => s + e.value, 0) / 1000)}k
                   </p>
@@ -311,7 +313,7 @@ export default function Analytics() {
               </div>
             ) : (
               <div className="h-[300px] flex items-center justify-center text-zinc-400 border border-dashed rounded-xl border-zinc-200">
-                No expense distribution recorded
+                {t('admin.analytics.noExpenseData')}
               </div>
             )}
           </CardContent>

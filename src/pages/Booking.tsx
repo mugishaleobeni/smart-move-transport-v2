@@ -233,9 +233,9 @@ export default function Booking() {
             {/* Left Column: Form Steps */}
             <div className="lg:col-span-7 xl:col-span-8 space-y-8">
               <header className="space-y-4">
-                <span className="text-accent font-black text-[10px] uppercase tracking-[0.3em]">Reservation Flow</span>
+                <span className="text-accent font-black text-[10px] uppercase tracking-[0.3em]">{t('booking.flowTitle')}</span>
                 <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">
-                  Book Your <span className="text-accent">Premium</span> Move
+                  {t('booking.title')}
                 </h1>
               </header>
 
@@ -268,14 +268,14 @@ export default function Booking() {
                     {step === 0 && (
                       <div className="space-y-8">
                         <div>
-                          <h2 className="text-2xl font-black uppercase tracking-tight mb-2">Select Your Vehicle</h2>
-                          <p className="text-muted-foreground text-sm">Choose the perfect companion for your journey from our elite fleet.</p>
+                          <h2 className="text-2xl font-black uppercase tracking-tight mb-2">{t('booking.steps.selectCar')}</h2>
+                          <p className="text-muted-foreground text-sm">{t('booking.stepDesc.selectCar')}</p>
                         </div>
 
                         {loadingCars ? (
                           <div className="py-24 flex flex-col items-center justify-center gap-4">
                             <div className="w-12 h-12 border-4 border-accent/20 border-t-accent rounded-full animate-spin" />
-                            <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground animate-pulse">Initializing Fleet...</p>
+                            <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground animate-pulse">{t('booking.fetching')}</p>
                           </div>
                         ) : (
                           <div className="grid sm:grid-cols-2 gap-4">
@@ -308,7 +308,7 @@ export default function Booking() {
                                   <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">
                                     <span className="flex items-center gap-1"><User className="w-3 h-3" /> {car.seats} Seats</span>
                                     <span className="w-1 h-1 bg-muted-foreground/30 rounded-full" />
-                                    <span>Automatic</span>
+                                    <span>{t('booking.status.automatic')}</span>
                                   </div>
                                 </div>
                                 {booking.carId === (car._id || car.id) && (
@@ -325,26 +325,26 @@ export default function Booking() {
                     {step === 1 && (
                       <div className="space-y-8">
                         <div>
-                          <h2 className="text-2xl font-black uppercase tracking-tight mb-2">Personal Details</h2>
-                          <p className="text-muted-foreground text-sm">Provide your contact information for a seamless pickup coordination.</p>
+                          <h2 className="text-2xl font-black uppercase tracking-tight mb-2">{t('booking.steps.clientInfo')}</h2>
+                          <p className="text-muted-foreground text-sm">{t('booking.stepDesc.clientInfo')}</p>
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-8">
                           <div className="space-y-2">
-                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Full Name</Label>
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">{t('booking.labels.name')}</Label>
                             <div className="relative group">
                               <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
                               <Input
                                 value={booking.clientName}
                                 onChange={(e) => setBooking({ ...booking, clientName: e.target.value })}
                                 className="h-14 pl-12 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold shadow-inner"
-                                placeholder="E.g. John Doe"
+                                placeholder={t('booking.placeholders.name')}
                                 required
                               />
                             </div>
                           </div>
                           <div className="space-y-2">
-                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Phone Number</Label>
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">{t('booking.labels.phone')}</Label>
                             <div className="relative group">
                               <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
                               <Input
@@ -352,13 +352,13 @@ export default function Booking() {
                                 value={booking.clientPhone}
                                 onChange={(e) => setBooking({ ...booking, clientPhone: e.target.value })}
                                 className="h-14 pl-12 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold shadow-inner"
-                                placeholder="+250 788 123 456"
+                                placeholder={t('booking.placeholders.phone')}
                                 required
                               />
                             </div>
                           </div>
                           <div className="md:col-span-2 space-y-2">
-                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Email (Optional)</Label>
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">{t('booking.labels.email')}</Label>
                             <div className="relative group">
                               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
                               <Input
@@ -366,32 +366,32 @@ export default function Booking() {
                                 value={booking.clientEmail}
                                 onChange={(e) => setBooking({ ...booking, clientEmail: e.target.value })}
                                 className="h-14 pl-12 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold shadow-inner"
-                                placeholder="you@example.com"
+                                placeholder={t('booking.placeholders.email')}
                               />
                             </div>
                           </div>
                           <div className="space-y-2">
-                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Pickup Location</Label>
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">{t('booking.labels.pickup')}</Label>
                             <div className="relative group">
                               <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
                               <Input
                                 value={booking.pickupLocation}
                                 onChange={(e) => setBooking({ ...booking, pickupLocation: e.target.value })}
                                 className="h-14 pl-12 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold shadow-inner"
-                                placeholder="Where to pick you up?"
+                                placeholder={t('booking.placeholders.pickup')}
                                 required
                               />
                             </div>
                           </div>
                           <div className="space-y-2">
-                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Dropoff Point</Label>
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">{t('booking.labels.dropoff')}</Label>
                             <div className="relative group">
                               <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
                               <Input
                                 value={booking.dropoffLocation}
                                 onChange={(e) => setBooking({ ...booking, dropoffLocation: e.target.value })}
                                 className="h-14 pl-12 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold shadow-inner"
-                                placeholder="Final destination (optional)"
+                                placeholder={t('booking.placeholders.dropoff')}
                                 required
                               />
                             </div>
@@ -404,12 +404,12 @@ export default function Booking() {
                     {step === 2 && (
                       <div className="space-y-8">
                         <div>
-                          <h2 className="text-2xl font-black uppercase tracking-tight mb-2">Schedule & Plan</h2>
-                          <p className="text-muted-foreground text-sm">Fine-tune your booking duration and timing for maximum efficiency.</p>
+                          <h2 className="text-2xl font-black uppercase tracking-tight mb-2">{t('booking.steps.selectDateTime')}</h2>
+                          <p className="text-muted-foreground text-sm">{t('booking.stepDesc.selectDateTime')}</p>
                         </div>
 
                         <div className="space-y-4">
-                          <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Select A Pricing Architecture</Label>
+                          <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">{t('booking.labels.pricing')}</Label>
                           <div className="grid grid-cols-3 gap-4">
                             {(['hour', 'day', 'trip'] as PricingPlan[]).map((plan) => (
                               <button
@@ -441,7 +441,7 @@ export default function Booking() {
 
                         <div className="grid md:grid-cols-2 gap-8 pt-4">
                           <div className="space-y-2">
-                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Date</Label>
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">{t('booking.labels.date')}</Label>
                             <Popover>
                               <PopoverTrigger asChild>
                                 <Button variant="outline" className="w-full h-14 rounded-xl justify-start bg-zinc-50 dark:bg-zinc-800 border-border/50 group hover:border-accent transition-all">
@@ -455,10 +455,10 @@ export default function Booking() {
                             </Popover>
                           </div>
                           <div className="space-y-2">
-                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">Departure Time</Label>
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">{t('booking.labels.time')}</Label>
                             <Select value={booking.time} onValueChange={(time) => setBooking({ ...booking, time })}>
                               <SelectTrigger className="h-14 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:ring-0 focus:border-accent font-bold text-sm">
-                                <SelectValue placeholder="Select Time..." />
+                                <SelectValue placeholder={t('booking.placeholders.selectTime')} />
                               </SelectTrigger>
                               <SelectContent className="rounded-xl border-border/50 max-h-[300px]">
                                 {Array.from({ length: 24 }, (_, i) => {
@@ -472,7 +472,7 @@ export default function Booking() {
 
                         <div className="space-y-4 pt-4 border-t border-border/30">
                           <div className="flex justify-between items-center px-1">
-                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">Duration ({getDurationLabel()})</Label>
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">{t('booking.labels.duration')} ({getDurationLabel()})</Label>
                             <span className="text-xl font-black text-accent">{booking.duration}</span>
                           </div>
                           <Input
@@ -495,8 +495,8 @@ export default function Booking() {
                     {step === 3 && selectedCarData && (
                       <div className="space-y-8">
                         <div>
-                          <h2 className="text-2xl font-black uppercase tracking-tight mb-2">Final Confirmation</h2>
-                          <p className="text-muted-foreground text-sm">Please verify your reservation details below before finalizing.</p>
+                          <h2 className="text-2xl font-black uppercase tracking-tight mb-2">{t('booking.steps.confirm')}</h2>
+                          <p className="text-muted-foreground text-sm">{t('booking.stepDesc.confirm')}</p>
                         </div>
 
                         <div className="space-y-6">
@@ -512,12 +512,12 @@ export default function Booking() {
 
                           <div className="grid grid-cols-2 gap-4">
                             <div className="p-5 bg-white dark:bg-zinc-900 border border-border/30 rounded-2xl">
-                              <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest mb-1 block">Client Identity</span>
+                              <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest mb-1 block">{t('booking.summary.active')}</span>
                               <p className="font-black text-sm uppercase">{booking.clientName}</p>
                               <p className="text-[10px] text-muted-foreground">{booking.clientPhone}</p>
                             </div>
                             <div className="p-5 bg-white dark:bg-zinc-900 border border-border/30 rounded-2xl">
-                              <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest mb-1 block">Logistics Info</span>
+                              <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest mb-1 block">{t('booking.summary.financial')}</span>
                               <p className="font-black text-sm uppercase truncate">{booking.pickupLocation}</p>
                               <p className="text-[10px] text-muted-foreground">{booking.date ? format(booking.date, 'MMM dd, yyyy') : '-'} @ {booking.time}</p>
                             </div>
@@ -529,7 +529,7 @@ export default function Booking() {
                             </div>
                             <div className="flex justify-between items-end relative z-10">
                               <div className="space-y-1">
-                                <span className="text-[8px] font-black uppercase text-accent tracking-[0.3em]">Estimated Total</span>
+                                <span className="text-[8px] font-black uppercase text-accent tracking-[0.3em]">{t('booking.priceEstimate')}</span>
                                 <div className="text-xs font-bold text-muted-foreground uppercase">{booking.duration} {getDurationLabel()} × {getPlanLabel(booking.pricingPlan)}</div>
                               </div>
                               <div className="text-5xl font-black tracking-tighter text-accent">
@@ -563,11 +563,11 @@ export default function Booking() {
                       >
                         {submitting ? (
                           <span className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 animate-spin" /> Finalizing...
+                            <Clock className="w-4 h-4 animate-spin" /> {t('common.loading')}
                           </span>
                         ) : (
                           <span className="flex items-center gap-2">
-                            {step === STEPS.length - 1 ? 'Confirm Reservation' : 'Secure Next Step'}
+                            {step === STEPS.length - 1 ? t('booking.confirm') : t('booking.next')}
                             {step === STEPS.length - 1 ? <Check className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                           </span>
                         )}
@@ -587,8 +587,8 @@ export default function Booking() {
                       <Shield className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-black uppercase tracking-widest">Booking Summary</h3>
-                      <p className="text-[9px] text-accent font-bold uppercase tracking-widest">Live Sync Status: Online</p>
+                      <h3 className="text-sm font-black uppercase tracking-widest">{t('booking.summary.title')}</h3>
+                      <p className="text-[9px] text-accent font-bold uppercase tracking-widest">{t('booking.status.online')}</p>
                     </div>
                   </div>
                 </div>
@@ -596,7 +596,7 @@ export default function Booking() {
                 <div className="p-8 space-y-8">
                   {/* Selected Vehicle Card */}
                   <div className="space-y-4">
-                    <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest block px-1">Active Selection</span>
+                    <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest block px-1">{t('booking.summary.active')}</span>
                     {selectedCarData ? (
                       <div className="group relative rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-border/50 p-4 flex gap-4">
                         <div className="w-24 aspect-video rounded-lg overflow-hidden shrink-0 shadow-md">
@@ -609,17 +609,17 @@ export default function Booking() {
                       </div>
                     ) : (
                       <div className="h-20 rounded-2xl border-2 border-dashed border-border/50 flex items-center justify-center p-6 text-center">
-                        <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Awaiting Vehicle Selection</p>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block w-full mb-1">{t('cars.startingFrom')}</span>
                       </div>
                     )}
                   </div>
 
                   {/* Pricing Breakdown */}
                   <div className="space-y-6">
-                    <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest block px-1">Financial Architecture</span>
+                    <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest block px-1">{t('booking.summary.financial')}</span>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center text-xs font-bold uppercase">
-                        <span className="text-muted-foreground">Standard Rate</span>
+                        <span className="text-muted-foreground">{t('booking.summary.rate')}</span>
                         <span>RWF {selectedCarData ? (booking.pricingPlan === 'hour' ? selectedCarData.price_per_hour : booking.pricingPlan === 'day' ? selectedCarData.price_per_day : selectedCarData.price_per_trip) : '0'}</span>
                       </div>
                       <div className="flex justify-between items-center text-xs font-bold uppercase">
@@ -627,7 +627,7 @@ export default function Booking() {
                         <span className="text-accent underline underline-offset-4 decoration-2">×{booking.duration}</span>
                       </div>
                       <div className="pt-4 mt-4 border-t border-border/30 flex justify-between items-end">
-                        <span className="text-[10px] font-black uppercase text-foreground tracking-widest">Final Amount</span>
+                        <span className="text-[10px] font-black uppercase text-foreground tracking-widest">{t('booking.summary.finalAmount')}</span>
                         <span className="text-3xl font-black tracking-tighter text-foreground">RWF {calculatePrice()}</span>
                       </div>
                     </div>
@@ -637,11 +637,11 @@ export default function Booking() {
                   <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border/30">
                     <div className="flex items-center gap-2 p-3 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
                       <Check className="w-4 h-4 text-emerald-500" />
-                      <span className="text-[8px] font-black uppercase tracking-tighter">Instant Approval</span>
+                      <span className="text-[8px] font-black uppercase tracking-tighter">{t('booking.badges.approval')}</span>
                     </div>
                     <div className="flex items-center gap-2 p-3 bg-zinc-50 dark:bg-zinc-900 rounded-xl">
                       <Shield className="w-4 h-4 text-accent" />
-                      <span className="text-[8px] font-black uppercase tracking-tighter">Safe & Secure</span>
+                      <span className="text-[8px] font-black uppercase tracking-tighter">{t('booking.badges.secure')}</span>
                     </div>
                   </div>
                 </div>
@@ -653,8 +653,8 @@ export default function Booking() {
                   <Phone className="w-5 h-5 text-accent" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-black uppercase tracking-widest">Need Direct Support?</h4>
-                  <p className="text-[10px] opacity-70 font-bold">+250 788 000 000</p>
+                  <h4 className="text-xs font-black uppercase tracking-widest">{t('booking.support.title')}</h4>
+                  <p className="text-[10px] opacity-70 font-bold">+250 788 123 456</p>
                 </div>
                 <ChevronRight className="w-4 h-4 ml-auto opacity-50" />
               </div>

@@ -58,10 +58,10 @@ export default function Register() {
     setLoading(true);
     try {
       await signInWithGoogle();
-      toast({ title: 'Welcome!', description: 'Your account is ready.' });
+      toast({ title: t('auth.welcomeTitle'), description: t('auth.accountReady') });
       navigate('/admin');
     } catch (error: any) {
-      toast({ title: 'Auth failed', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -70,7 +70,7 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.password !== form.confirmPassword) {
-      toast({ title: 'Error', description: 'Passwords do not match', variant: 'destructive' });
+      toast({ title: t('common.error'), description: t('auth.passwordsNoMatch'), variant: 'destructive' });
       return;
     }
 
@@ -82,11 +82,11 @@ export default function Register() {
         phone: form.phone,
         password: form.password
       });
-      toast({ title: 'Success', description: 'Account created! Please login.' });
+      toast({ title: t('common.success'), description: t('auth.registerSuccess') });
       navigate('/login');
     } catch (error: any) {
       toast({
-        title: 'Registration failed',
+        title: t('common.error'),
         description: error.response?.data?.error || error.message,
         variant: 'destructive'
       });
@@ -108,9 +108,9 @@ export default function Register() {
               {/* Left Side: Form */}
               <div className="p-8 md:p-12 h-full overflow-y-auto max-h-[85vh]">
                 <div className="mb-8">
-                  <h1 className="text-3xl font-bold mb-2">Join Smart Move</h1>
+                  <h1 className="text-3xl font-bold mb-2">{t('auth.joinTitle')}</h1>
                   <p className="text-muted-foreground">
-                    Get started with your premium journey
+                    {t('auth.joinSubtitle')}
                   </p>
                 </div>
 
@@ -131,7 +131,7 @@ export default function Register() {
                       <span className="w-full border-t border-zinc-200"></span>
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-background px-4 text-muted-foreground font-bold tracking-widest relative z-10">Or continue with mail</span>
+                      <span className="bg-background px-4 text-muted-foreground font-bold tracking-widest relative z-10">{t('auth.orSignUpWithMail')}</span>
                     </div>
                   </div>
 
@@ -145,7 +145,7 @@ export default function Register() {
                           value={form.fullName}
                           onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                           className="pl-10 h-12 bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800 focus:ring-accent"
-                          placeholder="John Doe"
+                          placeholder={t('auth.fullName')}
                           required
                         />
                       </div>
@@ -161,7 +161,7 @@ export default function Register() {
                           value={form.email}
                           onChange={(e) => setForm({ ...form, email: e.target.value })}
                           className="pl-10 h-12 bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800 focus:ring-accent"
-                          placeholder="you@example.com"
+                          placeholder={t('auth.emailPlaceholder')}
                           required
                         />
                       </div>
@@ -177,7 +177,7 @@ export default function Register() {
                           value={form.phone}
                           onChange={(e) => setForm({ ...form, phone: e.target.value })}
                           className="pl-10 h-12 bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800 focus:ring-accent"
-                          placeholder="+250 788 123 456"
+                          placeholder={t('auth.phone')}
                         />
                       </div>
                     </div>
@@ -192,7 +192,7 @@ export default function Register() {
                           value={form.password}
                           onChange={(e) => setForm({ ...form, password: e.target.value })}
                           className="pl-10 pr-10 h-12"
-                          placeholder="••••••••"
+                          placeholder={t('auth.passwordPlaceholder')}
                           required
                         />
                         <button
@@ -215,22 +215,22 @@ export default function Register() {
                           value={form.confirmPassword}
                           onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
                           className="pl-10 pr-10 h-12"
-                          placeholder="••••••••"
+                          placeholder={t('auth.passwordPlaceholder')}
                           required
                         />
                       </div>
                     </div>
 
                     <Button type="submit" size="lg" className="w-full btn-accent text-accent-foreground h-12 font-bold" disabled={loading}>
-                      {loading ? 'Creating account...' : t('auth.signUp')}
+                      {loading ? t('auth.creatingAccount') : t('auth.signUp')}
                     </Button>
                   </form>
 
                   <div className="text-center pt-2">
                     <p className="text-sm text-muted-foreground">
-                      Already have an account?{' '}
+                      {t('auth.hasAccount')}{' '}
                       <button onClick={() => navigate('/login')} className="text-accent font-bold hover:underline">
-                        Sign In here
+                        {t('auth.signInHere')}
                       </button>
                     </p>
                   </div>
@@ -246,8 +246,8 @@ export default function Register() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-l from-transparent to-black/30" />
                 <div className="absolute bottom-8 left-8 right-8 text-white">
-                  <h3 className="text-2xl font-bold mb-2">Join the Elite</h3>
-                  <p className="text-white/80">Experience the best transport services in Rwanda with Smart Move.</p>
+                  <h3 className="text-2xl font-bold mb-2">{t('auth.joinElite')}</h3>
+                  <p className="text-white/80">{t('auth.joinEliteDesc')}</p>
                 </div>
               </div>
             </div>

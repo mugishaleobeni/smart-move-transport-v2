@@ -1,115 +1,530 @@
 {
-  "nav": {
-    "home": "Ahabanza",
-    "cars": "Imodoka",
-    "booking": "Gufata",
-    "login": "Kwinjira",
-    "register": "Kwiyandikisha",
-    "logout": "Gusohoka"
-  },
-  "home": {
-    "heroTitle": "Gukodesha Imodoka Nziza",
-    "heroSubtitle": "Koresha imodoka nziza hamwe na Smart Move Transport",
-    "bookNow": "Fata Nonaha",
-    "viewCars": "Reba Imodoka",
-    "whyChooseUs": "Kubera Iki Uduhitamo",
-    "premium": "Imodoka Nziza",
-    "premiumDesc": "Imodoka zubatse neza zitunganyirizwa neza cyane",
-    "affordable": "Igiciro Cyiza",
-    "affordableDesc": "Ibiciro byiza bitagira amafaranga yahishwe",
-    "support": "Ubufasha 24/7",
-    "supportDesc": "Ubufasha buhoraho ku bintu byose ukeneye"
-  },
-  "cars": {
-    "title": "Imodoka Zacu",
-    "subtitle": "Hitamo muri imodoka zacu nziza",
-    "seats": "intebe",
-    "perDay": "/umunsi",
-    "perHour": "/isaha",
-    "perTrip": "/urugendo",
-    "viewDetails": "Reba Byinshi",
-    "bookNow": "Fata Nonaha",
-    "call": "Hamagara",
-    "whatsapp": "WhatsApp",
-    "features": "Ibiranga",
-    "pricing": "Ibiciro",
-    "description": "Ibisobanuro"
-  },
-  "booking": {
-    "title": "Fata Urugendo",
-    "selectCar": "Hitamo Imodoka",
-    "enterLocation": "Andika Ahantu",
-    "pickupLocation": "Aho Uzafatira",
-    "dropoffLocation": "Aho Uzamanikira",
-    "selectDateTime": "Hitamo Itariki n'Isaha",
-    "date": "Itariki",
-    "time": "Isaha",
-    "duration": "Igihe",
-    "hours": "amasaha",
-    "priceEstimate": "Igiciro Giteganijwe",
-    "total": "Igiteranyo",
-    "confirm": "Emeza Gufata",
-    "next": "Komeza",
-    "previous": "Subira Inyuma",
-    "success": "Gufata Byemejwe!",
-    "successMessage": "Gufata kwawe kwemejwe. Tuzaguhamagara vuba.",
-    "offlineMessage": "Uri offline. Gufata kwawe kuzashyirwa igihe uzongera guhuza."
-  },
-  "auth": {
-    "login": "Kwinjira",
-    "register": "Kwiyandikisha",
-    "email": "Imeli",
-    "phone": "Telefone",
-    "password": "Ijambo Banga",
-    "confirmPassword": "Emeza Ijambo Banga",
-    "fullName": "Amazina Yose",
-    "username": "Izina ry'Ukoresha",
-    "orContinueWith": "Cyangwa Komeza na",
-    "google": "Google",
-    "noAccount": "Nta konti ufite?",
-    "hasAccount": "Ufite konti?",
-    "signUp": "Iyandikishe",
-    "signIn": "Injira",
-    "forgotPassword": "Wibagiwe ijambo banga?"
-  },
-  "ai": {
-    "title": "Umufasha wa Smart",
-    "placeholder": "Mbaza ikintu cyose ku gufata...",
-    "greeting": "Muraho! Ndi umufasha wa Smart Move. Nshobora kugufasha iki uyu munsi?",
-    "offline": "Uri offline. Nzagaruka iyo uzongera guhuza.",
-    "error": "Hari ikintu kitagenze neza. Ongera ugerageze."
-  },
-  "common": {
-    "loading": "Birimo gutegereza...",
-    "error": "Ikosa",
-    "success": "Byagenze neza",
-    "close": "Funga",
-    "submit": "Ohereza",
-    "cancel": "Hagarika",
-    "save": "Bika",
-    "delete": "Siba",
-    "edit": "Hindura",
-    "back": "Subira",
-    "language": "Ururimi",
-    "theme": "Isura",
-    "dark": "Umwijima",
-    "light": "Urumuri"
-  },
-  "offline": {
-    "banner": "Uri offline ubu",
-    "pendingBookings": "Gufata gutegereje kuzashyirwa iyo uzongera guhuza"
-  },
-  "contact": {
-    "title": "Twandikire",
-    "subtitle": "Ufite ikibazo cyangwa ushaka gufata imodoka? Twandikire tuzagusubiza vuba.",
-    "sendMessage": "Twohereze Ubutumwa",
-    "message": "Ubutumwa",
-    "info": "Amakuru y'Ikigo",
-    "phone": "Telefone",
-    "email": "Imeli",
-    "address": "Aderesi",
-    "hours": "Amasaha y'Akazi",
-    "hoursValue": "Kuwa Mbere – Kuwa Gatandatu: 6:00 – 21:00",
-    "successMessage": "Ubutumwa bwawe bwoherejwe. Tuzagusubiza vuba!"
-  }
+    "nav": {
+        "home": "Ahabanza",
+        "cars": "Imodoka",
+        "booking": "Gukodesha",
+        "login": "Kwinjira",
+        "register": "Kwiyandikisha",
+        "logout": "Gusohoka",
+        "logoutConfirm": "Ese urashaka gusohoka koko?",
+        "logoutDescription": "Ibyo waba wahinduye bishobora gutakara. Bizasaba ko wongera kwinjira kugira ngo ugera kuri dashboard yawe.",
+        "admin": "Ubuyobozi",
+        "activity": "Ibikorwa",
+        "administrator": "Umuyobozi",
+        "client": "Umukiriya"
+    },
+    "home": {
+        "heroTitle": "Uburyo Bwiza bwo Gukodesha Imodoka i Kigali",
+        "heroSubtitle": "Inamo imodoka zigezweho kandi zihenze make mu Rwanda hamwe na Smart Move Transport. Umufatanyabikorwa wizewe mu kugeza abantu ku kibuga cy'indege i Kigali no gukodesha imodoka za 4x4.",
+        "bookNow": "Kodesha ubu",
+        "viewCars": "Reba Imodoka Zihari",
+        "whyChooseUs": "Kuki Wahitamo Gukodesha Imodoka Natwe i Kigali?",
+        "premium": "Imodoka Zigezweho mu Rwanda",
+        "premiumDesc": "Imodoka zo mu bwoko bwa 4x4, SUV, n'izindi nziza cyane zikurikiranwa neza ubutitsa.",
+        "affordable": "Ibiciro Birahendutse i Kigali",
+        "affordableDesc": "Dufite ibiciro bisobanutse mu gukodesha imodoka mu Rwanda nta yandi mafaranga yihishe.",
+        "support": "Ubufasha bwa 24/7 mu Rwanda",
+        "supportDesc": "Ubufasha bw'isaha n'isaha ku byerekeye ingendo zawe zose i Kigali no mu bice binyuranye.",
+        "badges": {
+            "available": "Imodoka Zihari ubu",
+            "instant": "Kwemeza Ako Kanya"
+        },
+        "express": {
+            "title": "Gukodesha Byihuse",
+            "subtitle": "Kodesha ubu",
+            "planTitle": "Hitamo Gahunda",
+            "planSub": "Hitamo Igiciro",
+            "fleetTitle": "Imodoka Zigezweho",
+            "fleetSub": "Hitamo Imodoka",
+            "cta": "Tangira Gukodesha ubu",
+            "guarantee": "Serivisi nziza iremewe"
+        },
+        "about": {
+            "title": "Gukodesha Imodoka i Kigali & Serivisi z'Ingendo mu Rwanda",
+            "text1": "Ikaze kuri Smart Move Transport, mu gutanga serivisi zo gukodesha imodoka i Kigali. Waba uri umucuruzi waje mu rugendo, uri mukerarugendo waje gusura, cyangwa uri umunyamahanga utuye mu Rwanda, dufite imodoka hihariye zihura n'ibyo ukeneye byose. Guhera ku gukodesha imodoka ku Kibuga cy'Indege Mpuzamahanga cya Kigali kugeza ku gukodesha imodoka igihe kirekire ku bigo, twizera ko kugenda kwawe mu \"Gihugu cy'Imisozi Igihumbi\" biba bworoshye kandi bifite ishema.",
+            "text2": "Serivisi zacu zo gukodesha imodoka mu Rwanda zibanda ku kwizirwa no mutekano. Buri modoka mu zacu i Kigali—harimo na Toyota Land Cruiser zikomeye zibereye gusura ingagi muri Pariki y'Igihugu y'Ibirunga—zikanika neza kugira ngo ubone serivisi inoze.",
+            "text3": "Ese urashaka gukodesha imodoka mu Rwanda ku giciro kiringaniye? Twishimira ko ibiciro byacu bisobanutse kandi nta mafaranga yihishemo. Hitamo kwitwara cyangwa gukoresha abashoferi bacu bazobereye mu ngendo zo mu mugi cyangwa izambukiranya imipaka.",
+            "service1": "Serivisi za VIP ku Kibuga cy'indege cya Kigali (KGL)",
+            "service2": "Gukodesha imodoka za 4x4 zo gusura n'ubukerarugendo",
+            "service3": "Gukodesha imodoka igihe kirekire ku bigo"
+        }
+    },
+    "cars": {
+        "title": "Kodesha Imodoka i Kigali - Imodoka Zacu",
+        "subtitle": "Hitamo mu modoka zacu zigezweho za 4x4 n'izindi nziza ku rugendo rwawe mu Rwanda.",
+        "seats": "imyanya",
+        "perDay": "/ku munsi",
+        "perHour": "/ku isaha",
+        "perTrip": "/ku rugendo",
+        "viewDetails": "Reba Ibisobanuro",
+        "bookNow": "Kodesha ubu",
+        "call": "Hamagara",
+        "whatsapp": "WhatsApp",
+        "features": "Ibiranga imodoka",
+        "pricing": "Ibiciro",
+        "description": "Ibisobanuro",
+        "seoTitle": "Gukodesha Imodoka i Kigali - Imodoka Zacu",
+        "seoDescription": "Hitamo mu modoka zacu zinyuranye dukodesha mu Rwanda. Kuva ku modoka zigezweho z'ubucuruzi kugeza kuri 4x4 zikomeye, duguha serivisi nziza i Kigali.",
+        "galleryTitle": "Amafoto y'Imodoka",
+        "photos": "Amafoto"
+    },
+    "booking": {
+        "title": "Kodesha Urugendo Rwawe",
+        "selectCar": "Hitamo Imodoka",
+        "enterLocation": "Andika aho uherereye",
+        "pickupLocation": "Aho ufatira imodoka",
+        "dropoffLocation": "Aho uzasiga imodoka",
+        "selectDateTime": "Hitamo Itariki n'Isaha",
+        "date": "Itariki",
+        "time": "Isaha",
+        "duration": "Igihe",
+        "hours": "amasaha",
+        "priceEstimate": "Igereranya ry'Igiciro",
+        "total": "Igiteranyo",
+        "confirm": "Emeza Gukodesha",
+        "next": "Kurikira",
+        "previous": "Banaza",
+        "success": "Gukodesha Kwemejwe!",
+        "successMessage": "Gukodesha kwawe kwemejwe. Tuzakuvugisha vuba aha.",
+        "offlineMessage": "Nta internet ufite. Gukodesha kwawe kuzoherezwa niba internet igarutse.",
+        "flowTitle": "Uburyo bwo Gukodesha",
+        "steps": {
+            "selectCar": "Hitamo Imodoka Yawe",
+            "clientInfo": "Ibiranga Umukiriya",
+            "selectDateTime": "Gahunda n'Igihe",
+            "confirm": "Kwemeza kwa Nyuma"
+        },
+        "stepDesc": {
+            "selectCar": "Hitamo imodoka ikubereye mu modoka zacu zigezweho.",
+            "clientInfo": "Andika amakuru yawe kugira ngo tugufashe kubona imodoka byoroshye.",
+            "selectDateTime": "Hitamo igihe n'amasaha ushaka gukodesha.",
+            "confirm": "Nyamuneka reba neza amakuru yawe mbere yo kwemeza."
+        },
+        "labels": {
+            "name": "Amazina Hanze",
+            "phone": "Nomero ya Terefone",
+            "email": "Imeri (Niba uyifite)",
+            "pickup": "Aho bagufatira",
+            "dropoff": "Aho bagugeza",
+            "pricing": "Hitamo uburyo bwo kwishyura",
+            "date": "Itariki",
+            "time": "Isaha yo guhaguruka",
+            "duration": "Igihe"
+        },
+        "summary": {
+            "title": "Incamake yo Gukodesha",
+            "active": "Ibyahiswemo",
+            "financial": "Uburyo bwo Kwishyura",
+            "awaiting": "Gutegereza guhitamo imodoka",
+            "rate": "Igiciro Gisanzwe"
+        },
+        "badges": {
+            "approval": "Kwemeza Ako Kanya",
+            "secure": "Mwebwe mufite umutekano"
+        },
+        "support": {
+            "title": "Ukeneye Ubufasha Budatunganye?"
+        },
+        "fetching": "Turacyashaka ibyiza...",
+        "notFound": "Imodoka ntiyabonetse",
+        "placeholders": {
+            "name": "Urugero: John Doe",
+            "phone": "+250 788 123 456",
+            "email": "you@example.com",
+            "pickup": "Aho tugusanga?",
+            "dropoff": "Aho uzasoreza (bidategetswe)",
+            "selectTime": "Hitamo igihe..."
+        }
+    },
+    "auth": {
+        "login": "Kwinjira",
+        "register": "Kwiyandikisha",
+        "email": "Imeri",
+        "phone": "Terefone",
+        "password": "Ijambo ry'ibanga",
+        "confirmPassword": "Subiramo ijambo ry'ibanga",
+        "fullName": "Amazina yose",
+        "username": "Izina ryo kwinjira",
+        "orContinueWith": "Cyangwa ukomeze ukoresheje",
+        "google": "Google",
+        "noAccount": "Nta konti ufite?",
+        "hasAccount": "Usanzwe ufite konti?",
+        "signUp": "Iyandikishe",
+        "signIn": "Injira",
+        "forgotPassword": "Wibagiye ijambo ry'ibanga?",
+        "welcomeBack": "Ikaze nanone",
+        "loginSubtitle": "Andika umwirondoro wawe kugira ngo winjire",
+        "googleSignIn": "Injira ukoresheje Google",
+        "authenticating": "Gushaka umwirondoro...",
+        "orLoginWithEmail": "Cyangwa winjire ukoresheje imeri",
+        "emailPlaceholder": "izina@rugero.com",
+        "passwordPlaceholder": "••••••••",
+        "createAccount": "Fungura Konti",
+        "joinTitle": "Injira muri Smart Move",
+        "joinSubtitle": "Tangira urugendo rwawe rwiza natwe",
+        "googleSignUp": "Komeza ukoresheje Google",
+        "connecting": "Guhuza...",
+        "orSignUpWithMail": "Cyangwa ukomeje ukoresheje imeri",
+        "signInHere": "Injira hano",
+        "welcomeBackTitle": "Ikaze nanone!",
+        "redirectDashboard": "Turimo kukujyana kuri dashboard yawe.",
+        "loginSuccess": "Winjiye neza!",
+        "welcomeTitle": "Ikaze!",
+        "accountReady": "Konti yawe yiteguye.",
+        "passwordsNoMatch": "Amagambo y'ibanga ntahura",
+        "registerSuccess": "Konti yafunguwe! Nyamuneka injira.",
+        "pleaseWait": "Nyamuneka tegereza...",
+        "creatingAccount": "Turimo gufungura konti...",
+        "joinElite": "Injira mu batoranyijwe",
+        "joinEliteDesc": "Gira ibihe byiza by'ingendo mu Rwanda hamwe na Smart Move.",
+        "premiumTravel": "Ingendo nziza zisobanutse. Buri rugendo ni ikimenyetso cy'icyubahiro."
+    },
+    "ai": {
+        "title": "Umufasha Wubwenge",
+        "placeholder": "Mbaza ikintu cyose cyerekeranye no gukodesha...",
+        "greeting": "Muraho! Ndi umufasha wa Smart Move. Nagufasha nte uyu munsi?",
+        "offline": "Nta internet ufite. Nzakugarukira niba internet igarutse.",
+        "error": "Hari ikintu kigende nabi. Nyamuneka ongera ugerageze."
+    },
+    "common": {
+        "loading": "Biracyashaka...",
+        "systemSync": "Guhuza amakuru",
+        "error": "Ikosa",
+        "success": "Byagenze neza",
+        "close": "Funga",
+        "submit": "Ohereza",
+        "cancel": "Reka",
+        "save": "Bika",
+        "delete": "Siba",
+        "edit": "Hindura",
+        "back": "Subira inyuma",
+        "language": "Ururimi",
+        "theme": "Uburyo bugaragara",
+        "dark": "Mwijima",
+        "light": "Mweru"
+    },
+    "offline": {
+        "banner": "Nta internet ufite ubu",
+        "pendingBookings": "Gukodesha kwawe kuzoherezwa niba internet igarutse",
+        "actionSaved": "Igikorwa cyabitswe kuko nta internet ufite. Bizoherezwa niba internet igarutse.",
+        "syncing": "Turimo kohereza impinduka {{count}}...",
+        "syncSuccess": "Imashini yujujwe neza!",
+        "partialSuccess": "Byagenze gato. Impinduka {{count}} ziracyategereja.",
+        "connected": "Wongeye guhura na sisitemu",
+        "enteringOffline": "Ubu nta internet ufite"
+    },
+    "contact": {
+        "title": "Twandikire",
+        "subtitle": "Ufite ikibazo cyangwa urashaka gukodesha? Twandikire natwe tuzagusubiza vuba.",
+        "sendMessage": "Tuhe Ubutumwa",
+        "message": "Ubutumwa",
+        "info": "Amakuru y'Ubucuruzi",
+        "phone": "Terefone",
+        "email": "Imeri",
+        "address": "Aho dukorera",
+        "hours": "Amasaha y'akazi",
+        "hoursValue": "Mbere – Gatandatu: 6:00 AM – 9:00 PM",
+        "successMessage": "Ubutumwa bwawe bwoherejwe. Tuzagusubiza vuba!"
+    },
+    "admin": {
+        "status": {
+            "pending": "Bitegerejwe",
+            "approved": "Byemejwe",
+            "rejected": "Byanzwe",
+            "completed": "Byarangiye",
+            "cancelled": "Byasheshwe",
+            "delete": "Siba"
+        },
+        "dashboard": {
+            "title": "Incamake",
+            "subtitle": "Kurikirana imikorere y'ubucuruzi bwawe n'imicungire y'imodoka.",
+            "viewAllBookings": "Reba gukodesha kose",
+            "addVehicle": "Ongeramo Imodoka",
+            "stats": {
+                "activeFleet": "Imodoka Zihari",
+                "activeFleetSub": "Igiteranyo cy'imodoka",
+                "currentBookings": "Gukodesha gukorwa",
+                "currentBookingsSub": "Abategerejwe",
+                "grossRevenue": "Ayinjiye Yose",
+                "grossRevenueSub": "Igiteranyo cyose",
+                "monthlyExpenses": "Ayasohotse uyu kwezi",
+                "monthlyExpensesSub": "Ayakoreshejwe",
+                "netProfit": "Inyungu",
+                "netProfitSub": "Inyungu yose"
+            },
+            "financial": {
+                "title": "Imikorere y'Imari",
+                "subtitle": "Ayinjiye n'ayasohotse mu mezi ashize.",
+                "income": "Ayinjiye",
+                "expense": "Ayasohotse",
+                "noData": "Nta makuru y'imari araboneka"
+            },
+            "recent": {
+                "title": "Gukodesha vuba aha",
+                "subtitle": "Gukodesha kwaherutse gukorwa uyu munsi.",
+                "noBookings": "Nta gukodesha kwabonetse",
+                "viewFullHistory": "Reba amateka yose"
+            }
+        },
+        "analytics": {
+            "title": "Isesengurabikorwa",
+            "subtitle": "Reba neza inyungu n'imikoreshereze y'umutungo.",
+            "loading": "Gukusanya imibare...",
+            "topPerformer": "Iyitwaye neza uyu kwezi",
+            "earnedMonth": "Yinjije RWF {{amount}} uyu kwezi",
+            "mostProfitable": "Imodoka itanga inyungu nyinshi",
+            "highMargin": "Inyungu nyayo iri hejuru",
+            "highCost": "Imodoka isohora menshi",
+            "maintenanceReview": "Ikwiye gusuzumwa",
+            "totalReservations": "Gukodesha kwose",
+            "acrossModels": "Mu modoka zose",
+            "revenueGen": "Uburyo amafaranga yinjira",
+            "incomeDistribution": "Ikwirakwizwa ry'amafaranga mu modoka zinyuranye.",
+            "awaitingData": "Gutegereza amakuru...",
+            "costLoad": "Ibiguzi by'imirimo",
+            "expenseDispersion": "Reba uburyo amafaranga asohoka akoreshwa mu modoka.",
+            "totalLoad": "Igiteranyo cyose",
+            "noExpenseData": "Nta makuru y'ayasohotse araboneka"
+        },
+        "bookings": {
+            "title": "Gukodesha",
+            "subtitle": "Cunga kandi ukurikire gukodesha kwose kw'abakiriya.",
+            "registerTrip": "Andika Urugendo",
+            "manualRegistration": "Kwiyandikisha k'Urugendo",
+            "registrationDesc": "Andika amakuru y'umukiriya n'urugendo.",
+            "clientName": "Izina ry'Umukiriya",
+            "customerName": "Amazina yose y'Umukiriya",
+            "phoneNumber": "Nomero ya Terefone",
+            "selectVehicle": "Hitamo Imodoka",
+            "chooseCar": "Hitamo imodoka",
+            "pickupDate": "Itariki yo gufata",
+            "tripTotal": "Igiteranyo (RWF)",
+            "pickupLocation": "Aho ufatira imodoka",
+            "addressPlaceholder": "Aho uherereye cyangwa ku Kibuga cy'indege",
+            "completeRegistration": "Andika neza",
+            "stats": {
+                "total": "Gukodesha Kwose",
+                "pending": "Bitegereje Kwemezwa",
+                "completed": "Ingendo Zarangiye"
+            },
+            "searchPlaceholder": "Shakisha...",
+            "allStatus": "Ibyiciro byose",
+            "table": {
+                "client": "Amakuru y'Umukiriya",
+                "vehicle": "Imodoka",
+                "schedule": "Gahunda",
+                "payment": "Kwambura",
+                "status": "Imiterere",
+                "attendant": "Umuyobozi",
+                "actions": "Ibikorwa"
+            },
+            "assignDriver": "Gena umushoferi...",
+            "actions": {
+                "approve": "Emeza",
+                "reject": "Siba",
+                "finalize": "Andika urangiye",
+                "complete": "Byarangiye",
+                "viewDetails": "Reba amakuru",
+                "delete": "Siba gukodesha"
+            },
+            "noBookings": "Nta gukodesha kwabonetse",
+            "clearFilters": "Kuraho ibyo wahisemo",
+            "confirmation": {
+                "title": "{{label}} Gukodesha",
+                "description": "Ese urashaka koko guhindura ubu buryo bwo {{action}}? {{extra}}",
+                "deleteExtra": "Ibi bizasiba burundu aya makuru.",
+                "defaultExtra": "Ibi bishobora guhinduka burundu."
+            },
+            "details": {
+                "title": "Andi makuru y'urugendo",
+                "close": "Funga amakuru"
+            },
+            "toast": {
+                "fetchError": "Habaye ikosa mu gushaka amakuru",
+                "deleteSuccess": "Gukodesha kwasibye",
+                "statusUpdate": "Gukodesha ubu kuri {{status}}",
+                "actionFailed": "Igikorwa ntiyashobotse",
+                "missingInfo": "Amakuru manke",
+                "fillRequired": "Nyamuneka andika izina ry'umukiriya, imodoka n'itariki.",
+                "registerSuccess": "Urugendo rwanditswe",
+                "tripConfirmed": "Urugendo rwa {{name}} rwemezwe.",
+                "registerFailed": "Kwiyandikisha ntiyashobotse",
+                "driverAssigned": "Umushoferi yagenwe",
+                "assignFailed": "Kugena umushoferi ntiyashobotse"
+            }
+        },
+        "cars": {
+            "title": "Imodoka",
+            "subtitle": "Cunga kandi ukurikire imodoka zose z'ikigo.",
+            "addCar": "Ongeramo Imodoka",
+            "manualAddition": "Kwiyandikisha kw'Imodoka nshya",
+            "additionDesc": "Andika ibiranga imodoka nshya.",
+            "carName": "Izina ry'Imodoka",
+            "namePlaceholder": "rugero. Toyota Land Cruiser",
+            "modelYear": "Umwaka yakozwe",
+            "dailyRate": "Igiciro ku munsi (RWF)",
+            "seats": "Imyanya",
+            "transmission": "Uburyo ihindura vitesse",
+            "fuelType": "Isanduku ya essence",
+            "category": "Icyiciro",
+            "description": "Ibisobanuro",
+            "features": "Ibiranga imodoka (Tandunyakanya n'akadebe)",
+            "featuresPlaceholder": "AC, GPS, 4x4...",
+            "imageUrl": "Ihuza ry'ifoto (Niba urifite)",
+            "submit": "Ohereza Imodoka Nshya",
+            "stats": {
+                "active": "Imodoka Zikora",
+                "maintenance": "Garashe/Izidakora"
+            },
+            "searchPlaceholder": "Shakisha imodoka...",
+            "perDay": "/ku munsi",
+            "actions": {
+                "edit": "Hindura",
+                "delete": "Siba Imodoka"
+            },
+            "noCars": "Nta modoka yabonetse ihuza n'ibyo ushaka",
+            "toast": {
+                "fetchError": "Habaye ikosa mu gushaka imodoka",
+                "deleteSuccess": "Imodoka yasibye",
+                "addSuccess": "Imodoka yongeweho",
+                "addMessage": "{{name}} yongewe neza.",
+                "addFailed": "Kwinjiza imodoka ntibyashobotse"
+            },
+            "placeholders": {
+                "type": "Urugero: Premium SUV",
+                "description": "Andika ibisobanuro bigufi by'imodoka...",
+                "imageUrl": "https://external-storage.com/image.jpg"
+            }
+        },
+        "expenses": {
+            "title": "Ayasohotse",
+            "subtitle": "Kurikirana ibikoreshwa n'imirimo yo gusana.",
+            "addExpense": "Ongeramo Ayasohotse",
+            "logNew": "Andika ikintu gishya cyasohotsemo amafaranga.",
+            "distribution": "Ikwirakwizwa mu modoka",
+            "distributionDesc": "Uko amafaranga akoreshwa mu modoka.",
+            "records": "Amakuru yanditswe",
+            "recordsDesc": "Ayakoreshejwe yose yanditswe.",
+            "labels": {
+                "description": "Ibisobanuro",
+                "descPlaceholder": "rugero. Guhindura amavuta",
+                "vehicle": "Imodoka (Niba ihari)",
+                "amount": "Ayakoreshejwe (RWF)",
+                "date": "Itariki",
+                "category": "Icyiciro"
+            },
+            "categories": {
+                "maintenance": "Gusana",
+                "fuel": "Essence",
+                "insurance": "Ubwishingizi",
+                "salary": "Umushahara",
+                "other": "Ibindi"
+            },
+            "table": {
+                "item": "Ikintu",
+                "vehicle": "Imodoka",
+                "date": "Itariki",
+                "amount": "Amafaranga",
+                "category": "Icyiciro"
+            },
+            "toast": {
+                "fetchError": "Habaye ikosa mu gushaka amakuru",
+                "saveSuccess": "Amakuru yabitswe",
+                "deleteSuccess": "Amakuru yasibye",
+                "actionFailed": "Igikorwa ntiyashobotse"
+            }
+        },
+        "pricing": {
+            "title": "Igenamigambi ry'Ibiciro",
+            "subtitle": "Tunganya ibiciro bitandukanye ku modoka zitandukanye.",
+            "newComponent": "Icyiciro Gishya",
+            "addComponent": "Ongeraho icyiciro gishya cy'ibiciro cyangwa serivisi.",
+            "activeModels": "Uburyo bw'Ibiciro Bukora",
+            "modelsDesc": "Ibiciro birimo gukoreshwa ubu.",
+            "placeholders": {
+                "location": "Urugero: Ku Kibuga cy'indege",
+                "notes": "Urugero: Ibiciro by'impera z'icyumweru..."
+            },
+            "labels": {
+                "name": "Izina ry'ikintu",
+                "namePlaceholder": "rugero. Imodoka nziza ku munsi",
+                "baseRate": "Igiciro fatizo (RWF)",
+                "unit": "Ikigereranyo",
+                "category": "Icyiciro",
+                "description": "Ibisobanuro",
+                "location": "Aho biva / Aho bijya (Niba bihari)",
+                "notes": "Andi makuru",
+                "units": {
+                    "hour": "Igiciro ku isaha",
+                    "day": "Igiciro ku munsi",
+                    "trip": "Igiciro ku rugendo",
+                    "hourShort": "/ isaha",
+                    "dayShort": "/ munsi",
+                    "tripShort": "/ urugendo"
+                },
+                "planTitle": "Andi makuru kuri gahunda",
+                "planSubtitle": "Andi makuru"
+            },
+            "toast": {
+                "fetchError": "Habaye ikosa mu gushaka amakuru",
+                "saveSuccess": "Amakuru yabitswe",
+                "deleteSuccess": "Amakuru yasibye"
+            }
+        },
+        "reports": {
+            "title": "Raporo y'Imikorere y'Imodoka",
+            "subtitle": "Andika amakuru arambuye y'imari n'inyungu kuri buri modoka.",
+            "exportStatement": "Sohora Raporo",
+            "more": "Ibindi",
+            "exportCompleted": "Sohora Ingendo Zarangiye",
+            "exportFleet": "Sohora Urutonde rw'Imodoka",
+            "periodStart": "Igihe Raporo itangirira",
+            "periodEnd": "Igihe Raporo irangirira",
+            "periodActive": "Igihe cyashyizweho",
+            "stats": {
+                "processed": "Ingendo Zakozwe",
+                "processedNote": "Mu gihe cyashyizweho",
+                "grossIncome": "Ayinjiye Yose mu Gihe Cyashyizweho",
+                "grossIncomeNote": "Mbere yo gukuramo ayakoreshejwe",
+                "netProfit": "Inyungu Isigaye",
+                "netProfitNote": "Nyuma yo gukuramo ayakoreshejwe"
+            },
+            "matrix": {
+                "title": "Incamake y'Imikorere",
+                "subtitle": "Isesengura rirambuye ry'inyungu kuri buri modoka.",
+                "vehicle": "Imodoka",
+                "income": "Ayinjiye",
+                "expenses": "Ayasohotse",
+                "net": "Inyungu Isigaye",
+                "loading": "Turimo gukusanya imibare...",
+                "noData": "Nta makuru ahagije aboneka mu gihe cyashyizweho"
+            }
+        }
+    },
+    "footer": {
+        "desc": "Serivisi nziza cyane zo gutwara abantu mu Rwanda. Dufite imodoka zigezweho zo gukodesha, kugeza abantu ku kibuga cy'indege, n'abashoferi babizobereye.",
+        "newsletterTitle": "Newsletter",
+        "newsletterSub": "Iyandikishe kugira ngo ubone amakuru mashya n'amatangazo.",
+        "emailPlaceholder": "Imeri yawe",
+        "spamNote": "* Twanga ubutumwa budakenewe nkawe.",
+        "features": {
+            "payment": "Kwambura neza",
+            "support": "Ubufasha bwa 24/7",
+            "price": "Igiciro cyiza",
+            "booking": "Gukodesha byihuse"
+        },
+        "appTitle": "Gira ibihe byiza hamwe na App yacu",
+        "appleDownload": "Yikure kuri",
+        "googleDownload": "YIKURE KURI",
+        "rights": "Uburenganzira bwose burasigasigwa.",
+        "links": {
+            "privacy": "Amategeko y'ibanga",
+            "terms": "Amategeko n'amabwiriza",
+            "cookies": "Ibikoreshwa kuri internet"
+        }
+    },
+    "notFound": {
+        "title": "Oops! Urubuga ntirwabonetse",
+        "backHome": "Subira Ahabanza"
+    }
 }

@@ -96,10 +96,10 @@ export default function Home() {
             <div className="flex flex-col items-start gap-2 mb-6">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 border border-accent/40 text-accent text-[8px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                Fleet Available Now
+                {t('home.badges.available')}
               </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-[8px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
-                Instant Confirmation
+                {t('home.badges.instant')}
               </span>
             </div>
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-4 leading-[1] text-white drop-shadow-[0_2px_15px_rgba(0,0,0,0.8)] uppercase tracking-tighter">
@@ -134,8 +134,8 @@ export default function Home() {
             </div>
             <div className="relative z-10 space-y-4">
               <header className="opacity-90">
-                <span className="text-accent/80 font-bold text-[7px] uppercase tracking-[0.3em]">Express Access</span>
-                <h3 className="text-sm font-bold text-white uppercase tracking-tight">Quick Reserve</h3>
+                <span className="text-accent/80 font-bold text-[7px] uppercase tracking-[0.3em]">{t('home.express.title')}</span>
+                <h3 className="text-sm font-bold text-white uppercase tracking-tight">{t('home.express.subtitle')}</h3>
               </header>
 
               <div className="space-y-3">
@@ -144,8 +144,8 @@ export default function Home() {
                     <Clock className="w-3.5 h-3.5 text-accent group-hover/item:text-white" />
                   </div>
                   <div>
-                    <p className="text-[8px] font-black text-white/40 uppercase tracking-widest">Select Plan</p>
-                    <p className="text-xs font-bold text-white">Choose Your Rate</p>
+                    <p className="text-[8px] font-black text-white/40 uppercase tracking-widest">{t('home.express.planTitle')}</p>
+                    <p className="text-xs font-bold text-white">{t('home.express.planSub')}</p>
                   </div>
                 </div>
 
@@ -154,17 +154,17 @@ export default function Home() {
                     <Star className="w-3.5 h-3.5 text-accent group-hover/item:text-white" />
                   </div>
                   <div>
-                    <p className="text-[8px] font-black text-white/40 uppercase tracking-widest">Elite Fleet</p>
-                    <p className="text-xs font-bold text-white">Pick A Vehicle</p>
+                    <p className="text-[8px] font-black text-white/40 uppercase tracking-widest">{t('home.express.fleetTitle')}</p>
+                    <p className="text-xs font-bold text-white">{t('home.express.fleetSub')}</p>
                   </div>
                 </div>
 
                 <Button className="w-full h-11 btn-accent text-white font-black uppercase tracking-widest text-[9px] rounded-xl shadow-xl hover:scale-[1.02] transition-transform" onClick={() => navigate('/booking')}>
-                  Start Reservation Now
+                  {t('home.express.cta')}
                 </Button>
               </div>
 
-              <p className="text-[8px] text-center text-white/40 font-bold uppercase tracking-widest">Premium Service Guaranteed</p>
+              <p className="text-[8px] text-center text-white/40 font-bold uppercase tracking-widest">{t('home.express.guarantee')}</p>
             </div>
           </motion.div>
         </div>
@@ -323,33 +323,33 @@ export default function Home() {
               className="prose prose-zinc dark:prose-invert max-w-none"
             >
               <h2 className="text-2xl md:text-3xl font-bold mb-6 text-foreground uppercase tracking-tight">
-                Premium Car Rental Kigali & Rwanda Travel Services
+                {t('home.about.title')}
               </h2>
               <div className="grid md:grid-cols-2 gap-8 text-sm text-balance text-muted-foreground leading-relaxed">
                 <div>
                   <p className="mb-4">
-                    Welcome to <strong>Smart Move Transport</strong>, your premier provider for <strong>car rental in Kigali</strong>. Whether you are a business traveler, a tourist on safari, or an expat living in Rwanda, we offer a specialized fleet to meet every need. From <strong>Kigali International Airport car rentals</strong> with instant pickup to long-term corporate leases, we ensure your mobility in the "Land of a Thousand Hills" is seamless and stylish.
+                    {t('home.about.text1')}
                   </p>
                   <p>
-                    Our <strong>Rwanda car hire</strong> services focus on reliability and safety. Every vehicle in our <strong>Kigali fleet</strong>—including rugged <strong>4x4 Toyota Land Cruisers</strong> perfect for gorilla trekking in Volcanoes National Park—undergoes rigorous maintenance to guarantee a professional experience.
+                    {t('home.about.text2')}
                   </p>
                 </div>
                 <div>
                   <p className="mb-4">
-                    Looking for <strong>affordable car rental in Rwanda</strong>? We pride ourselves on transparent pricing with <strong>no hidden fees</strong>. Choose between self-drive freedom or the convenience of our <strong>chauffeur-driven services</strong> for city tours or cross-border travel.
+                    {t('home.about.text3')}
                   </p>
                   <ul className="list-none space-y-2 mt-4 font-medium text-accent">
                     <li className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-accent" />
-                      Kigali Airport VIP Transfers (KGL)
+                      {t('home.about.service1')}
                     </li>
                     <li className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-accent" />
-                      4x4 Safari & Tour Vehicle Hire
+                      {t('home.about.service2')}
                     </li>
                     <li className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-accent" />
-                      Monthly & Long-term Corporate Rental
+                      {t('home.about.service3')}
                     </li>
                   </ul>
                 </div>

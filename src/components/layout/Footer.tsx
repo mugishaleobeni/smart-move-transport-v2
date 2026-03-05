@@ -68,8 +68,7 @@ export function Footer() {
                             </span>
                         </Link>
                         <p className="text-muted-foreground leading-relaxed">
-                            Premium transportation services in Rwanda. We offer luxury car rentals,
-                            airport transfers, and professional chauffeur services for your every need.
+                            {t('footer.desc')}
                         </p>
                         <div className="flex gap-4">
                             {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
@@ -129,15 +128,15 @@ export function Footer() {
 
                     {/* Newsletter */}
                     <motion.div variants={itemVariants} className="space-y-6">
-                        <h4 className="text-lg font-semibold">Newsletter</h4>
+                        <h4 className="text-lg font-semibold">{t('footer.newsletterTitle')}</h4>
                         <p className="text-muted-foreground">
-                            Subscribe to get latest updates and offers.
+                            {t('footer.newsletterSub')}
                         </p>
                         <div className="space-y-3">
                             <div className="relative">
                                 <Input
                                     type="email"
-                                    placeholder="Your email address"
+                                    placeholder={t('footer.emailPlaceholder')}
                                     className="glass pr-12 h-12"
                                 />
                                 <Button
@@ -148,7 +147,7 @@ export function Footer() {
                                 </Button>
                             </div>
                             <p className="text-xs text-muted-foreground/60 italic">
-                                * We hate spam as much as you do.
+                                {t('footer.spamNote')}
                             </p>
                         </div>
                     </motion.div>
@@ -163,10 +162,10 @@ export function Footer() {
                     className="grid grid-cols-2 md:grid-cols-4 gap-4 py-12 mt-12 border-t border-border/50"
                 >
                     {[
-                        { icon: ShieldCheck, text: "Secure Payment" },
-                        { icon: Clock, text: "24/7 Support" },
-                        { icon: CreditCard, text: "Best Price" },
-                        { icon: ArrowRight, text: "Fast Booking" },
+                        { icon: ShieldCheck, text: t('footer.features.payment') },
+                        { icon: Clock, text: t('footer.features.support') },
+                        { icon: CreditCard, text: t('footer.features.price') },
+                        { icon: ArrowRight, text: t('footer.features.booking') },
                     ].map((feature, i) => (
                         <div key={i} className="flex items-center gap-3 justify-center md:justify-start">
                             <feature.icon className="w-5 h-5 text-accent" />
@@ -182,19 +181,19 @@ export function Footer() {
                     viewport={{ once: true }}
                     className="pb-12 text-center"
                 >
-                    <p className="text-sm font-medium mb-4 text-muted-foreground uppercase tracking-wider">Experience more with our mobile app</p>
+                    <p className="text-sm font-medium mb-4 text-muted-foreground uppercase tracking-wider">{t('footer.appTitle')}</p>
                     <div className="flex flex-wrap justify-center gap-4">
                         <div className="h-12 w-40 bg-black rounded-lg flex items-center px-4 border border-white/10 cursor-pointer hover:bg-black/80 transition-colors">
                             <div className="mr-3 text-white"><AppleIcon /></div>
                             <div className="text-left">
-                                <p className="text-[10px] text-white/60 leading-none">Download on the</p>
+                                <p className="text-[10px] text-white/60 leading-none">{t('footer.appleDownload')}</p>
                                 <p className="text-sm text-white font-semibold">App Store</p>
                             </div>
                         </div>
                         <div className="h-12 w-40 bg-black rounded-lg flex items-center px-4 border border-white/10 cursor-pointer hover:bg-black/80 transition-colors">
                             <div className="mr-3 text-white"><PlayIcon /></div>
                             <div className="text-left">
-                                <p className="text-[10px] text-white/60 leading-none">GET IT ON</p>
+                                <p className="text-[10px] text-white/60 leading-none">{t('footer.googleDownload')}</p>
                                 <p className="text-sm text-white font-semibold">Google Play</p>
                             </div>
                         </div>
@@ -204,12 +203,12 @@ export function Footer() {
                 {/* Bottom Bar */}
                 <div className="pt-8 mt-0 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground border-t border-border/30">
                     <p>
-                        © {year} Smart Move Transport. All rights reserved.
+                        © {year} Smart Move Transport. {t('footer.rights')}
                     </p>
                     <div className="flex gap-8">
-                        <a href="#" className="hover:text-accent transition-colors">Privacy Policy</a>
-                        <a href="#" className="hover:text-accent transition-colors">Terms of Service</a>
-                        <a href="#" className="hover:text-accent transition-colors">Cookies Settings</a>
+                        <a href="#" className="hover:text-accent transition-colors">{t('footer.links.privacy')}</a>
+                        <a href="#" className="hover:text-accent transition-colors">{t('footer.links.terms')}</a>
+                        <a href="#" className="hover:text-accent transition-colors">{t('footer.links.cookies')}</a>
                     </div>
                 </div>
             </div>

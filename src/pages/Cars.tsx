@@ -73,10 +73,10 @@ export default function Cars() {
             className="text-center mb-12"
           >
             <h1 className="text-3xl md:text-5xl font-bold mb-4">
-              Best Car Rental Kigali - Our Premium Fleet
+              {t('cars.seoTitle')}
             </h1>
             <p className="text-muted-foreground max-w-lg mx-auto">
-              Explore our diverse selection of <strong>car hire in Rwanda</strong>. From luxury SUVs for business to rugged 4x4s for safari, we provide the best <strong>Kigali car rental</strong> experience.
+              {t('cars.seoDescription')}
             </p>
           </motion.div>
 
@@ -123,7 +123,7 @@ export default function Cars() {
 
                   {/* Price */}
                   <div className="flex flex-wrap gap-2 mb-6 text-sm">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block w-full mb-1">Starting from</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block w-full mb-1">{t('cars.startingFrom')}</span>
                     <Badge variant="secondary" className="bg-accent/10 text-accent border-none font-bold">
                       RWF {car.price || car.pricePerDay || '30,000'} / Day
                     </Badge>

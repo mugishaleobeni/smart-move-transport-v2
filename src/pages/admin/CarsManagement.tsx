@@ -40,8 +40,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 import { Progress } from "@/components/ui/progress";
-import { motion } from 'framer-motion';
 import { ActionConfirmation } from '@/components/dashboard/ActionConfirmation';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 interface CarRow {
   _id?: string;
@@ -95,9 +95,9 @@ export default function CarsManagement() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   useEffect(() => {
     fetchCars();
@@ -112,7 +112,7 @@ export default function CarsManagement() {
       const response = await carsApi.getAll();
       setCars(response.data);
     } catch (error: any) {
-      toast({ title: 'Error fetching cars', description: error.message, variant: 'destructive' });
+      toast({ title: t('admin.cars.toast.fetchError'), description: error.message, variant: 'destructive' });
     }
   };
 
@@ -164,7 +164,7 @@ export default function CarsManagement() {
 
   const handleSave = async () => {
     if (!form.name || !form.type) {
-      toast({ title: "Required Fields", description: "Name and Type are required.", variant: "destructive" });
+      toast({ title: t('admin.cars.carName'), description: t('admin.cars.namePlaceholder'), variant: "destructive" });
       return;
     }
 
@@ -186,10 +186,10 @@ export default function CarsManagement() {
     try {
       if (editId) {
         await carsApi.update(editId, payload);
-        toast({ title: 'Vehicle updated', description: `${form.name} updated successfully.` });
+        toast({ title: t('admin.cars.actions.edit'), description: `${form.name} updated successfully.` });
       } else {
         await carsApi.create(payload);
-        toast({ title: 'Vehicle added', description: `${form.name} added to the fleet.` });
+        toast({ title: t('admin.cars.toast.addSuccess'), description: t('admin.cars.toast.addMessage').replace('{{name}}', form.name) });
       }
       setOpen(false);
       setEditId(null);
@@ -228,10 +228,10 @@ export default function CarsManagement() {
     const { id, name } = itemToDelete;
     try {
       await carsApi.delete(id);
-      toast({ title: 'Vehicle deleted', description: `${name} has been removed.`, variant: 'destructive' });
+      toast({ title: t('admin.cars.toast.deleteSuccess'), description: `${name} has been removed.`, variant: 'destructive' });
       fetchCars();
     } catch (error: any) {
-      toast({ title: 'Delete failed', description: error.message, variant: 'destructive' });
+      toast({ title: t('admin.cars.toast.fetchError'), description: error.message, variant: 'destructive' });
     }
   };
 
@@ -252,41 +252,41 @@ export default function CarsManagement() {
     <div className="space-y-8 pb-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Cars Management</h1>
-          <p className="text-slate-500 dark:text-zinc-400">Inventory control and vehicle status tracking.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t('admin.cars.title')}</h1>
+          <p className="text-slate-500 dark:text-zinc-400">{t('admin.cars.subtitle')}</p>
         </div>
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); setForm(emptyForm); } }}>
           <DialogTrigger asChild>
             <Button className="btn-accent gap-2 px-6 h-11 rounded-xl shadow-lg shadow-primary/20 text-white">
-              <Plus className="w-5 h-5" /> Add New Vehicle
+              <Plus className="w-5 h-5" /> {t('admin.cars.addCar')}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-[95vw] lg:max-w-[1000px] xl:max-w-[1200px] rounded-2xl p-0 overflow-hidden border-none shadow-2xl">
             <DialogHeader className="p-6 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800">
-              <DialogTitle className="text-xl font-bold">{editId ? 'Modify Vehicle Details' : 'Register New Vehicle'}</DialogTitle>
-              <DialogDescription>Input all specifications for the new addition to your fleet.</DialogDescription>
+              <DialogTitle className="text-xl font-bold">{editId ? t('admin.cars.actions.edit') : t('admin.cars.manualAddition')}</DialogTitle>
+              <DialogDescription>{t('admin.cars.additionDesc')}</DialogDescription>
             </DialogHeader>
             <div className="p-6 max-h-[75vh] overflow-y-auto space-y-8">
               {/* Row 1: Brand, Type and Rates */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Brand & Model</Label>
-                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Toyota Land Cruiser" className="h-10 rounded-lg" />
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.carName')}</Label>
+                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t('admin.cars.namePlaceholder')} className="h-10 rounded-lg" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Vehicle Type</Label>
-                  <Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="e.g. Premium SUV" className="h-10 rounded-lg" />
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.category')}</Label>
+                  <Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder={t('admin.cars.placeholders.type')} className="h-10 rounded-lg" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Daily (RWF)</Label>
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.dailyRate')}</Label>
                   <Input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="30,000" className="h-10 rounded-lg" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Hourly (RWF)</Label>
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.hourly')}</Label>
                   <Input value={form.pricePerHour} onChange={(e) => setForm({ ...form, pricePerHour: e.target.value })} placeholder="5,000" className="h-10 rounded-lg" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Trip (RWF)</Label>
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.trip')}</Label>
                   <Input value={form.pricePerTrip} onChange={(e) => setForm({ ...form, pricePerTrip: e.target.value })} placeholder="15,000" className="h-10 rounded-lg" />
                 </div>
               </div>
@@ -295,19 +295,19 @@ export default function CarsManagement() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-3 space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Fleet Status</Label>
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.bookings.table.status')}</Label>
                     <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
                       <SelectTrigger className="h-10 rounded-lg">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="available">Available for Bookings</SelectItem>
-                        <SelectItem value="garage">In Maintenance / Garage</SelectItem>
+                        <SelectItem value="available">{t('admin.status.approved')}</SelectItem>
+                        <SelectItem value="garage">{t('admin.cars.stats.maintenance')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Seating Capacity</Label>
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.seating')}</Label>
                     <div className="flex items-center gap-2">
                       <Users className="w-4 h-4 text-slate-400" />
                       <Input type="number" value={form.seats} onChange={(e) => setForm({ ...form, seats: parseInt(e.target.value) || 5 })} className="h-10 rounded-lg" />
@@ -315,15 +315,15 @@ export default function CarsManagement() {
                   </div>
                 </div>
                 <div className="lg:col-span-9 space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">General Information</Label>
-                  <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Write a brief overview of the vehicle specifications..." className="min-h-[105px] rounded-lg resize-none" />
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.description')}</Label>
+                  <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t('admin.cars.placeholders.description')} className="min-h-[105px] rounded-lg resize-none" />
                 </div>
               </div>
 
               {/* Row 3: Features and Media */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-4">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Standard Features</Label>
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.standardFeatures')}</Label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-zinc-50 dark:bg-zinc-800/30 rounded-xl border border-zinc-100 dark:border-zinc-800">
                     {STANDARD_FEATURES.map((feature) => {
                       const isChecked = form.features.split(',').map(f => f.trim()).includes(feature.label);
@@ -356,17 +356,17 @@ export default function CarsManagement() {
                   <Input
                     value={form.features}
                     onChange={(e) => setForm({ ...form, features: e.target.value })}
-                    placeholder="Additional features (comma separated)..."
+                    placeholder={t('admin.cars.featuresPlaceholder')}
                     className="h-9 rounded-lg text-[11px]"
                   />
                 </div>
 
                 <div className="space-y-4">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Media & Photography</Label>
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.media')}</Label>
                   <Tabs defaultValue="upload" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 rounded-lg p-1 bg-zinc-100 dark:bg-zinc-800">
-                      <TabsTrigger value="upload" className="rounded-md text-[11px]">Direct Upload</TabsTrigger>
-                      <TabsTrigger value="url" className="rounded-md text-[11px]">External URL</TabsTrigger>
+                      <TabsTrigger value="upload" className="rounded-md text-[11px]">{t('admin.cars.labels.directUpload')}</TabsTrigger>
+                      <TabsTrigger value="url" className="rounded-md text-[11px]">{t('admin.cars.labels.externalUrl')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="upload" className="space-y-4 pt-2">
                       <div className="border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl p-4 flex flex-col items-center justify-center bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all cursor-pointer relative overflow-hidden group min-h-[140px]">
@@ -375,7 +375,7 @@ export default function CarsManagement() {
                           <div className="flex flex-col items-center gap-4 w-full max-w-[200px]">
                             <Loader2 className="w-8 h-8 animate-spin text-primary" />
                             <div className="w-full text-center">
-                              <p className="text-[10px] font-semibold mb-1">Transferring image...</p>
+                              <p className="text-[10px] font-semibold mb-1">{t('admin.cars.labels.transferring')}</p>
                               <Progress value={45} className="h-1" />
                             </div>
                           </div>
@@ -384,8 +384,8 @@ export default function CarsManagement() {
                             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                               <Upload className="w-4 h-4 text-primary" />
                             </div>
-                            <p className="text-[11px] font-bold text-slate-900 dark:text-white">Upload Gallery Photos</p>
-                            <p className="text-[10px] text-slate-500 mt-0.5">Select one or more (Max 5MB each)</p>
+                            <p className="text-[11px] font-bold text-slate-900 dark:text-white">{t('admin.cars.labels.uploadPhotos')}</p>
+                            <p className="text-[10px] text-slate-500 mt-0.5">{t('admin.cars.labels.uploadLimits')}</p>
                           </>
                         )}
                       </div>
@@ -396,7 +396,7 @@ export default function CarsManagement() {
                           <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                           <Input
                             id="url-input"
-                            placeholder="https://external-storage.com/image.jpg"
+                            placeholder={t('admin.cars.placeholders.imageUrl')}
                             className="h-10 pl-9 rounded-lg text-[11px]"
                           />
                         </div>
@@ -460,7 +460,7 @@ export default function CarsManagement() {
                             </div>
                             {form.image === img && (
                               <div className="absolute top-0.5 left-0.5">
-                                <Badge className="bg-accent text-[6px] h-3 px-1 leading-none">Main</Badge>
+                                <Badge className="bg-accent text-[6px] h-3 px-1 leading-none">{t('admin.cars.labels.main')}</Badge>
                               </div>
                             )}
                           </div>
@@ -472,9 +472,9 @@ export default function CarsManagement() {
               </div>
             </div>
             <DialogFooter className="p-6 bg-zinc-50/80 dark:bg-zinc-800/80 border-t border-zinc-100 dark:border-zinc-800 backdrop-blur-md">
-              <Button variant="ghost" onClick={() => setOpen(false)} className="rounded-lg h-11 px-6">Cancel</Button>
+              <Button variant="ghost" onClick={() => setOpen(false)} className="rounded-lg h-11 px-6">{t('common.cancel')}</Button>
               <Button onClick={handleSave} className="rounded-lg px-8 h-11 shadow-lg shadow-primary/20" disabled={uploading}>
-                {editId ? 'Save Modifications' : 'Confirm Registration'}
+                {editId ? t('common.save') : t('admin.bookings.completeRegistration')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -483,9 +483,9 @@ export default function CarsManagement() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Total Fleet', value: fleetStats.total, icon: Grid, color: 'bg-zinc-100 text-zinc-600' },
-          { label: 'Available Cars', value: fleetStats.available, icon: CheckCircle2, color: 'bg-emerald-50 text-emerald-600' },
-          { label: 'In Garage', value: fleetStats.inMaintenance, icon: AlertCircle, color: 'bg-rose-50 text-rose-600' },
+          { label: t('admin.cars.stats.active'), value: fleetStats.total, icon: Grid, color: 'bg-zinc-100 text-zinc-600' },
+          { label: t('admin.status.approved'), value: fleetStats.available, icon: CheckCircle2, color: 'bg-emerald-50 text-emerald-600' },
+          { label: t('admin.cars.stats.maintenance'), value: fleetStats.inMaintenance, icon: AlertCircle, color: 'bg-rose-50 text-rose-600' },
         ].map((s, i) => (
           <Card key={i} className="border-none card-premium p-6 flex items-center gap-4 bg-white dark:bg-zinc-900">
             <div className={cn("p-3 rounded-2xl", s.color)}>
@@ -504,7 +504,7 @@ export default function CarsManagement() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
-              placeholder="Filter by brand, model or type..."
+              placeholder={t('admin.cars.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 h-10 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border-none focus-visible:ring-1"
@@ -514,13 +514,13 @@ export default function CarsManagement() {
             <SelectTrigger className="w-44 rounded-xl h-10 bg-slate-50 dark:bg-zinc-800 border-none focus:ring-1 text-slate-900 dark:text-zinc-100">
               <div className="flex items-center gap-2">
                 <Filter className="w-3.5 h-3.5" />
-                <SelectValue placeholder="All Status" />
+                <SelectValue placeholder={t('admin.bookings.allStatus')} />
               </div>
             </SelectTrigger>
             <SelectContent className="rounded-xl overflow-hidden">
-              <SelectItem value="all">Every Status</SelectItem>
-              <SelectItem value="available">Available Only</SelectItem>
-              <SelectItem value="garage">Garage Only</SelectItem>
+              <SelectItem value="all">{t('admin.bookings.allStatus')}</SelectItem>
+              <SelectItem value="available">{t('admin.status.approved')}</SelectItem>
+              <SelectItem value="garage">{t('admin.cars.stats.maintenance')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -562,7 +562,7 @@ export default function CarsManagement() {
                   ) : (
                     <div className="w-full h-full bg-slate-100 flex flex-col items-center justify-center text-slate-300">
                       <CarFront className="w-12 h-12 mb-2" />
-                      <p className="text-xs uppercase tracking-widest font-bold">No Image</p>
+                      <p className="text-xs uppercase tracking-widest font-bold">{t('admin.cars.labels.noImage')}</p>
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
@@ -599,7 +599,7 @@ export default function CarsManagement() {
                 <CardFooter className="p-4 bg-slate-50/50 dark:bg-zinc-800/20 border-t border-slate-100 dark:border-zinc-800 flex gap-3">
                   <Button variant="outline" size="sm" onClick={() => handleEdit(car)} className="flex-1 h-10 rounded-xl border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 font-bold gap-2 group/btn">
                     <Edit className="w-3.5 h-3.5 group-hover/btn:text-primary transition-colors" />
-                    Edit Features
+                    {t('admin.cars.actions.edit')}
                   </Button>
                   <Button variant="ghost" size="icon" onClick={() => handleDelete((car._id || car.id)!, car.name)} className="h-10 w-10 rounded-xl text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20">
                     <Trash2 className="w-4 h-4" />
@@ -614,10 +614,10 @@ export default function CarsManagement() {
           <table className="w-full text-left">
             <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800">
               <tr>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Vehicle Info</th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Type & Space</th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">Status</th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 text-right">Actions</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">{t('admin.cars.table.info')}</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">{t('admin.cars.table.typeSpace')}</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">{t('admin.cars.table.status')}</th>
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400 text-right">{t('admin.cars.table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -673,10 +673,10 @@ export default function CarsManagement() {
           <div className="w-20 h-20 rounded-full bg-slate-50 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-6">
             <CarFront className="w-10 h-10 text-slate-300" />
           </div>
-          <h2 className="text-xl font-bold dark:text-white">Empty Inventory</h2>
-          <p className="text-slate-500 dark:text-zinc-400 mt-2 max-w-sm mx-auto">No vehicles match your current search criteria. Try adjusting your filters or add a new vehicle.</p>
+          <h2 className="text-xl font-bold dark:text-white">{t('admin.cars.noCars')}</h2>
+          <p className="text-slate-500 dark:text-zinc-400 mt-2 max-w-sm mx-auto">{t('admin.cars.noCars')}</p>
           <Button variant="link" onClick={() => { setSearch(''); setStatusFilter('all'); }} className="text-primary mt-4 font-bold">
-            Reset all filters
+            {t('admin.bookings.clearFilters')}
           </Button>
         </div>
       )}
@@ -685,9 +685,9 @@ export default function CarsManagement() {
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={confirmDelete}
-        title="Remove Vehicle"
-        description={`Are you sure you want to delete ${itemToDelete?.name}? This action cannot be undone.`}
-        confirmText="Delete Vehicle"
+        title={t('admin.cars.actions.delete')}
+        description={t('admin.bookings.confirmation.description').replace('{{action}}', t('admin.status.delete').toLowerCase()).replace('{{extra}}', t('admin.bookings.confirmation.deleteExtra'))}
+        confirmText={t('admin.status.delete')}
         variant="destructive"
       />
     </div>

@@ -35,7 +35,7 @@ export default function CarDetails() {
       <Layout>
         <div className="container mx-auto px-4 py-20 flex flex-col items-center justify-center gap-4">
           <Loader2 className="w-12 h-12 text-accent animate-spin" />
-          <p className="text-muted-foreground font-medium">Fetching excellence...</p>
+          <p className="text-muted-foreground font-medium">{t('cars.fetching')}</p>
         </div>
       </Layout>
     );
@@ -45,7 +45,7 @@ export default function CarDetails() {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-20 text-center">
-          <h1 className="text-2xl font-bold mb-4">Car not found</h1>
+          <h1 className="text-2xl font-bold mb-4">{t('cars.notFound')}</h1>
           <Link to="/cars">
             <Button>{t('common.back')}</Button>
           </Link>
@@ -140,9 +140,9 @@ export default function CarDetails() {
               {images.length > 1 && (
                 <div className="space-y-4 mt-6">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/60">Vehicle Gallery</h4>
+                    <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/60">{t('cars.galleryTitle')}</h4>
                     <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-accent/10 text-accent uppercase">
-                      {images.length} Photos
+                      {images.length} {t('cars.photos')}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-3 max-h-[150px] overflow-y-auto pb-2 scrollbar-hide">

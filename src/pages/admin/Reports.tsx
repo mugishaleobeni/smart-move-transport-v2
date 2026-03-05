@@ -21,6 +21,7 @@ import {
 import { carsApi, bookingsApi, expensesApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { useLanguage } from '@/i18n/LanguageContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +40,7 @@ export default function Reports() {
   const [carProfits, setCarProfits] = useState<CarProfit[]>([]);
   const [summary, setSummary] = useState({ bookings: 0, income: 0, expenses: 0 });
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     fetchReport();
@@ -161,26 +163,26 @@ export default function Reports() {
     <div className="space-y-8 pb-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Fleet Performance Reports</h1>
-          <p className="text-slate-500 dark:text-zinc-400">Generate detailed financial logs and vehicle profitability statements.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{t('admin.reports.title')}</h1>
+          <p className="text-slate-500 dark:text-zinc-400">{t('admin.reports.subtitle')}</p>
         </div>
         <div className="flex gap-3">
           <Button onClick={exportCSV} className="gap-2 px-6 h-11 rounded-xl shadow-lg shadow-zinc-200 dark:shadow-none font-semibold">
-            <Download className="w-4 h-4" /> Export Statement
+            <Download className="w-4 h-4" /> {t('admin.reports.exportStatement')}
           </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2 h-11 rounded-xl border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-                More <ChevronDown className="w-4 h-4" />
+                {t('admin.reports.more')} <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 rounded-xl p-1 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 shadow-2xl">
               <DropdownMenuItem onClick={exportCompletedBookings} className="gap-3 py-2.5 cursor-pointer rounded-lg font-bold">
-                <FileText className="w-4 h-4 text-blue-500" /> Export Completed Trips
+                <FileText className="w-4 h-4 text-blue-500" /> {t('admin.reports.exportCompleted')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={exportCarsList} className="gap-3 py-2.5 cursor-pointer rounded-lg font-bold">
-                <Car className="w-4 h-4 text-emerald-500" /> Export Fleet List
+                <Car className="w-4 h-4 text-emerald-500" /> {t('admin.reports.exportFleet')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -189,14 +191,14 @@ export default function Reports() {
 
       <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 flex flex-col sm:flex-row items-end gap-6">
         <div className="w-full sm:w-auto space-y-2">
-          <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">Reporting Period (Start)</Label>
+          <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">{t('admin.reports.periodStart')}</Label>
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="h-11 pl-10 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border-none focus-visible:ring-1 min-w-[200px]" />
           </div>
         </div>
         <div className="w-full sm:w-auto space-y-2">
-          <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">Reporting Period (End)</Label>
+          <Label className="text-xs font-bold uppercase tracking-wider text-slate-400">{t('admin.reports.periodEnd')}</Label>
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="h-11 pl-10 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border-none focus-visible:ring-1 min-w-[200px]" />
@@ -204,16 +206,16 @@ export default function Reports() {
         </div>
         <div className="flex-1 flex justify-end">
           <Badge variant="outline" className="h-11 px-6 rounded-xl border-dashed border-zinc-300 text-slate-500 gap-2 font-medium">
-            <Filter className="w-4 h-4" /> Period active
+            <Filter className="w-4 h-4" /> {t('admin.reports.periodActive')}
           </Badge>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Reservations Processed', value: summary.bookings, icon: Target, color: 'text-blue-600 bg-blue-50', note: 'During selected dates' },
-          { label: 'Gross Period Income', value: `RWF ${summary.income.toLocaleString()}`, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50', note: 'Pre-expense total' },
-          { label: 'Calculated Net Profit', value: `RWF ${(summary.income - summary.expenses).toLocaleString()}`, icon: ArrowUpRight, color: 'text-indigo-600 bg-indigo-50', note: 'After operational costs' },
+          { label: t('admin.reports.stats.processed'), value: summary.bookings, icon: Target, color: 'text-blue-600 bg-blue-50', note: t('admin.reports.stats.processedNote') },
+          { label: t('admin.reports.stats.grossIncome'), value: `RWF ${summary.income.toLocaleString()}`, icon: TrendingUp, color: 'text-emerald-600 bg-emerald-50', note: t('admin.reports.stats.grossIncomeNote') },
+          { label: t('admin.reports.stats.netProfit'), value: `RWF ${(summary.income - summary.expenses).toLocaleString()}`, icon: ArrowUpRight, color: 'text-indigo-600 bg-indigo-50', note: t('admin.reports.stats.netProfitNote') },
         ].map((item, i) => (
           <Card key={i} className="border-none card-premium overflow-hidden group hover:ring-primary/20">
             <CardContent className="p-6">
@@ -238,9 +240,9 @@ export default function Reports() {
           <div>
             <CardTitle className="text-xl font-bold flex items-center gap-2">
               <FileText className="w-5 h-5 text-primary" />
-              Fleet Performance Matrix
+              {t('admin.reports.matrix.title')}
             </CardTitle>
-            <CardDescription className="mt-1">Detailed profitability analysis per vehicle for the defined duration.</CardDescription>
+            <CardDescription className="mt-1">{t('admin.reports.matrix.subtitle')}</CardDescription>
           </div>
           <div className="p-2 rounded-full bg-emerald-50 text-emerald-600">
             <CheckCircle2 className="w-5 h-5" />
@@ -250,16 +252,16 @@ export default function Reports() {
           <Table>
             <TableHeader className="bg-zinc-50/30 dark:bg-zinc-900/50">
               <TableRow className="hover:bg-transparent border-zinc-100 dark:border-zinc-800">
-                <TableHead className="font-bold text-xs uppercase px-8 py-5">Vehicle Designation</TableHead>
-                <TableHead className="font-bold text-xs uppercase">Generated Income</TableHead>
-                <TableHead className="font-bold text-xs uppercase text-rose-500">Log Expenses</TableHead>
-                <TableHead className="font-bold text-xs uppercase text-right px-8">Net Performance</TableHead>
+                <TableHead className="font-bold text-xs uppercase px-8 py-5">{t('admin.reports.matrix.vehicle')}</TableHead>
+                <TableHead className="font-bold text-xs uppercase">{t('admin.reports.matrix.income')}</TableHead>
+                <TableHead className="font-bold text-xs uppercase text-rose-500">{t('admin.reports.matrix.expenses')}</TableHead>
+                <TableHead className="font-bold text-xs uppercase text-right px-8">{t('admin.reports.matrix.net')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-20 text-slate-400">Recalculating fleet metrics...</TableCell>
+                  <TableCell colSpan={4} className="text-center py-20 text-slate-400">{t('admin.reports.matrix.loading')}</TableCell>
                 </TableRow>
               ) : carProfits.map((c) => (
                 <TableRow key={c.name} className="hover:bg-zinc-50/20 dark:hover:bg-zinc-800/20 transition-colors border-zinc-50 dark:border-zinc-800">
@@ -281,7 +283,7 @@ export default function Reports() {
                   <TableCell colSpan={4} className="text-center py-24 bg-zinc-50/10">
                     <div className="flex flex-col items-center gap-2">
                       <PieChart className="w-10 h-10 text-slate-200" />
-                      <p className="text-sm font-bold text-slate-400">Insufficient data for this reporting window</p>
+                      <p className="text-sm font-bold text-slate-400">{t('admin.reports.matrix.noData')}</p>
                     </div>
                   </TableCell>
                 </TableRow>
