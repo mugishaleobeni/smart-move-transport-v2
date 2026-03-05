@@ -15,7 +15,8 @@ import {
   Search,
   CheckCircle2,
   ChevronDown,
-  Car
+  Car,
+  Filter
 } from 'lucide-react';
 import { carsApi, bookingsApi, expensesApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
