@@ -390,6 +390,10 @@
                 "addMessage": "{{name}} yongewe neza.",
                 "addFailed": "Kwinjiza imodoka ntibyashobotse"
             },
+            "labels": {
+                "inCity": "Umujyi",
+                "province": "Intara"
+            },
             "placeholders": {
                 "type": "Urugero: Premium SUV",
                 "description": "Andika ibisobanuro bigufi by'imodoka...",

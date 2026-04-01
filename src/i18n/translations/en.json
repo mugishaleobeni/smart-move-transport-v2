@@ -398,7 +398,8 @@
       },
       "labels": {
         "hourly": "Hourly (RWF)",
-        "trip": "Trip (RWF)",
+        "inCity": "City",
+        "province": "Provence",
         "seating": "Seating Capacity",
         "standardFeatures": "Standard Features",
         "media": "Media & Photography",
