@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Bell, User, Sun, Moon, Search, Command } from 'lucide-react';
+import { Bell, User, Sun, Moon, Search, Command, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
 import { notificationsApi } from '@/lib/api';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import {
@@ -16,7 +17,15 @@ import {
   SheetFooter
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { CommandMenu } from './CommandMenu';
 
 interface Notification {
@@ -30,7 +39,8 @@ interface Notification {
 
 export function AdminTopbar() {
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const unreadCount = notifications.filter((n) => !n.is_read).length;
@@ -67,6 +77,11 @@ export function AdminTopbar() {
     } catch (error) {
       console.error('Failed to mark all as read:', error);
     }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/');
   };
 
   return (
@@ -173,20 +188,52 @@ export function AdminTopbar() {
         </Sheet>
 
         <div className="h-8 w-px bg-zinc-200 dark:bg-zinc-800 mx-1 hidden sm:block" />
-
-        <div className="flex items-center gap-3 pl-2 py-1.5 group cursor-pointer">
-          <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center border border-zinc-200 dark:border-zinc-800 group-hover:bg-primary/5 group-hover:border-primary/20 transition-all overflow-hidden ring-offset-background group-focus-within:ring-2 group-focus-within:ring-ring">
-            <User className="w-5 h-5 text-zinc-500 group-hover:text-primary transition-colors" />
-          </div>
-          <div className="hidden sm:block">
-            <p className="text-xs font-bold leading-none text-zinc-900 dark:text-zinc-100">
-              {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Administrator'}
-            </p>
-            <p className="text-[10px] text-zinc-400 mt-0.5 font-medium truncate max-w-[120px]">
-              {user?.email}
-            </p>
-          </div>
-        </div>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className="flex items-center gap-3 pl-2 py-1.5 group cursor-pointer">
+              <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center border border-zinc-200 dark:border-zinc-800 group-hover:bg-primary/5 group-hover:border-primary/20 transition-all overflow-hidden ring-offset-background group-focus-within:ring-2 group-focus-within:ring-ring">
+                <User className="w-5 h-5 text-zinc-500 group-hover:text-primary transition-colors" />
+              </div>
+              <div className="hidden sm:block text-left">
+                <p className="text-xs font-bold leading-none text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                  {user?.name || user?.email?.split('@')[0] || 'Administrator'}
+                  <ChevronDown className="w-3 h-3 text-zinc-400 group-hover:text-primary transition-colors" />
+                </p>
+                <p className="text-[10px] text-zinc-400 mt-0.5 font-medium truncate max-w-[120px]">
+                  {user?.email}
+                </p>
+              </div>
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56 mt-2 rounded-2xl glass-strong border-zinc-200 dark:border-zinc-800 shadow-2xl" align="end">
+            <DropdownMenuLabel className="font-normal p-4">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-bold leading-none">{user?.name || 'Administrator'}</p>
+                <p className="text-xs leading-none text-zinc-500">{user?.email}</p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-zinc-200 dark:bg-zinc-800" />
+            <DropdownMenuGroup className="p-1.5">
+              <Link to="/admin/settings">
+                <DropdownMenuItem className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-primary/5 dark:hover:bg-zinc-900 focus:bg-primary/5 dark:focus:bg-zinc-900 transition-colors">
+                  <Settings className="w-4 h-4 text-zinc-500" />
+                  <span className="text-sm font-semibold">Settings</span>
+                </DropdownMenuItem>
+              </Link>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator className="bg-zinc-200 dark:border-zinc-800" />
+            <div className="p-1.5">
+              <DropdownMenuItem 
+                onClick={handleLogout}
+                className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 focus:bg-rose-50 dark:focus:bg-rose-950/20 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="text-sm font-semibold">Logout</span>
+              </DropdownMenuItem>
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

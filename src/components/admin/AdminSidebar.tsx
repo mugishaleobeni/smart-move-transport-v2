@@ -7,7 +7,6 @@ import {
   BarChart3,
   FileText,
   LogOut,
-  Settings,
 } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,7 +32,6 @@ const menuItems = [
   { title: 'Expenses', icon: Receipt, to: '/admin/expenses' },
   { title: 'Analytics', icon: BarChart3, to: '/admin/analytics' },
   { title: 'Reports', icon: FileText, to: '/admin/reports' },
-  { title: 'Settings', icon: Settings, to: '/admin/settings' },
 ];
 
 export function AdminSidebar() {
