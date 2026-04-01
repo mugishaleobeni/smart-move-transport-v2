@@ -57,7 +57,8 @@ interface CarRow {
   status: string;
   price?: string | number;
   pricePerHour?: string | number;
-  pricePerTrip?: string | number;
+  priceInCity?: string | number;
+  priceProvince?: string | number;
 }
 
 const STANDARD_FEATURES = [
@@ -83,7 +84,8 @@ const emptyForm = {
   status: 'available',
   price: '',
   pricePerHour: '',
-  pricePerTrip: '',
+  priceInCity: '',
+  priceProvince: '',
   images: [] as string[]
 };
 
@@ -182,7 +184,8 @@ export default function CarsManagement() {
       status: form.status,
       price: form.price,
       pricePerHour: form.pricePerHour,
-      pricePerTrip: form.pricePerTrip,
+      priceInCity: form.priceInCity,
+      priceProvince: form.priceProvince,
     };
 
     try {
@@ -213,7 +216,8 @@ export default function CarsManagement() {
       status: car.status,
       price: car.price?.toString() || '',
       pricePerHour: car.pricePerHour?.toString() || '',
-      pricePerTrip: car.pricePerTrip?.toString() || '',
+      priceInCity: car.priceInCity?.toString() || '',
+      priceProvince: car.priceProvince?.toString() || '',
       images: car.images || (car.image ? [car.image] : []),
     });
     setEditId(car._id || car.id || null);
@@ -289,8 +293,12 @@ export default function CarsManagement() {
                   <Input value={form.pricePerHour} onChange={(e) => setForm({ ...form, pricePerHour: e.target.value })} placeholder="5,000" className="h-10 rounded-lg" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.trip')}</Label>
-                  <Input value={form.pricePerTrip} onChange={(e) => setForm({ ...form, pricePerTrip: e.target.value })} placeholder="15,000" className="h-10 rounded-lg" />
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.inCity') || 'In City'}</Label>
+                  <Input value={form.priceInCity} onChange={(e) => setForm({ ...form, priceInCity: e.target.value })} placeholder="15,000" className="h-10 rounded-lg" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.province') || 'Province'}</Label>
+                  <Input value={form.priceProvince} onChange={(e) => setForm({ ...form, priceProvince: e.target.value })} placeholder="25,000" className="h-10 rounded-lg" />
                 </div>
               </div>
 

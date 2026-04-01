@@ -184,21 +184,24 @@ export default function CarDetails() {
                   </div>
                 </div>
 
-                {/* Pricing */}
                 <div className="mb-8">
                   <h3 className="text-lg font-semibold mb-4">{t('cars.pricing')}</h3>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="glass rounded-xl p-4 text-center">
-                      <div className="text-2xl font-bold text-accent">RWF {car.pricePerHour || '5,000'}</div>
-                      <div className="text-sm text-muted-foreground">{t('cars.perHour')}</div>
+                      <div className="text-xl font-bold text-accent">RWF {car.pricePerHour || '5,000'}</div>
+                      <div className="text-xs text-muted-foreground uppercase font-bold tracking-tighter">{t('cars.perHour')}</div>
                     </div>
                     <div className="glass rounded-xl p-4 text-center">
-                      <div className="text-2xl font-bold text-accent">RWF {car.pricePerTrip || '15,000'}</div>
-                      <div className="text-sm text-muted-foreground">{t('cars.perTrip')}</div>
+                      <div className="text-xl font-bold text-accent">RWF {car.priceInCity || '15,000'}</div>
+                      <div className="text-xs text-muted-foreground uppercase font-bold tracking-tighter">In City</div>
                     </div>
                     <div className="glass rounded-xl p-4 text-center">
-                      <div className="text-2xl font-bold text-accent">RWF {car.price || car.pricePerDay || '30,000'}</div>
-                      <div className="text-sm text-muted-foreground">{t('cars.perDay')}</div>
+                      <div className="text-xl font-bold text-accent">RWF {car.priceProvince || '25,000'}</div>
+                      <div className="text-xs text-muted-foreground uppercase font-bold tracking-tighter">Province</div>
+                    </div>
+                    <div className="glass rounded-xl p-4 text-center">
+                      <div className="text-xl font-bold text-accent">RWF {car.price || car.pricePerDay || '30,000'}</div>
+                      <div className="text-xs text-muted-foreground uppercase font-bold tracking-tighter">{t('cars.perDay')}</div>
                     </div>
                   </div>
                 </div>
