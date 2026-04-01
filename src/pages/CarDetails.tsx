@@ -70,7 +70,7 @@ export default function CarDetails() {
 
   return (
     <Layout>
-      <section className="py-12 md:py-20">
+      <section className="pt-2 pb-12 md:py-20">
         <div className="container mx-auto px-4">
           {/* Back Button */}
           <motion.div

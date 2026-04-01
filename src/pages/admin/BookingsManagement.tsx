@@ -69,6 +69,8 @@ export default function BookingsManagement() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [pendingAction, setPendingAction] = useState<{ id: string; status: string; label: string } | null>(null);
   const [form, setForm] = useState({ client_name: '', client_phone: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], pickup_location: '', total_price: 0 });
   const { toast } = useToast();

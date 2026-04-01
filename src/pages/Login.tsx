@@ -83,7 +83,7 @@ export default function Login() {
 
   return (
     <Layout>
-      <section className="h-[calc(100vh-80px)] min-h-[600px] flex items-center justify-center py-6 md:py-0 overflow-hidden">
+      <section className="h-[calc(100vh-80px)] min-h-[600px] flex items-center justify-center pt-2 pb-6 md:py-0 overflow-hidden">
         <div className="container mx-auto px-4 h-full flex items-center justify-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}

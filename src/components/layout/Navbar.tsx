@@ -273,8 +273,6 @@ export function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile bottom spacer so content isn't hidden behind bottom nav */}
-      <div className="md:hidden h-16 w-full" aria-hidden="true" />
 
       {/* Logout Confirmation Dialog */}
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>

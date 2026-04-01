@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { AIAssistant } from '@/components/ai/AIAssistant';
-import { AIAssistant } from '@/components/ai/AIAssistant';
 
 interface LayoutProps {
   children: ReactNode;

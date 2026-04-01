@@ -42,6 +42,7 @@ import { cn } from '@/lib/utils';
 import { Progress } from "@/components/ui/progress";
 import { ActionConfirmation } from '@/components/dashboard/ActionConfirmation';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { motion } from 'framer-motion';
 
 interface CarRow {
   _id?: string;
@@ -96,6 +97,7 @@ export default function CarsManagement() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
 
@@ -230,6 +232,7 @@ export default function CarsManagement() {
       await carsApi.delete(id);
       toast({ title: t('admin.cars.toast.deleteSuccess'), description: `${name} has been removed.`, variant: 'destructive' });
       fetchCars();
+      setConfirmOpen(false);
     } catch (error: any) {
       toast({ title: t('admin.cars.toast.fetchError'), description: error.message, variant: 'destructive' });
     }

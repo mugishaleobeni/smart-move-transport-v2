@@ -199,7 +199,7 @@ export default function Booking() {
   if (isSubmitted) {
     return (
       <Layout>
-        <section className="py-20 md:py-32 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
+        <section className="pt-4 pb-20 md:py-32 bg-zinc-50 dark:bg-zinc-950 min-h-screen">
           <div className="container mx-auto px-4 text-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -226,7 +226,7 @@ export default function Booking() {
 
   return (
     <Layout>
-      <section className="bg-zinc-50 dark:bg-zinc-950 min-h-screen pt-24 pb-20 md:pt-32">
+      <section className="bg-zinc-50 dark:bg-zinc-950 min-h-screen pt-4 pb-20 md:pt-16">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-12 gap-12 items-start">
 

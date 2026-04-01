@@ -38,6 +38,7 @@ export default function PricingManagement() {
   const [editId, setEditId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [ruleToDelete, setRuleToDelete] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
 
@@ -238,7 +239,7 @@ export default function PricingManagement() {
                 <TableCell>
                   <div className="flex items-baseline gap-1">
                     <span className="text-lg font-black text-primary">RWF {rule.amount}</span>
-                    <span className="text-[10px] font-medium text-slate-400">{t(`admin.pricing.labels.units.${comp.unit}Short`)}</span>
+                    <span className="text-[10px] font-medium text-slate-400 capitalize">/{t(`admin.pricing.units.${rule.pricing_type}`)}</span>
                   </div>
                 </TableCell>
                 <TableCell>

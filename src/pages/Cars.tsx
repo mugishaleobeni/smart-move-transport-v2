@@ -53,7 +53,7 @@ export default function Cars() {
 
   return (
     <Layout>
-      <section className="relative py-12 md:py-20 overflow-hidden">
+      <section className="relative pt-2 pb-12 md:py-20 overflow-hidden">
         {/* Background Image with low opacity */}
         <div
           className="absolute inset-0 z-0 pointer-events-none opacity-[0.03] dark:opacity-[0.05]"

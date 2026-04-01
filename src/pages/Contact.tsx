@@ -31,7 +31,7 @@ export default function Contact() {
 
   return (
     <Layout>
-      <section className="py-16 md:py-24">
+      <section className="pt-2 pb-16 md:py-24">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
