@@ -11,6 +11,10 @@ const api = axios.create({
     },
 });
 
+export const authApi = {
+    updateProfile: (data: any) => api.put('/auth/update-profile', data),
+};
+
 // Offline Request Queuing Interceptor
 api.interceptors.request.use((config) => {
     const isMutation = ['post', 'put', 'patch', 'delete'].includes(config.method || '');

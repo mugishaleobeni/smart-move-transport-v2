@@ -239,7 +239,8 @@
       "rejected": "Rejected",
       "completed": "Completed",
       "cancelled": "Cancelled",
-      "delete": "Delete"
+      "delete": "Delete",
+      "settings": "Settings"
     },
     "dashboard": {
       "title": "Overview",

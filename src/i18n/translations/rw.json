@@ -233,7 +233,8 @@
             "rejected": "Byanzwe",
             "completed": "Byarangiye",
             "cancelled": "Byasheshwe",
-            "delete": "Siba"
+            "delete": "Siba",
+            "settings": "Igenamiterere"
         },
         "dashboard": {
             "title": "Incamake",

@@ -18,6 +18,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   loginManual: (credentials: any) => Promise<void>;
   registerManual: (data: any) => Promise<void>;
+  updateProfile: (data: any) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -138,8 +139,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateProfile = async (data: any) => {
+    setLoading(true);
+    try {
+      const response = await api.put('/auth/update-profile', data);
+      if (response.data.message) {
+        // Refresh local user data
+        const meResponse = await api.get('/auth/me');
+        if (meResponse.data.authenticated) {
+          setUser({
+            uid: meResponse.data.uid,
+            email: meResponse.data.email,
+            name: meResponse.data.name,
+            phone: meResponse.data.phone,
+            role: meResponse.data.role
+          });
+        }
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Profile update failed:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isAdmin, loading, signInWithGoogle, loginManual, registerManual, signOut }}>
+    <AuthContext.Provider value={{ user, isAdmin, loading, signInWithGoogle, loginManual, registerManual, updateProfile, signOut }}>
       {children}
     </AuthContext.Provider>
   );
