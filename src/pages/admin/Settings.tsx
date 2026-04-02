@@ -1,17 +1,20 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Mail, Lock, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Shield, Mail, Lock, CheckCircle2, AlertCircle, Loader2, Send, BellRing } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { toast } from 'sonner';
+import { notificationsApi } from '@/lib/api';
 
 export default function Settings() {
   const { user, updateProfile } = useAuth();
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const [testingEmail, setTestingEmail] = useState(false);
+  const [emailTestResult, setEmailTestResult] = useState<{ status: string; method?: string; hint?: string } | null>(null);
   
   const [formData, setFormData] = useState({
     email: user?.email || '',
@@ -53,6 +56,26 @@ export default function Settings() {
       toast.error(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTestEmail = async () => {
+    setTestingEmail(true);
+    setEmailTestResult(null);
+    try {
+      const { data } = await notificationsApi.testEmail();
+      setEmailTestResult(data);
+      if (data.status === 'success') {
+        toast.success(`Test email sent via ${data.method}!`);
+      } else {
+        toast.error('Email test failed. Check configuration.');
+      }
+    } catch (error: any) {
+      const hint = error.response?.data?.hint || 'Email configuration may be incomplete.';
+      setEmailTestResult({ status: 'failed', hint });
+      toast.error('Email test failed.');
+    } finally {
+      setTestingEmail(false);
     }
   };
 
@@ -218,6 +241,62 @@ export default function Settings() {
             </p>
             <Button variant="outline" className="w-full border-rose-500/20 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20">
               Report Security Issue
+            </Button>
+          </motion.div>
+
+          {/* Email Notification Test */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="glass rounded-2xl p-8 space-y-5"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-accent/10">
+                <BellRing className="w-5 h-5 text-accent" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Email Notifications</h3>
+                <p className="text-xs text-muted-foreground">Verify booking alert emails are working</p>
+              </div>
+            </div>
+
+            <div className="text-sm text-muted-foreground space-y-1 bg-muted/30 rounded-xl p-4">
+              <p className="font-semibold text-foreground">Configured sender:</p>
+              <p className="font-mono text-accent text-xs">leo@gmail.com</p>
+              <p className="text-xs mt-2">Uses your Gmail App Password (SMTP) or the Firebase service account (Gmail API)</p>
+            </div>
+
+            {emailTestResult && (
+              <div className={`rounded-xl p-4 flex gap-3 text-sm ${
+                emailTestResult.status === 'success'
+                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400'
+              }`}>
+                {emailTestResult.status === 'success' ? (
+                  <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                )}
+                <div>
+                  {emailTestResult.status === 'success'
+                    ? <><strong>Success!</strong> Sent via <em>{emailTestResult.method}</em>. Check your inbox at leo@gmail.com.</>
+                    : <><strong>Failed.</strong> {emailTestResult.hint}</>}
+                </div>
+              </div>
+            )}
+
+            <Button
+              id="btn-test-email"
+              onClick={handleTestEmail}
+              disabled={testingEmail}
+              className="w-full btn-accent text-white h-11 font-bold gap-2"
+            >
+              {testingEmail ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Sending Test Email...</>
+              ) : (
+                <><Send className="w-4 h-4" /> Send Test Email</>  
+              )}
             </Button>
           </motion.div>
         </div>

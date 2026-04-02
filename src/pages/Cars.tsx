@@ -7,7 +7,7 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { Layout } from '@/components/layout/Layout';
 import { carsApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
+import { CarCard } from '@/components/ui/CarCard';
 
 interface CarItem {
   _id?: string;
@@ -88,85 +88,8 @@ export default function Cars() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="glass rounded-2xl overflow-hidden hover-lift group"
               >
-                {/* Image */}
-                <div className="aspect-[16/10] overflow-hidden relative">
-                  <img
-                    src={car.image || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=800'}
-                    alt={car.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                  {car.images && car.images.length > 1 && (
-                    <div className="absolute top-4 left-4 glass-dark px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-white/10 z-10">
-                      <ImageIcon className="w-3 h-3 text-white" />
-                      <span className="text-[10px] font-bold text-white uppercase tracking-tighter">{car.images.length} Photos</span>
-                    </div>
-                  )}
-                  <div className={cn(
-                    "absolute top-4 right-4 glass px-3 py-1 rounded-full text-sm font-medium",
-                    car.status === 'garage' ? "bg-rose-500/80 text-white" : "text-foreground"
-                  )}>
-                    {car.status === 'garage' ? 'Maintenance' : car.type}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2">{car.name}</h3>
-
-                  <div className="flex items-center gap-2 text-muted-foreground text-sm mb-4">
-                    <Users className="w-4 h-4" />
-                    <span>{car.seats} {t('cars.seats')}</span>
-                  </div>
-
-                  {/* Price */}
-                  <div className="flex flex-wrap gap-2 mb-6 text-sm">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block w-full mb-1">{t('cars.startingFrom')}</span>
-                    <Badge variant="secondary" className="bg-accent/10 text-accent border-none font-bold">
-                      RWF {car.price || car.pricePerDay || '30,000'} / Day
-                    </Badge>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <Link to={`/Cars/${car._id || car.id}`} className="flex-1">
-                      <Button variant="outline" className="w-full glass">
-                        {t('cars.viewDetails')}
-                      </Button>
-                    </Link>
-                    <Link to={car.status === 'garage' ? '#' : `/booking?car=${car._id || car.id}`} className="flex-1">
-                      <Button
-                        className={cn("w-full btn-accent text-white", car.status === 'garage' && "opacity-50 cursor-not-allowed")}
-                        disabled={car.status === 'garage'}
-                      >
-                        {car.status === 'garage' ? 'In Garage' : t('cars.bookNow')}
-                      </Button>
-                    </Link>
-                  </div>
-
-                  {/* Contact Actions */}
-                  <div className="flex gap-3 mt-3">
-                    <a href="tel:+250788123456" className="flex-1">
-                      <Button variant="ghost" size="sm" className="w-full gap-2">
-                        <Phone className="w-4 h-4" />
-                        {t('cars.call')}
-                      </Button>
-                    </a>
-                    <a
-                      href={`https://wa.me/250788123456?text=I'm interested in ${car.name}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1"
-                    >
-                      <Button variant="ghost" size="sm" className="w-full gap-2">
-                        <MessageCircle className="w-4 h-4" />
-                        {t('cars.whatsapp')}
-                      </Button>
-                    </a>
-                  </div>
-                </div>
+                <CarCard car={car} />
               </motion.div>
             ))}
           </div>

@@ -73,6 +73,7 @@ export const notificationsApi = {
     getAll: () => api.get('/notifications'),
     markRead: (id: string) => api.patch(`/notifications/${id}`, { is_read: true }),
     markAllRead: () => api.post('/notifications/mark-all-read'),
+    testEmail: () => api.post('/notifications/test-email'),
 };
 
 export const searchApi = {

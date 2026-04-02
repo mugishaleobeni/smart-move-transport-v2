@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Star, Shield, Clock, ImageIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star, Shield, Clock, ImageIcon, Phone, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { Layout } from '@/components/layout/Layout';
 import { carsApi } from '@/lib/api';
+import { CarCard } from '@/components/ui/CarCard';
 
 const defaultHeroImages = [
   'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600&q=80', // Timeless luxury sports car
@@ -17,7 +18,7 @@ export default function Home() {
   const navigate = useNavigate();
   const [featuredCars, setFeaturedCars] = useState<any[]>([]);
   const { t } = useLanguage();
-  const [heroImages, setHeroImages] = useState<string[]>(defaultHeroImages);
+  const [heroCars, setHeroCars] = useState<any[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -27,14 +28,13 @@ export default function Home() {
         if (data && data.length > 0) {
           setFeaturedCars(data.slice(0, 3));
 
-          // Use images from cars for hero section if they exist
-          const carImages = data
-            .map((car: any) => car.image)
-            .filter((img: string | null) => img !== null)
+          // Use cars for hero section if they have images
+          const carsWithImages = data
+            .filter((car: any) => car.image !== null)
             .slice(0, 5);
 
-          if (carImages.length > 0) {
-            setHeroImages(carImages);
+          if (carsWithImages.length > 0) {
+            setHeroCars(carsWithImages);
           }
         }
       } catch (err) {
@@ -45,15 +45,17 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (heroImages.length <= 1) return;
+    const slidesCount = heroCars.length > 0 ? heroCars.length : defaultHeroImages.length;
+    if (slidesCount <= 1) return;
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroImages.length);
+      setCurrentSlide((prev) => (prev + 1) % slidesCount);
     }, 5000);
     return () => clearInterval(timer);
-  }, [heroImages]);
+  }, [heroCars]);
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % heroImages.length);
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length);
+  const slidesCount = heroCars.length > 0 ? heroCars.length : defaultHeroImages.length;
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slidesCount);
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slidesCount) % slidesCount);
 
   return (
     <Layout>
@@ -61,7 +63,7 @@ export default function Home() {
       <section className="relative h-[90vh] min-h-[600px] overflow-hidden">
         {/* Background Slider */}
         <div className="absolute inset-0">
-          {heroImages.map((img, i) => (
+          {(heroCars.length > 0 ? heroCars : defaultHeroImages).map((item, i) => (
             <motion.div
               key={i}
               initial={false}
@@ -69,11 +71,11 @@ export default function Home() {
                 opacity: currentSlide === i ? 1 : 0,
                 scale: currentSlide === i ? 1 : 1.1,
               }}
-              transition={{ duration: 0.7 }}
+              transition={{ duration: 1 }}
               className="absolute inset-0"
             >
               <img
-                src={img}
+                src={typeof item === 'string' ? item : item.image}
                 alt={`Hero ${i + 1}`}
                 className="w-full h-full object-cover"
                 loading={i === 0 ? 'eager' : 'lazy'}
@@ -88,37 +90,64 @@ export default function Home() {
         {/* Content */}
         <div className="relative h-full container mx-auto px-4 flex flex-col justify-end pb-20 md:pb-32 lg:flex-row lg:items-end lg:justify-between gap-12">
           <motion.div
+            key={currentSlide}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.8 }}
             className="max-w-2xl"
           >
             <div className="flex flex-col items-start gap-2 mb-6">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 border border-accent/40 text-accent text-[8px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                {t('home.badges.available')}
+                {heroCars.length > 0 ? heroCars[currentSlide].type : t('home.badges.available')}
               </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-[8px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
                 {t('home.badges.instant')}
               </span>
             </div>
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-4 leading-[1] text-white drop-shadow-[0_2px_15px_rgba(0,0,0,0.8)] uppercase tracking-tighter">
-              {t('home.heroTitle')}
+            <h1 className="text-3xl md:text-5xl lg:text-7xl font-black mb-4 leading-[1] text-white drop-shadow-[0_2px_15px_rgba(0,0,0,0.8)] uppercase tracking-tighter">
+              {heroCars.length > 0 ? heroCars[currentSlide].name : t('home.heroTitle')}
             </h1>
-            <p className="text-sm md:text-base text-white/90 max-w-md drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)] mb-8 font-medium italic border-l-2 border-accent pl-4">
-              {t('home.heroSubtitle')}
+            <p className="text-sm md:text-base text-white/90 max-w-md drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)] mb-8 font-medium italic border-l-3 border-accent pl-4">
+              {heroCars.length > 0 
+                ? `Experience the ${heroCars[currentSlide].name} from Only RWF ${heroCars[currentSlide].price || heroCars[currentSlide].pricePerDay || '30,000'} per day. Secure your premium ride now.` 
+                : t('home.heroSubtitle')}
             </p>
-            <div className="flex flex-wrap gap-3">
-              <Link to="/booking">
-                <Button size="default" className="btn-accent text-white text-[9px] font-black uppercase tracking-widest px-8 h-12 rounded-lg shadow-xl">
-                  {t('home.bookNow')}
-                </Button>
-              </Link>
-              <Link to="/cars">
-                <Button size="default" variant="outline" className="text-[9px] font-black uppercase tracking-widest px-8 h-12 rounded-lg text-white border-white/40 hover:bg-white hover:text-black transition-colors bg-transparent">
-                  {t('home.viewCars')}
-                </Button>
-              </Link>
+            
+            {/* Action Buttons for Hero Car */}
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-2">
+              <div className="flex gap-3">
+                <Link to={heroCars.length > 0 ? `/booking?car=${heroCars[currentSlide]._id || heroCars[currentSlide].id}` : '/booking'}>
+                  <Button size="lg" className="btn-accent text-white text-[10px] font-black uppercase tracking-widest px-10 h-14 rounded-xl shadow-2xl hover:scale-[1.02] transition-transform">
+                    {t('home.bookNow')}
+                  </Button>
+                </Link>
+                <Link to={heroCars.length > 0 ? `/Cars/${heroCars[currentSlide]._id || heroCars[currentSlide].id}` : '/cars'}>
+                  <Button size="lg" variant="outline" className="text-[10px] font-black uppercase tracking-widest px-10 h-14 rounded-xl text-white border-white/40 hover:bg-white hover:text-black transition-all bg-black/20 backdrop-blur-md">
+                    {t('cars.viewDetails')}
+                  </Button>
+                </Link>
+              </div>
+
+              {heroCars.length > 0 && (
+                <div className="flex gap-3">
+                  <a href="tel:+250794800454" className="flex-1 sm:flex-none">
+                    <Button variant="ghost" size="icon" className="w-14 h-14 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-accent hover:border-accent transition-all group shadow-xl">
+                      <Phone className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    </Button>
+                  </a>
+                  <a 
+                    href={`https://wa.me/250794800454?text=I'm interested in the ${heroCars[currentSlide].name} currently on display.`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="flex-1 sm:flex-none"
+                  >
+                    <Button variant="ghost" size="icon" className="w-14 h-14 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-green-500 hover:border-green-500 transition-all group shadow-xl">
+                      <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    </Button>
+                  </a>
+                </div>
+              )}
             </div>
           </motion.div>
 
@@ -175,7 +204,7 @@ export default function Home() {
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <div className="flex gap-2">
-            {heroImages.map((_, i) => (
+            {(heroCars.length > 0 ? heroCars : defaultHeroImages).map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrentSlide(i)}
@@ -227,38 +256,7 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
               >
-                <Link to={`/cars/${car._id || car.id}`} className="block">
-                  <div className="glass rounded-2xl overflow-hidden hover-lift group">
-                    <div className="aspect-[16/10] overflow-hidden">
-                      <img
-                        src={car.image}
-                        alt={car.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                      />
-                      {car.images && car.images.length > 1 && (
-                        <div className="absolute top-2 right-2 glass-premium px-2 py-1 rounded-lg flex items-center gap-1.5 border border-white/10">
-                          <ImageIcon className="w-3 h-3 text-white" />
-                          <span className="text-[10px] font-black text-white">{car.images.length}</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-6">
-                      <h3 className="text-xl font-semibold mb-2">{car.name}</h3>
-                      <p className="text-muted-foreground text-sm mb-4">
-                        {car.type} • {car.seats} {t('cars.seats')}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-2xl font-bold text-accent">
-                          RWF {car.price || '30,000'}
-                          <span className="text-sm font-normal text-muted-foreground">
-                            {t('cars.perDay')}
-                          </span>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+                <CarCard car={car} />
               </motion.div>
             ))}
           </div>
