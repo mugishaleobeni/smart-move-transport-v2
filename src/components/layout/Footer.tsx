@@ -62,9 +62,12 @@ export function Footer() {
                 >
                     {/* Brand Column */}
                     <motion.div variants={itemVariants} className="space-y-6">
-                        <Link to="/" className="flex items-center gap-2">
-                            <span className="text-2xl font-bold bg-gradient-to-r from-accent to-accent/60 bg-clip-text text-transparent">
-                                Smart Move Transport
+                        <Link to="/" className="flex items-center gap-3 group">
+                            <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-metallic group-hover:scale-105 transition-all duration-300">
+                                <img src="/logo.jpg" alt="Smart Move" className="w-full h-full object-cover" />
+                            </div>
+                            <span className="text-2xl font-black tracking-tighter bg-gradient-to-r from-accent to-accent/60 bg-clip-text text-transparent uppercase">
+                                Smart Move
                             </span>
                         </Link>
                         <p className="text-muted-foreground leading-relaxed">
@@ -113,15 +116,15 @@ export function Footer() {
                         <ul className="space-y-4">
                             <li className="flex items-start gap-3 text-muted-foreground">
                                 <MapPin className="w-5 h-5 text-accent shrink-0 mt-1" />
-                                <span>123 Business Avenue, Kigali, Rwanda</span>
+                                <span>KG 11 Ave, Kigali, Rwanda</span>
                             </li>
                             <li className="flex items-center gap-3 text-muted-foreground">
                                 <Phone className="w-5 h-5 text-accent shrink-0" />
-                                <span>+250 788 000 000</span>
+                                <span>+250 794 800 454</span>
                             </li>
                             <li className="flex items-center gap-3 text-muted-foreground">
                                 <Mail className="w-5 h-5 text-accent shrink-0" />
-                                <span>info@smartmove.rw</span>
+                                <span>mugishaleobeni0@gmail.com</span>
                             </li>
                         </ul>
                     </motion.div>

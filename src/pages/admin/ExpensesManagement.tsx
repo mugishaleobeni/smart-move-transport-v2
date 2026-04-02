@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { expensesApi, carsApi } from '@/lib/api';
 import {
   Plus,
@@ -31,33 +32,74 @@ interface Expense { _id?: string; id?: string; car_id: string | null; amount: nu
 interface CarOption { _id: string; id?: string; name: string; }
 
 export default function ExpensesManagement() {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [cars, setCars] = useState<CarOption[]>([]);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { t } = useLanguage();
+
   const [filterCar, setFilterCar] = useState('all');
   const [search, setSearch] = useState('');
-  const [form, setForm] = useState({ car_id: '', amount: 0, description: '', expense_date: new Date().toISOString().split('T')[0] });
+  const [page, setPage] = useState(1);
+  const [form, setForm] = useState({ car_id: 'general', amount: 0, description: '', expense_date: new Date().toISOString().split('T')[0] });
   const [editId, setEditId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const { toast } = useToast();
-  const { t } = useLanguage();
 
-  useEffect(() => {
-    fetchExpenses();
-    carsApi.getAll().then((res) => setCars(res.data));
-  }, []);
+  // ─── QUERIES ───
+  const { data: expensesData, isLoading: expensesLoading } = useQuery({
+    queryKey: ['expenses', filterCar, search, page],
+    queryFn: () => expensesApi.getAll({ page, limit: 50 }),
+    placeholderData: (previousData) => previousData,
+    staleTime: 30000,
+  });
 
-  const fetchExpenses = async () => {
-    try {
-      const response = await expensesApi.getAll();
-      setExpenses(response.data);
-    } catch (error: any) {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+  const { data: carsData } = useQuery({
+    queryKey: ['cars'],
+    queryFn: () => carsApi.getAll(),
+    staleTime: 300000,
+  });
+
+  const expenses = (expensesData?.data as any)?.data || [];
+  const cars = (carsData?.data as any)?.data || [];
+
+  // ─── MUTATIONS (OPTIMISTIC UI) ───
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => expensesApi.delete(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['expenses'] });
+      const previous = queryClient.getQueryData(['expenses', filterCar, search, page]);
+      queryClient.setQueryData(['expenses', filterCar, search, page], (old: any) => {
+        if (!old) return old;
+        return { ...old, data: { ...old.data, data: old.data.data.filter((e: any) => (e._id || e.id) !== id) } };
+      });
+      return { previous };
+    },
+    onError: (err, id, context) => {
+      queryClient.setQueryData(['expenses', filterCar, search, page], context?.previous);
+      toast({ title: t('common.error'), description: err.message, variant: 'destructive' });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+    },
+    onSuccess: () => {
+      toast({ title: t('admin.expenses.toast.deleteSuccess'), variant: "destructive" });
     }
-  };
+  });
 
-  const handleSave = async () => {
+  const createMutation = useMutation({
+    mutationFn: (payload: any) => expensesApi.create(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      toast({ title: t('admin.expenses.toast.saveSuccess'), description: t('admin.expenses.logNew') });
+      setOpen(false);
+      setForm({ car_id: 'general', amount: 0, description: '', expense_date: new Date().toISOString().split('T')[0] });
+    },
+    onError: (err) => {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
+  });
+
+  const handleSave = () => {
     if (form.amount <= 0 || !form.description) {
       toast({ title: t('admin.bookings.toast.missingInfo'), description: t('admin.bookings.toast.fillRequired'), variant: "destructive" });
       return;
@@ -69,21 +111,11 @@ export default function ExpensesManagement() {
       description: form.description,
       expense_date: form.expense_date
     };
-    try {
-      if (editId) {
-        // Backend put route needed if we want update, for now backend might only have list/create/delete
-        // Check implementation or assumes it exists
-        toast({ title: 'Update not yet implemented on backend', variant: 'default' });
-      } else {
-        await expensesApi.create(payload);
-        toast({ title: t('admin.expenses.toast.saveSuccess'), description: t('admin.expenses.logNew') });
-      }
-      setOpen(false);
-      setEditId(null);
-      setForm({ car_id: 'general', amount: 0, description: '', expense_date: new Date().toISOString().split('T')[0] });
-      fetchExpenses();
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    
+    if (editId) {
+      toast({ title: 'Update not yet implemented on backend', variant: 'default' });
+    } else {
+      createMutation.mutate(payload);
     }
   };
 
@@ -92,15 +124,14 @@ export default function ExpensesManagement() {
     setConfirmOpen(true);
   };
 
-  const confirmDelete = async () => {
+  const confirmDelete = () => {
     if (!expenseToDelete) return;
-    try {
-      await expensesApi.delete(expenseToDelete);
-      toast({ title: t('admin.expenses.toast.deleteSuccess'), variant: "destructive" });
-      fetchExpenses();
-    } catch (error: any) {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
-    }
+    deleteMutation.mutate(expenseToDelete, {
+      onSuccess: () => {
+        setConfirmOpen(false);
+        setExpenseToDelete(null);
+      }
+    });
   };
 
   const carName = (carId: string | null) => cars.find((c) => (c._id === carId || c.id === carId))?.name || t('admin.expenses.categories.other');
@@ -183,12 +214,12 @@ export default function ExpensesManagement() {
         {[
           { label: 'Cumulative Spending', value: `RWF ${totalAmount.toLocaleString()}`, icon: TrendingDown, color: 'text-rose-600 bg-rose-50' },
           { label: 'Active Cost Centers', value: cars.length, icon: Car, color: 'text-blue-600 bg-blue-50' },
-          { label: 'Total Entries', value: filtered.length, icon: Receipt, color: 'text-amber-600 bg-amber-50' },
+          { label: 'Total Entries', value: (expensesData?.data as any)?.pagination?.total || 0, icon: Receipt, color: 'text-amber-600 bg-amber-50' },
         ].map((s, i) => (
           <Card key={i} className="border-none card-premium p-6 flex items-center justify-between bg-white dark:bg-zinc-900">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{s.label}</p>
-              <p className="text-2xl font-bold mt-1 tracking-tight">{s.value}</p>
+              {expensesLoading ? <Skeleton className="h-8 w-24 mt-1" /> : <p className="text-2xl font-bold mt-1 tracking-tight">{s.value}</p>}
             </div>
             <div className={cn("p-2.5 rounded-xl", s.color)}>
               <s.icon className="w-5 h-5" />
@@ -224,7 +255,7 @@ export default function ExpensesManagement() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 rounded-2xl overflow-hidden">
+      <div className="hidden md:block bg-white dark:bg-zinc-900 border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 rounded-2xl overflow-hidden">
         <Table>
           <TableHeader className="bg-zinc-50/10 dark:bg-zinc-800/50">
             <TableRow className="border-zinc-100 dark:border-zinc-800">
@@ -236,7 +267,18 @@ export default function ExpensesManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((e) => (
+            {expensesLoading ? (
+              Array(5).fill(0).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell className="px-6 py-4"><Skeleton className="h-4 w-20" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-24 rounded-full" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                  <TableCell className="text-right px-6"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
+                </TableRow>
+              ))
+            ) : (
+              expenses.map((e: any) => (
               <TableRow key={e._id || e.id} className="hover:bg-zinc-50/20 dark:hover:bg-zinc-800/20 transition-colors border-zinc-50 dark:border-zinc-800">
                 <TableCell className="px-6 py-4">
                   <span className="text-xs font-bold text-slate-500">{e.expense_date}</span>
@@ -281,7 +323,7 @@ export default function ExpensesManagement() {
                 </TableCell>
               </TableRow>
             ))}
-            {filtered.length === 0 && (
+            {!expensesLoading && filtered.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-24">
                   <div className="flex flex-col items-center gap-2">
@@ -297,6 +339,92 @@ export default function ExpensesManagement() {
           </TableBody>
         </Table>
       </div>
+
+      {/* ─── MOBILE CARDS VIEW ─── */}
+      <div className="space-y-4 md:hidden">
+        {expensesLoading ? (
+          Array(3).fill(0).map((_, i) => (
+            <Card key={i} className="p-5 rounded-3xl"><Skeleton className="h-20 w-full" /></Card>
+          ))
+        ) : (
+          expenses.map((e: any) => (
+          <motion.div
+            key={e._id || e.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-3xl p-5 shadow-sm font-bold"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-rose-500 uppercase tracking-[0.2em]">{t('admin.expenses.table.amount')}</p>
+                <p className="text-2xl font-black text-rose-600 tracking-tighter">- RWF {Number(e.amount).toLocaleString()}</p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => { setForm({ car_id: e.car_id || '', amount: e.amount, description: e.description, expense_date: e.expense_date }); setEditId((e._id || e.id)!); setOpen(true); }}
+                  className="h-10 w-10 rounded-2xl bg-zinc-50 dark:bg-zinc-800"
+                >
+                  <Edit className="w-4 h-4 text-primary" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDelete((e._id || e.id)!)}
+                  className="h-10 w-10 rounded-2xl bg-rose-50 dark:bg-rose-900/10 text-rose-500"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-50 dark:border-zinc-800/50">
+              <div className="space-y-1">
+                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">{t('admin.expenses.table.category')}</p>
+                <Badge variant="outline" className={cn(
+                  "h-5 text-[8px] font-black border-none uppercase px-2",
+                  e.car_id ? "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400" : "bg-purple-100 text-purple-600 dark:bg-purple-900/20"
+                )}>
+                  {carName(e.car_id)}
+                </Badge>
+              </div>
+              <div className="space-y-1 text-right">
+                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">{t('admin.expenses.table.date')}</p>
+                <p className="text-[10px] font-black text-zinc-500">{e.expense_date}</p>
+              </div>
+              <div className="col-span-2 space-y-1">
+                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">{t('admin.expenses.labels.description')}</p>
+                <p className="text-xs font-bold text-zinc-800 dark:text-zinc-100 italic">{e.description}</p>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      <div className="flex items-center justify-center gap-2 mt-8">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          disabled={page === 1} 
+          onClick={() => setPage(p => p - 1)}
+          className="rounded-xl h-9 px-4 font-bold"
+        >
+          {t('common.previous')}
+        </Button>
+        <span className="text-xs font-bold text-zinc-500">
+          {t('common.page')} {page} / {(expensesData?.data as any)?.pagination?.pages || 1}
+        </span>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          disabled={page === ((expensesData?.data as any)?.pagination?.pages || 1)} 
+          onClick={() => setPage(p => p + 1)}
+          className="rounded-xl h-9 px-4 font-bold"
+        >
+          {t('common.next')}
+        </Button>
+      </div>
+
       <ActionConfirmation
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}

@@ -219,24 +219,24 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 pb-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('admin.dashboard.title')}</h1>
-          <p className="text-muted-foreground">{t('admin.dashboard.subtitle')}</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase">{t('admin.dashboard.title')}</h1>
+          <p className="text-muted-foreground text-sm font-medium">{t('admin.dashboard.subtitle')}</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Link to="/admin/bookings">
-            <Button variant="outline" className="hidden sm:flex">{t('admin.dashboard.viewAllBookings')}</Button>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <Link to="/admin/bookings" className="flex-1 md:flex-none">
+            <Button variant="outline" className="w-full h-12 font-bold uppercase tracking-wider text-[10px] hidden sm:flex">{t('admin.dashboard.viewAllBookings')}</Button>
           </Link>
-          <Link to="/admin/cars">
-            <Button className="gap-2">
+          <Link to="/admin/cars" className="flex-1 md:flex-none">
+            <Button className="w-full h-12 btn-accent text-white font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-accent/20">
               <Plus className="w-4 h-4" /> {t('admin.dashboard.addVehicle')}
             </Button>
           </Link>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
         {(loading ? Array(5).fill(0) : statCards).map((card: any, i) => (
           <motion.div
             key={loading ? `skeleton-${i}` : card.title}
@@ -244,8 +244,8 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08, duration: 0.4 }}
           >
-            <Card className="overflow-hidden border-none card-premium bg-white dark:bg-zinc-900 h-full">
-              <CardContent className="p-6">
+            <Card className="overflow-hidden border-none card-premium bg-white dark:bg-zinc-900 h-full shadow-xl shadow-black/5 dark:shadow-none">
+              <CardContent className="p-5 md:p-6">
                 {loading ? (
                   <div className="space-y-4">
                     <Skeleton className="h-10 w-10 rounded-xl" />
@@ -257,15 +257,15 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <>
-                    <div className="flex justify-between items-start mb-4">
-                      <div className={cn("p-2.5 rounded-xl", card.color)}>
-                        <card.icon className="w-5 h-5" />
+                    <div className="flex justify-between items-start mb-5">
+                      <div className={cn("p-3 rounded-2xl shadow-inner", card.color)}>
+                        <card.icon className="w-6 h-6 md:w-5 md:h-5" />
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">{card.title}</p>
-                      <p className="text-2xl font-bold mt-1 tracking-tight">{card.value}</p>
-                      <p className="text-[10px] text-zinc-400 mt-1">{card.subtitle}</p>
+                      <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">{card.title}</p>
+                      <p className="text-2xl md:text-3xl font-black mt-2 tracking-tighter text-black dark:text-white">{card.value}</p>
+                      <p className="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-tight">{card.subtitle}</p>
                     </div>
                   </>
                 )}

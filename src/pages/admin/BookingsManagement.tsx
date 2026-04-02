@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bookingsApi, carsApi } from '@/lib/api';
 import {
   Search,
@@ -62,43 +63,91 @@ const getStatusMap = (t: (key: string) => string) => ({
 });
 
 export default function BookingsManagement() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [cars, setCars] = useState<CarOption[]>([]);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { t } = useLanguage();
+  const statusMap = getStatusMap(t);
+
+  // Filters & UI State
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [pendingAction, setPendingAction] = useState<{ id: string; status: string; label: string } | null>(null);
   const [form, setForm] = useState({ client_name: '', client_phone: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], pickup_location: '', total_price: 0 });
-  const { toast } = useToast();
-  const { t } = useLanguage();
-  const statusMap = getStatusMap(t);
 
-  useEffect(() => {
-    fetchBookings();
-    carsApi.getAll().then((res) => setCars(res.data));
+  // ─── QUERIES ───
+  const { data: bookingsData, isLoading: bookingsLoading } = useQuery({
+    queryKey: ['bookings', statusFilter, search, page],
+    queryFn: () => bookingsApi.getAll({ page, limit: 50 }),
+    placeholderData: (previousData) => previousData,
+    staleTime: 30000, // Consider data fresh for 30s
+  });
 
-    const interval = setInterval(() => {
-      fetchBookings();
-    }, 15000); // Poll every 15s
+  const { data: carsData } = useQuery({
+    queryKey: ['cars'],
+    queryFn: () => carsApi.getAll(),
+    staleTime: 300000, // Cars don't change often
+  });
 
-    return () => clearInterval(interval);
-  }, []);
+  const bookings = (bookingsData?.data as any)?.data || [];
+  const cars = (carsData?.data as any)?.data || [];
 
-  const fetchBookings = async () => {
-    try {
-      setLoading(true);
-      const response = await bookingsApi.getAll();
-      setBookings(response.data);
-    } catch (error: any) {
-      toast({ title: t('admin.bookings.toast.fetchError'), description: error.message, variant: 'destructive' });
-    } finally {
-      setLoading(false);
+  // ─── MUTATIONS (OPTIMISTIC UI) ───
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) => 
+      status === 'delete' ? bookingsApi.delete(id) : bookingsApi.updateStatus(id, status),
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: ['bookings'] });
+      const previousBookings = queryClient.getQueryData(['bookings', statusFilter, search, page]);
+      
+      // Optimistically update the cache
+      queryClient.setQueryData(['bookings', statusFilter, search, page], (old: any) => {
+        if (!old) return old;
+        if (status === 'delete') {
+          return { ...old, data: { ...old.data, data: old.data.data.filter((b: any) => (b._id || b.id) !== id) } };
+        }
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            data: old.data.data.map((b: any) => (b._id || b.id) === id ? { ...b, status } : b)
+          }
+        };
+      });
+
+      return { previousBookings };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(['bookings', statusFilter, search, page], context?.previousBookings);
+      toast({ title: t('admin.bookings.toast.actionFailed'), description: err.message, variant: 'destructive' });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+    },
+    onSuccess: (_, variables) => {
+      const msg = variables.status === 'delete' 
+        ? t('admin.bookings.toast.deleteSuccess')
+        : t('admin.bookings.toast.statusUpdate').replace('{{status}}', t(`admin.status.${variables.status}`));
+      toast({ title: msg });
     }
-  };
+  });
+
+  const createBookingMutation = useMutation({
+    mutationFn: (newBooking: any) => bookingsApi.create(newBooking),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      toast({ title: t('admin.bookings.toast.registerSuccess') });
+      setOpen(false);
+      setForm({ client_name: '', client_phone: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], pickup_location: '', total_price: 0 });
+    },
+    onError: (err) => {
+      toast({ title: t('admin.bookings.toast.registerFailed'), description: err.message, variant: 'destructive' });
+    }
+  });
 
   const handleStatusUpdate = (id: string, status: string, label: string) => {
     if (status === 'rejected' || status === 'cancelled' || status === 'delete') {
@@ -109,39 +158,20 @@ export default function BookingsManagement() {
     }
   };
 
-  const updateStatus = async (id: string, status: string) => {
-    try {
-      if (status === 'delete') {
-        await bookingsApi.delete(id);
-        toast({ title: t('admin.bookings.toast.deleteSuccess') });
-      } else {
-        await bookingsApi.updateStatus(id, status);
-        toast({ title: t('admin.bookings.toast.statusUpdate').replace('{{status}}', t(`admin.status.${status}`)) });
-      }
-      fetchBookings();
-    } catch (error: any) {
-      toast({ title: t('admin.bookings.toast.actionFailed'), description: error.message, variant: 'destructive' });
-    }
-  };
-
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!form.client_name || !form.car_id || !form.booking_date) {
       toast({ title: t('admin.bookings.toast.missingInfo'), description: t('admin.bookings.toast.fillRequired'), variant: 'destructive' });
       return;
     }
-    try {
-      await bookingsApi.create({
-        ...form,
-        total_price: Number(form.total_price),
-        status: 'approved'
-      });
-      toast({ title: t('admin.bookings.toast.registerSuccess'), description: t('admin.bookings.toast.tripConfirmed').replace('{{name}}', form.client_name) });
-      setOpen(false);
-      setForm({ client_name: '', client_phone: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], pickup_location: '', total_price: 0 });
-      fetchBookings();
-    } catch (error: any) {
-      toast({ title: t('admin.bookings.toast.registerFailed'), description: error.message, variant: 'destructive' });
-    }
+    createBookingMutation.mutate({
+      ...form,
+      total_price: Number(form.total_price),
+      status: 'approved'
+    });
+  };
+
+  const updateStatus = (id: string, status: string) => {
+    updateStatusMutation.mutate({ id, status });
   };
 
   const updateDriver = async (id: string, driver: string) => {
@@ -239,7 +269,7 @@ export default function BookingsManagement() {
             <CardContent className="p-6 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">{s.label}</p>
-                <p className="text-2xl font-bold mt-1 tracking-tight">{s.value}</p>
+                {bookingsLoading ? <Skeleton className="h-8 w-12 mt-1" /> : <p className="text-2xl font-bold mt-1 tracking-tight">{s.value}</p>}
               </div>
               <div className={cn("p-2.5 rounded-xl", s.color)}>
                 <s.icon className="w-5 h-5" />
@@ -279,7 +309,7 @@ export default function BookingsManagement() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 rounded-2xl overflow-hidden">
+      <div className="hidden md:block bg-white dark:bg-zinc-900 border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 rounded-2xl overflow-hidden">
         <Table>
           <TableHeader className="bg-zinc-50 dark:bg-zinc-800/50">
             <TableRow>
@@ -293,7 +323,7 @@ export default function BookingsManagement() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {bookingsLoading ? (
               Array(6).fill(0).map((_, i) => (
                 <TableRow key={i}>
                   <TableCell className="px-6 py-4">
@@ -423,7 +453,7 @@ export default function BookingsManagement() {
                 </TableRow>
               ))
             )}
-            {!loading && filtered.length === 0 && (
+            {!bookingsLoading && filtered.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-20">
                   <div className="flex flex-col items-center gap-2">
@@ -441,6 +471,136 @@ export default function BookingsManagement() {
           </TableBody>
         </Table>
       </div>
+
+      {/* ─── MOBILE CARDS VIEW ─── */}
+      <div className="grid grid-cols-1 gap-4 md:hidden">
+        {bookingsLoading ? (
+          Array(4).fill(0).map((_, i) => (
+            <Card key={i} className="border-none shadow-sm dark:bg-zinc-900 p-5 rounded-2xl">
+              <div className="flex items-center gap-4">
+                <Skeleton className="w-12 h-12 rounded-full" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+                <Skeleton className="w-8 h-8 rounded-full" />
+              </div>
+            </Card>
+          ))
+        ) : (
+          filtered.map((b) => (
+            <motion.div
+              key={b._id || b.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-3xl p-5 shadow-sm active:scale-[0.98] transition-all font-bold"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-black text-xs shadow-inner">
+                    {b.client_name.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-black dark:text-zinc-100 uppercase tracking-tight">{b.client_name}</h4>
+                    <Badge variant="outline" className={cn("h-5 text-[8px] px-1.5 font-black uppercase border-none mt-1 shadow-sm", statusMap[b.status]?.color)}>
+                      {statusMap[b.status]?.label || b.status}
+                    </Badge>
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-50 dark:border-zinc-800/50">
+                      <MoreVertical className="w-5 h-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 rounded-2xl overflow-hidden border-zinc-200 dark:border-zinc-800 shadow-2xl bg-white dark:bg-zinc-950 p-2">
+                    {/* Reuse existing DropdownMenuItems logic here */}
+                    {b.status === 'pending' && (
+                      <>
+                        <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'approved', t('admin.bookings.actions.approve'))} className="gap-2 text-emerald-600 focus:bg-emerald-50 rounded-xl p-3 font-bold mb-1">
+                          <Check className="w-4 h-4" /> {t('admin.bookings.actions.approve')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'rejected', t('admin.bookings.actions.reject'))} className="gap-2 text-rose-600 focus:bg-rose-50 rounded-xl p-3 font-bold mb-1">
+                          <Ban className="w-4 h-4" /> {t('admin.bookings.actions.reject')}
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    {b.status === 'approved' && (
+                      <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'completed', t('admin.bookings.actions.finalize'))} className="gap-2 text-blue-600 focus:bg-blue-50 rounded-xl p-3 font-bold mb-1">
+                        <Check className="w-4 h-4" /> {t('admin.bookings.actions.finalize')}
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem
+                      onClick={() => { setSelectedBooking(b); setDetailsOpen(true); }}
+                      className="gap-2 rounded-xl p-3 font-bold mb-1"
+                    >
+                      <User className="w-4 h-4" /> {t('admin.bookings.actions.viewDetails')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleStatusUpdate((b._id || b.id)!, 'delete', t('admin.status.delete'))}
+                      className="gap-2 text-rose-600 focus:bg-rose-50 rounded-xl p-3 font-bold"
+                    >
+                      <Trash className="w-4 h-4" /> {t('admin.bookings.actions.delete')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-50 dark:border-zinc-800/50">
+                <div className="space-y-1">
+                  <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">{t('admin.bookings.table.vehicle')}</p>
+                  <p className="text-xs font-bold flex items-center gap-1.5 ">
+                    <CarFront className="w-3.5 h-3.5 text-primary" />
+                    {carName(b.car_id)}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">{t('admin.bookings.table.payment')}</p>
+                  <p className="text-xs font-black text-amber-600">RWF {Number(b.total_price).toLocaleString()}</p>
+                </div>
+                <div className="col-span-2 space-y-1">
+                  <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">{t('admin.bookings.table.schedule')}</p>
+                  <div className="flex items-center gap-2 text-xs font-bold">
+                    <Calendar className="w-3.5 h-3.5 text-zinc-400" />
+                    <span>{b.booking_date}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] text-zinc-500 font-medium">
+                    <MapPin className="w-3.5 h-3.5 text-zinc-400" />
+                    {b.pickup_location}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))
+        )}
+      </div>
+
+      {/* ─── PAGINATION (NEW) ─── */}
+      {(bookingsData?.data as any)?.pagination?.pages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-8">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            disabled={page === 1} 
+            onClick={() => setPage(p => p - 1)}
+            className="rounded-xl h-9 px-4 font-bold"
+          >
+            {t('common.previous')}
+          </Button>
+          <span className="text-xs font-bold text-zinc-500">
+            {t('common.page')} {page} / {(bookingsData?.data as any)?.pagination?.pages}
+          </span>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            disabled={page === (bookingsData?.data as any)?.pagination?.pages} 
+            onClick={() => setPage(p => p + 1)}
+            className="rounded-xl h-9 px-4 font-bold"
+          >
+            {t('common.next')}
+          </Button>
+        </div>
+      )}
 
       <ActionConfirmation
         isOpen={confirmOpen}

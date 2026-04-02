@@ -28,13 +28,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/i18n/LanguageContext';
 
 interface CarOption { _id: string; id?: string; name: string; }
-interface PricingRule { id: string; car_id: string; pricing_type: string; amount: number; location: string | null; notes: string | null; }
+interface PricingRule { id: string; car_id: string; pricing_type: string; amount: number; location: string | null; notes: string | null; client_name?: string; date?: string; }
 
 export default function PricingManagement() {
   const [cars, setCars] = useState<CarOption[]>([]);
   const [rules, setRules] = useState<PricingRule[]>([]);
   const [selectedCar, setSelectedCar] = useState<string>('all');
-  const [form, setForm] = useState({ car_id: '', pricing_type: 'hour', amount: 0, location: '', notes: '' });
+  const [form, setForm] = useState({ 
+    car_id: '', 
+    pricing_type: 'hour', 
+    amount: 0, 
+    location: '', 
+    notes: '', 
+    client_name: '', 
+    date: new Date().toISOString().split('T')[0] 
+  });
   const [editId, setEditId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [ruleToDelete, setRuleToDelete] = useState<string | null>(null);
@@ -64,7 +72,15 @@ export default function PricingManagement() {
       return;
     }
 
-    const payload = { car_id: form.car_id, pricing_type: form.pricing_type, amount: form.amount, location: form.location || null, notes: form.notes || null };
+    const payload = { 
+      car_id: form.car_id, 
+      pricing_type: form.pricing_type, 
+      amount: form.amount, 
+      location: form.location || null, 
+      notes: form.notes || null,
+      client_name: form.client_name || null,
+      date: form.date || null
+    };
     try {
       if (editId) {
         await pricingApi.update(editId, payload);
@@ -73,7 +89,16 @@ export default function PricingManagement() {
         await pricingApi.create(payload);
         toast({ title: t('admin.pricing.toast.saveSuccess'), description: "New pricing rate established." });
       }
-      setOpen(false); setEditId(null); setForm({ car_id: '', pricing_type: 'hour', amount: 0, location: '', notes: '' });
+      setOpen(false); setEditId(null); 
+      setForm({ 
+        car_id: '', 
+        pricing_type: 'hour', 
+        amount: 0, 
+        location: '', 
+        notes: '', 
+        client_name: '', 
+        date: new Date().toISOString().split('T')[0] 
+      });
       fetchRules();
     } catch (error: any) {
       toast({ title: 'Error saving rule', description: error.message, variant: 'destructive' });
@@ -139,6 +164,30 @@ export default function PricingManagement() {
                       {cars.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">{t('admin.bookings.labels.clientName')}</Label>
+                  <div className="relative">
+                    <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input 
+                      value={form.client_name} 
+                      onChange={(e) => setForm({ ...form, client_name: e.target.value })} 
+                      placeholder="e.g. John Doe (Optional)" 
+                      className="h-11 pl-9 rounded-lg" 
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">{t('admin.bookings.labels.date')}</Label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input 
+                      type="date" 
+                      value={form.date} 
+                      onChange={(e) => setForm({ ...form, date: e.target.value })} 
+                      className="h-11 pl-9 rounded-lg" 
+                    />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -213,10 +262,10 @@ export default function PricingManagement() {
           <TableHeader className="bg-zinc-50/50 dark:bg-zinc-800/50">
             <TableRow className="hover:bg-transparent border-zinc-100 dark:border-zinc-800">
               <TableHead className="font-bold text-xs uppercase px-6 py-4">{t('admin.bookings.table.vehicle')}</TableHead>
+              <TableHead className="font-bold text-xs uppercase">{t('admin.bookings.labels.clientName')}</TableHead>
               <TableHead className="font-bold text-xs uppercase">{t('admin.pricing.labels.unit')}</TableHead>
               <TableHead className="font-bold text-xs uppercase">{t('admin.expenses.table.amount')}</TableHead>
-              <TableHead className="font-bold text-xs uppercase">{t('admin.pricing.location')}</TableHead>
-              <TableHead className="font-bold text-xs uppercase">{t('admin.pricing.notes')}</TableHead>
+              <TableHead className="font-bold text-xs uppercase">{t('admin.bookings.table.date')}</TableHead>
               <TableHead className="font-bold text-xs uppercase text-right px-6">{t('admin.bookings.table.actions')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -232,30 +281,21 @@ export default function PricingManagement() {
                   </div>
                 </TableCell>
                 <TableCell>
+                  <span className="text-xs font-bold text-slate-700 dark:text-zinc-200">{rule.client_name || "Any Client"}</span>
+                </TableCell>
+                <TableCell>
                   <Badge variant="outline" className="h-6 text-[10px] font-bold border-none bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-400 capitalize">
                     {t(`admin.pricing.units.${rule.pricing_type}`)}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-lg font-black text-primary">RWF {rule.amount}</span>
+                    <span className="text-lg font-black text-primary">RWF {rule.amount.toLocaleString()}</span>
                     <span className="text-[10px] font-medium text-slate-400 capitalize">/{t(`admin.pricing.units.${rule.pricing_type}`)}</span>
                   </div>
                 </TableCell>
                 <TableCell>
-                  {rule.location ? (
-                    <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-zinc-400">
-                      <MapPin className="w-3 h-3 text-slate-400" />
-                      {rule.location}
-                    </div>
-                  ) : (
-                    <span className="text-xs text-slate-400 italic font-medium">{t('admin.expenses.categories.other')}</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <span className="text-xs text-slate-500 max-w-[200px] truncate block font-medium">
-                    {rule.notes || "—"}
-                  </span>
+                  <span className="text-xs font-bold text-slate-500">{rule.date || "N/A"}</span>
                 </TableCell>
                 <TableCell className="text-right px-6">
                   <div className="flex justify-end gap-1">
@@ -263,7 +303,15 @@ export default function PricingManagement() {
                       variant="ghost"
                       size="icon"
                       onClick={() => {
-                        setForm({ car_id: rule.car_id, pricing_type: rule.pricing_type, amount: rule.amount, location: rule.location || '', notes: rule.notes || '' });
+                        setForm({ 
+                          car_id: rule.car_id, 
+                          pricing_type: rule.pricing_type, 
+                          amount: rule.amount, 
+                          location: rule.location || '', 
+                          notes: rule.notes || '',
+                          client_name: rule.client_name || '',
+                          date: rule.date || new Date().toISOString().split('T')[0]
+                        });
                         setEditId(rule.id);
                         setOpen(true);
                       }}

@@ -50,12 +50,12 @@ export function AdminSidebar() {
         <Sidebar className="border-r border-sidebar-border">
           <SidebarHeader className="p-4 border-b border-sidebar-border">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary text-white shadow-sm">
-                <Car className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm">
+                <img src="/logo.jpg" alt="Smart Move" className="w-full h-full object-cover" />
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <h2 className="text-sm font-bold text-black dark:text-white">Smart Move</h2>
+                  <h2 className="text-sm font-bold text-black dark:text-white uppercase tracking-tighter">Smart Move</h2>
                   <div className="flex items-center gap-1">
                     <span className="relative flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -126,27 +126,27 @@ export function AdminSidebar() {
       </div>
 
       {/* ─── MOBILE BOTTOM NAV BAR (hidden on desktop) ─── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-border">
-        <div className="flex items-stretch h-16 overflow-x-auto">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-border px-2">
+        <div className="flex items-center h-20 overflow-x-auto no-scrollbar snap-x">
           {menuItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.to === '/admin'}
-              className="flex-1 min-w-[56px] flex flex-col items-center justify-center gap-0.5 relative group"
+              className="flex-shrink-0 w-20 snap-center flex flex-col items-center justify-center relative group"
             >
               {({ isActive }) => (
-                <>
+                <div className="flex flex-col items-center justify-center h-full w-full">
                   {isActive && (
                     <motion.div
-                      layoutId="admin-mobile-nav-active"
-                      className="absolute inset-x-1 top-0 h-0.5 rounded-full bg-primary"
+                      layoutId="admin-mobile-nav-active-pill"
+                      className="absolute inset-x-1.5 inset-y-1.5 rounded-xl bg-primary/10 dark:bg-primary/20"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
                   <item.icon
                     className={cn(
-                      'w-5 h-5 transition-smooth',
+                      'w-5 h-5 transition-smooth relative z-10',
                       isActive
                         ? 'text-primary'
                         : 'text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200'
@@ -154,7 +154,7 @@ export function AdminSidebar() {
                   />
                   <span
                     className={cn(
-                      'text-[9px] font-medium leading-none transition-smooth',
+                      'text-[9px] font-bold leading-none transition-smooth relative z-10 mt-1',
                       isActive
                         ? 'text-primary'
                         : 'text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200'
@@ -162,7 +162,7 @@ export function AdminSidebar() {
                   >
                     {item.title}
                   </span>
-                </>
+                </div>
               )}
             </NavLink>
           ))}
@@ -170,18 +170,20 @@ export function AdminSidebar() {
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="flex-1 min-w-[56px] flex flex-col items-center justify-center gap-0.5 group"
+            className="flex-shrink-0 w-20 snap-center flex flex-col items-center justify-center group"
           >
-            <LogOut className="w-5 h-5 text-rose-500 group-hover:text-rose-600 transition-smooth" />
-            <span className="text-[9px] font-medium text-rose-500 group-hover:text-rose-600 leading-none">
-              Logout
-            </span>
+            <div className="flex flex-col items-center justify-center h-full w-full">
+              <LogOut className="w-5 h-5 text-rose-500 group-hover:text-rose-600 transition-smooth" />
+              <span className="text-[9px] font-bold text-rose-500 group-hover:text-rose-600 leading-none mt-1">
+                Logout
+              </span>
+            </div>
           </button>
         </div>
       </nav>
 
       {/* Mobile bottom spacer so content isn't hidden behind the nav */}
-      <div className="md:hidden h-16 w-full" aria-hidden="true" />
+      <div className="md:hidden h-20 w-full" aria-hidden="true" />
     </>
   );
 }

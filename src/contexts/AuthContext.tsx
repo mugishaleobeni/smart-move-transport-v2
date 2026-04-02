@@ -30,23 +30,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in via Flask session
+    // 1. Try to restore session from storage for instant UI (Revalidated below)
+    const storedUser = localStorage.getItem('smartmove_user');
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
+        setIsAdmin(parsed.role === 'admin');
+        setLoading(false); // Quick show, then revalidate
+      } catch (e) {
+        localStorage.removeItem('smartmove_user');
+      }
+    }
+
+    // 2. Revalidate Flask Session
     const checkSession = async () => {
       try {
         const response = await api.get('/auth/me');
         if (response.data.authenticated) {
-          // You might want to store user details in session or fetch them here
-          setUser({
+          const userData = {
             uid: response.data.uid,
             email: response.data.email,
             name: response.data.name,
             phone: response.data.phone,
             role: response.data.role
-          });
-          setIsAdmin(response.data.role === 'admin');
+          };
+          setUser(userData);
+          setIsAdmin(userData.role === 'admin');
+          localStorage.setItem('smartmove_user', JSON.stringify(userData));
+        } else {
+          setUser(null);
+          setIsAdmin(false);
+          localStorage.removeItem('smartmove_user');
         }
       } catch (error) {
-        console.log('No active session');
+        console.log('Session revalidation failed');
       } finally {
         setLoading(false);
       }
@@ -54,13 +72,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     checkSession();
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        // We handle the login via the manual call to signInWithGoogle
-        // But if the user refreshes, we might need to re-verify or rely on Flask session
-      } else {
-        // If Firebase says logged out, we should probably clear local state
-        // but Flask session might still be active. Usually they are synced.
+    // 3. Listen for Firebase Auth changes (if used)
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (!firebaseUser && !storedUser) {
+        // Only force logout if we have NO flask session and NO firebase user
+        // but we prioritize Flask session for Admin.
       }
     });
 
@@ -127,11 +143,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         await auth.signOut();
       } catch (e) {
-        console.log('Firebase signOut failed or not logged in via Firebase');
+        console.log('Firebase signOut failed');
       }
       await api.post('/auth/logout');
       setUser(null);
       setIsAdmin(false);
+      localStorage.removeItem('smartmove_user');
     } catch (error) {
       console.error('Sign out failed:', error);
     } finally {

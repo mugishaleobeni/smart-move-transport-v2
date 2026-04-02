@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
@@ -61,6 +61,39 @@ export default function Booking() {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  
+  const pickupRef = useRef<HTMLInputElement>(null);
+  const dropoffRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (step === 1 && (window as any).google) {
+      const options = {
+        componentRestrictions: { country: "rw" },
+        fields: ["formatted_address", "geometry", "name"],
+        strictBounds: false,
+      };
+
+      if (pickupRef.current) {
+        const autocomplete = new (window as any).google.maps.places.Autocomplete(pickupRef.current, options);
+        autocomplete.addListener("place_changed", () => {
+          const place = autocomplete.getPlace();
+          if (place.formatted_address) {
+            setBooking(prev => ({ ...prev, pickupLocation: place.formatted_address }));
+          }
+        });
+      }
+
+      if (dropoffRef.current) {
+        const autocomplete = new (window as any).google.maps.places.Autocomplete(dropoffRef.current, options);
+        autocomplete.addListener("place_changed", () => {
+          const place = autocomplete.getPlace();
+          if (place.formatted_address) {
+            setBooking(prev => ({ ...prev, dropoffLocation: place.formatted_address }));
+          }
+        });
+      }
+    }
+  }, [step]);
 
   useEffect(() => {
     if (Notification.permission === 'default') {
@@ -654,7 +687,7 @@ export default function Booking() {
                 </div>
                 <div>
                   <h4 className="text-xs font-black uppercase tracking-widest">{t('booking.support.title')}</h4>
-                  <p className="text-[10px] opacity-70 font-bold">+250 788 123 456</p>
+                  <p className="text-[10px] opacity-70 font-bold">+250 794 800 454</p>
                 </div>
                 <ChevronRight className="w-4 h-4 ml-auto opacity-50" />
               </div>

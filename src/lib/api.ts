@@ -42,7 +42,7 @@ api.interceptors.request.use((config) => {
 });
 
 export const carsApi = {
-    getAll: () => api.get('/cars'),
+    getAll: (params?: { limit?: number; page?: number }) => api.get('/cars', { params }),
     getById: (id: string) => api.get(`/cars/${id}`),
     create: (data: any) => api.post('/cars', data),
     update: (id: string, data: any) => api.put(`/cars/${id}`, data),
@@ -50,14 +50,14 @@ export const carsApi = {
 };
 
 export const bookingsApi = {
-    getAll: () => api.get('/bookings'),
+    getAll: (params?: { limit?: number; page?: number }) => api.get('/bookings', { params }),
     create: (data: any) => api.post('/bookings', data),
     updateStatus: (id: string, status: string) => api.patch(`/bookings/${id}`, { status }),
     delete: (id: string) => api.delete(`/bookings/${id}`),
 };
 
 export const expensesApi = {
-    getAll: () => api.get('/expenses'),
+    getAll: (params?: { limit?: number; page?: number }) => api.get('/expenses', { params }),
     create: (data: any) => api.post('/expenses', data),
     delete: (id: string) => api.delete(`/expenses/${id}`),
 };

@@ -47,8 +47,7 @@ export function AdminLayout() {
         <AdminSidebar />
         <div className="flex-1 flex flex-col min-h-screen">
           <AdminTopbar />
-          {/* Extra bottom padding on mobile so content clears the bottom nav */}
-          <main className="flex-1 p-4 md:p-6 overflow-auto pb-20 md:pb-6">
+          <main className="flex-1 p-4 md:p-8 overflow-auto pb-24 md:pb-8 mt-16 md:mt-0">
             <Outlet />
           </main>
         </div>

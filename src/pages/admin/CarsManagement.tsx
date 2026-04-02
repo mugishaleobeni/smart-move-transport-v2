@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
   Edit,
@@ -90,7 +91,11 @@ const emptyForm = {
 };
 
 export default function CarsManagement() {
-  const [cars, setCars] = useState<CarRow[]>([]);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { t } = useLanguage();
+
+  // Filters & State
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -98,27 +103,57 @@ export default function CarsManagement() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [page, setPage] = useState(1);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const { toast } = useToast();
-  const { t } = useLanguage();
 
-  useEffect(() => {
-    fetchCars();
-    const interval = setInterval(() => {
-      fetchCars();
-    }, 15000); // Poll every 15s
-    return () => clearInterval(interval);
-  }, []);
+  // ─── QUERIES ───
+  const { data: carsData, isLoading: carsLoading } = useQuery({
+    queryKey: ['cars', statusFilter, search, page],
+    queryFn: () => carsApi.getAll({ page, limit: 50 }),
+    placeholderData: (previousData) => previousData,
+    staleTime: 60000,
+  });
 
-  const fetchCars = async () => {
-    try {
-      const response = await carsApi.getAll();
-      setCars(response.data);
-    } catch (error: any) {
-      toast({ title: t('admin.cars.toast.fetchError'), description: error.message, variant: 'destructive' });
+  const cars = (carsData?.data as any)?.data || [];
+
+  // ─── MUTATIONS (OPTIMISTIC UI) ───
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => carsApi.delete(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['cars'] });
+      const previousCars = queryClient.getQueryData(['cars', statusFilter, search, page]);
+      queryClient.setQueryData(['cars', statusFilter, search, page], (old: any) => {
+        if (!old) return old;
+        return { ...old, data: { ...old.data, data: old.data.data.filter((c: any) => (c._id || c.id) !== id) } };
+      });
+      return { previousCars };
+    },
+    onError: (err, id, context) => {
+      queryClient.setQueryData(['cars', statusFilter, search, page], context?.previousCars);
+      toast({ title: t('admin.cars.toast.fetchError'), description: err.message, variant: 'destructive' });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['cars'] });
+    },
+    onSuccess: (_, id) => {
+      toast({ title: t('admin.cars.toast.deleteSuccess'), variant: 'destructive' });
     }
-  };
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: (payload: any) => editId ? carsApi.update(editId, payload) : carsApi.create(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cars'] });
+      toast({ title: editId ? t('admin.cars.actions.edit') : t('admin.cars.toast.addSuccess') });
+      setOpen(false);
+      setEditId(null);
+      setForm(emptyForm);
+    },
+    onError: (err) => {
+      toast({ title: 'Save failed', description: err.message, variant: 'destructive' });
+    }
+  });
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -166,7 +201,7 @@ export default function CarsManagement() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!form.name || !form.type) {
       toast({ title: t('admin.cars.carName'), description: t('admin.cars.namePlaceholder'), variant: "destructive" });
       return;
@@ -188,21 +223,7 @@ export default function CarsManagement() {
       priceProvince: form.priceProvince,
     };
 
-    try {
-      if (editId) {
-        await carsApi.update(editId, payload);
-        toast({ title: t('admin.cars.actions.edit'), description: `${form.name} updated successfully.` });
-      } else {
-        await carsApi.create(payload);
-        toast({ title: t('admin.cars.toast.addSuccess'), description: t('admin.cars.toast.addMessage').replace('{{name}}', form.name) });
-      }
-      setOpen(false);
-      setEditId(null);
-      setForm(emptyForm);
-      fetchCars();
-    } catch (error: any) {
-      toast({ title: 'Save failed', description: error.message, variant: 'destructive' });
-    }
+    saveMutation.mutate(payload);
   };
 
   const handleEdit = (car: CarRow) => {
@@ -229,17 +250,14 @@ export default function CarsManagement() {
     setConfirmOpen(true);
   };
 
-  const confirmDelete = async () => {
+  const confirmDelete = () => {
     if (!itemToDelete) return;
-    const { id, name } = itemToDelete;
-    try {
-      await carsApi.delete(id);
-      toast({ title: t('admin.cars.toast.deleteSuccess'), description: `${name} has been removed.`, variant: 'destructive' });
-      fetchCars();
-      setConfirmOpen(false);
-    } catch (error: any) {
-      toast({ title: t('admin.cars.toast.fetchError'), description: error.message, variant: 'destructive' });
-    }
+    deleteMutation.mutate(itemToDelete.id, {
+      onSuccess: () => {
+        setConfirmOpen(false);
+        setItemToDelete(null);
+      }
+    });
   };
 
   const filtered = cars.filter(car => {
@@ -504,7 +522,7 @@ export default function CarsManagement() {
             </div>
             <div>
               <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider">{s.label}</p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white">{s.value}</p>
+              {carsLoading ? <Skeleton className="h-8 w-12 mt-1" /> : <p className="text-2xl font-black text-slate-900 dark:text-white uppercase">{s.value}</p>}
             </div>
           </Card>
         ))}
@@ -546,84 +564,95 @@ export default function CarsManagement() {
       </div>
 
       {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filtered.map((car, i) => (
-            <motion.div
-              key={car.id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.05 }}
-            >
-              <Card className="group overflow-hidden border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 hover:ring-primary/40 dark:hover:ring-primary/40 transition-all duration-300 flex flex-col h-full bg-white dark:bg-zinc-900 rounded-2xl">
-                <div className="relative h-56 overflow-hidden">
-                  <Badge className={cn(
-                    "absolute top-4 left-4 z-10 font-bold border-none shadow-md capitalize",
-                    car.status === 'available'
-                      ? "bg-emerald-500 text-white"
-                      : "bg-rose-500 text-white"
-                  )}>
-                    {car.status}
-                  </Badge>
-                  {car.image ? (
-                    <img
-                      src={car.image}
-                      alt={car.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-slate-100 flex flex-col items-center justify-center text-slate-300">
-                      <CarFront className="w-12 h-12 mb-2" />
-                      <p className="text-xs uppercase tracking-widest font-bold">{t('admin.cars.labels.noImage')}</p>
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                    <p className="text-white text-xs font-medium leading-relaxed line-clamp-2">
-                      {car.description || 'No description available for this luxury vehicle.'}
-                    </p>
-                  </div>
-                </div>
-                <CardContent className="p-6 flex-1">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">{car.name}</h3>
-                      <p className="text-xs font-semibold text-primary uppercase tracking-widest mt-1">{car.type}</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 dark:bg-slate-800 rounded-full">
-                      <Users className="w-3.5 h-3.5 text-slate-500" />
-                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{car.seats}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1.5 min-h-[50px] content-start">
-                    {(car.features || []).slice(0, 4).map((feature, idx) => (
-                      <span key={idx} className="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-50 dark:bg-zinc-800 text-zinc-500 border border-zinc-100 dark:border-zinc-700">
-                        {feature}
-                      </span>
-                    ))}
-                    {car.features?.length > 4 && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-50 dark:bg-zinc-800 text-zinc-500">
-                        +{car.features.length - 4} more
-                      </span>
-                    )}
+          {carsLoading ? (
+            Array(6).fill(0).map((_, i) => (
+              <Card key={i} className="border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 rounded-2xl p-0 overflow-hidden">
+                <Skeleton className="h-48 w-full" />
+                <CardContent className="p-6 space-y-4">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-6 w-16 rounded-lg" />
+                    <Skeleton className="h-6 w-16 rounded-lg" />
                   </div>
                 </CardContent>
-                <CardFooter className="p-4 bg-slate-50/50 dark:bg-zinc-800/20 border-t border-slate-100 dark:border-zinc-800 flex gap-3">
-                  <Button variant="outline" size="sm" onClick={() => handleEdit(car)} className="flex-1 h-10 rounded-xl border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 font-bold gap-2 group/btn">
-                    <Edit className="w-3.5 h-3.5 group-hover/btn:text-primary transition-colors" />
-                    {t('admin.cars.actions.edit')}
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete((car._id || car.id)!, car.name)} className="h-10 w-10 rounded-xl text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </CardFooter>
               </Card>
-            </motion.div>
-          ))}
+            ))
+          ) : (
+            filtered.map((car, i) => (
+              <motion.div
+                key={car._id || car.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.05 }}
+              >
+                <Card className="group overflow-hidden border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 hover:ring-primary/40 dark:hover:ring-primary/40 transition-all duration-300 flex flex-col h-full bg-white dark:bg-zinc-900 rounded-2xl md:rounded-3xl">
+                  <div className="relative h-48 md:h-56 overflow-hidden">
+                    <Badge className={cn(
+                      "absolute top-4 left-4 z-10 font-black border-none shadow-md capitalize px-3",
+                      car.status === 'available'
+                        ? "bg-emerald-500 text-white"
+                        : "bg-rose-500 text-white"
+                    )}>
+                      {car.status === 'available' ? 'Live' : 'Garage'}
+                    </Badge>
+                    {car.image ? (
+                      <img
+                        src={car.image}
+                        alt={car.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-slate-100 dark:bg-zinc-800 flex flex-col items-center justify-center text-slate-300">
+                        <CarFront className="w-12 h-12 mb-2" />
+                        <p className="text-[10px] uppercase tracking-widest font-black">{t('admin.cars.labels.noImage')}</p>
+                      </div>
+                    )}
+                  </div>
+                  <CardContent className="p-5 md:p-6 flex-1">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">{car.name}</h3>
+                        <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mt-1">{car.type}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 dark:bg-slate-800/50 rounded-full border border-slate-100 dark:border-zinc-800">
+                        <Users className="w-3.5 h-3.5 text-slate-500" />
+                        <span className="text-xs font-black text-slate-700 dark:text-slate-300">{car.seats}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5 min-h-[40px] content-start">
+                      {(car.features || []).slice(0, 3).map((feature, idx) => (
+                        <span key={idx} className="text-[9px] font-black px-2 py-1 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-500 border border-zinc-100 dark:border-zinc-700 uppercase tracking-tighter">
+                          {feature}
+                        </span>
+                      ))}
+                      {car.features?.length > 3 && (
+                        <span className="text-[9px] font-black px-2 py-1 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-500 border border-zinc-100 dark:border-zinc-700">
+                          +{car.features.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  </CardContent>
+                  <CardFooter className="p-4 bg-slate-50/50 dark:bg-zinc-800/20 border-t border-slate-100 dark:border-zinc-800 flex gap-3">
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(car)} className="flex-1 h-10 rounded-xl border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 font-black uppercase text-[10px] tracking-widest gap-2 group/btn">
+                      <Edit className="w-3.5 h-3.5 group-hover/btn:text-primary transition-colors text-primary" />
+                      {t('admin.cars.actions.edit')}
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete((car._id || car.id)!, car.name)} className="h-10 w-10 rounded-xl text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 border border-transparent hover:border-rose-100">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </motion.div>
+            ))
+          )}
         </div>
       ) : (
         <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800">
+          <div className="hidden md:block">
+            <table className="w-full text-left">
+              <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800">
               <tr>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">{t('admin.cars.table.info')}</th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-400">{t('admin.cars.table.typeSpace')}</th>
@@ -676,6 +705,32 @@ export default function CarsManagement() {
               ))}
             </tbody>
           </table>
+          </div>
+          {/* Mobile List as Cards */}
+          <div className="md:hidden space-y-4 p-4 bg-zinc-50 dark:bg-black/20">
+            {filtered.map((car) => (
+              <div key={car._id || car.id} className="bg-white dark:bg-zinc-900 rounded-2xl p-4 shadow-sm border border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
+                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800">
+                  {car.image ? <img src={car.image} alt="" className="w-full h-full object-cover" /> : <CarFront className="w-8 h-8 text-zinc-300 mx-auto mt-4" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-black text-zinc-900 dark:text-white uppercase truncate tracking-tight">{car.name}</h4>
+                  <p className="text-[10px] font-bold text-zinc-500 uppercase">{car.type} • {car.seats} Seats</p>
+                  <Badge className={cn("mt-2 h-5 text-[8px] font-black uppercase", car.status === 'available' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600')}>
+                    {car.status}
+                  </Badge>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button variant="ghost" size="icon" onClick={() => handleEdit(car)} className="h-9 w-9 rounded-xl bg-zinc-50 dark:bg-zinc-800">
+                    <Edit className="w-4 h-4 text-primary" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleDelete((car._id || car.id)!, car.name)} className="h-9 w-9 rounded-xl bg-rose-50 dark:bg-rose-900/10 text-rose-500">
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -691,6 +746,30 @@ export default function CarsManagement() {
           </Button>
         </div>
       )}
+
+      <div className="flex items-center justify-center gap-2 mt-8">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          disabled={page === 1} 
+          onClick={() => setPage(p => p - 1)}
+          className="rounded-xl h-9 px-4 font-bold"
+        >
+          {t('common.previous')}
+        </Button>
+        <span className="text-xs font-bold text-zinc-500">
+          {t('common.page')} {page} / {(carsData?.data as any)?.pagination?.pages || 1}
+        </span>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          disabled={page === ((carsData?.data as any)?.pagination?.pages || 1)} 
+          onClick={() => setPage(p => p + 1)}
+          className="rounded-xl h-9 px-4 font-bold"
+        >
+          {t('common.next')}
+        </Button>
+      </div>
 
       <ActionConfirmation
         isOpen={confirmOpen}
