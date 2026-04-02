@@ -263,7 +263,7 @@ export default function Settings() {
 
             <div className="text-sm text-muted-foreground space-y-1 bg-muted/30 rounded-xl p-4">
               <p className="font-semibold text-foreground">Configured sender:</p>
-              <p className="font-mono text-accent text-xs">leo@gmail.com</p>
+              <p className="font-mono text-accent text-xs">mugishaleobeni0@gmail.com</p>
               <p className="text-xs mt-2">Uses your Gmail App Password (SMTP) or the Firebase service account (Gmail API)</p>
             </div>
 
