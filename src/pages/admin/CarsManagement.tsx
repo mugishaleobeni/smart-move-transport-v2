@@ -564,6 +564,7 @@ export default function CarsManagement() {
       </div>
 
       {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {carsLoading ? (
             Array(6).fill(0).map((_, i) => (
               <Card key={i} className="border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 rounded-2xl p-0 overflow-hidden">
