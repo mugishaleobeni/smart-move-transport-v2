@@ -50,13 +50,12 @@ export function Navbar() {
           <div className="flex items-center justify-between h-16 md:h-20">
 
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-metallic group-hover:scale-105 transition-all duration-300">
-                <img src="/logo.jpg" alt="Smart Move" className="w-full h-full object-cover" />
-              </div>
-              <span className="text-xl md:text-2xl font-black tracking-tighter text-metallic uppercase transition-smooth hidden sm:block">
-                Smart<span className="text-accent">Move</span>
-              </span>
+            <Link to="/" className="flex items-center group">
+              <img 
+                src="/logotype.jpg" 
+                alt="Smart Move" 
+                className="h-9 md:h-11 w-auto object-contain group-hover:scale-105 transition-all duration-300 rounded-lg"
+              />
             </Link>
 
             {/* Desktop Navigation Links */}

@@ -62,13 +62,12 @@ export function Footer() {
                 >
                     {/* Brand Column */}
                     <motion.div variants={itemVariants} className="space-y-6">
-                        <Link to="/" className="flex items-center gap-3 group">
-                            <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-metallic group-hover:scale-105 transition-all duration-300">
-                                <img src="/logo.jpg" alt="Smart Move" className="w-full h-full object-cover" />
-                            </div>
-                            <span className="text-2xl font-black tracking-tighter bg-gradient-to-r from-zinc-400 to-accent bg-clip-text text-transparent uppercase">
-                                Smart Move
-                            </span>
+                        <Link to="/" className="flex items-center group">
+                            <img 
+                                src="/logotype.jpg" 
+                                alt="Smart Move" 
+                                className="h-12 md:h-14 w-auto object-contain group-hover:scale-105 transition-all duration-300 rounded-xl" 
+                            />
                         </Link>
                         <p className="text-muted-foreground leading-relaxed">
                             {t('footer.desc')}
