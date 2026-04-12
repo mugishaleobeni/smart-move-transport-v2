@@ -22,7 +22,7 @@ export default function Contact() {
   };
 
   const details = [
-    { icon: Phone, label: t('contact.phone'), value: '+250 794 800 454', href: 'tel:+250794800454' },
+    { icon: Phone, label: t('contact.phone'), value: '+250 ', href: 'tel:+250794800454' },
     { icon: Mail, label: t('contact.email'), value: 'mugishaleobeni0@gmail.com', href: 'mailto:mugishaleobeni0@gmail.com' },
     { icon: MapPin, label: t('contact.address'), value: 'KG 11 Ave, Kigali, Rwanda' },
     { icon: Clock, label: t('contact.hours'), value: t('contact.hoursValue') },

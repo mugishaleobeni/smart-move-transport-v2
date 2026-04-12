@@ -66,7 +66,7 @@ export function Footer() {
                             <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-metallic group-hover:scale-105 transition-all duration-300">
                                 <img src="/logo.jpg" alt="Smart Move" className="w-full h-full object-cover" />
                             </div>
-                            <span className="text-2xl font-black tracking-tighter bg-gradient-to-r from-accent to-accent/60 bg-clip-text text-transparent uppercase">
+                            <span className="text-2xl font-black tracking-tighter bg-gradient-to-r from-zinc-400 to-accent bg-clip-text text-transparent uppercase">
                                 Smart Move
                             </span>
                         </Link>
