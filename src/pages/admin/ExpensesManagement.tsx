@@ -276,8 +276,7 @@ export default function ExpensesManagement() {
                   <TableCell><Skeleton className="h-6 w-24" /></TableCell>
                   <TableCell className="text-right px-6"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
                 </TableRow>
-              ))
-            ) : (
+              ))) : (
               expenses.map((e: any) => (
               <TableRow key={e._id || e.id} className="hover:bg-zinc-50/20 dark:hover:bg-zinc-800/20 transition-colors border-zinc-50 dark:border-zinc-800">
                 <TableCell className="px-6 py-4">
@@ -322,7 +321,7 @@ export default function ExpensesManagement() {
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+            )))}
             {!expensesLoading && filtered.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-24">
