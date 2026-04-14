@@ -31,6 +31,7 @@ const ExpensesManagement = lazy(() => import("./pages/admin/ExpensesManagement")
 const Analytics = lazy(() => import("./pages/admin/Analytics"));
 const Reports = lazy(() => import("./pages/admin/Reports"));
 const Settings = lazy(() => import("./pages/admin/Settings"));
+const FileManager = lazy(() => import("./pages/admin/FileManager"));
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,7 @@ const AppContent = () => {
           <Route path="analytics" element={<Suspense fallback={<Loading t={t} />}><Analytics /></Suspense>} />
           <Route path="reports" element={<Suspense fallback={<Loading t={t} />}><Reports /></Suspense>} />
           <Route path="settings" element={<Suspense fallback={<Loading t={t} />}><Settings /></Suspense>} />
+          <Route path="files" element={<Suspense fallback={<Loading t={t} />}><FileManager /></Suspense>} />
         </Route>
       </Route>
       <Route path="*" element={<NotFound />} />

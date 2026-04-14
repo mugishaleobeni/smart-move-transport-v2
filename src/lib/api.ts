@@ -81,4 +81,14 @@ export const searchApi = {
     global: (query: string) => api.get(`/search?q=${query}`),
 };
 
+export const filesApi = {
+    getFolders: (parentId?: string) => api.get('/files/folders', { params: { parent_id: parentId } }),
+    createFolder: (data: { name: string; parent_id?: string }) => api.post('/files/folders', data),
+    getFiles: (folderId?: string) => api.get('/files', { params: { folder_id: folderId } }),
+    uploadFile: (formData: FormData) => api.post('/files/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    deleteFile: (id: string) => api.delete(`/files/${id}`),
+};
+
 export default api;
