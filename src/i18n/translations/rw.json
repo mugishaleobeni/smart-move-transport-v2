@@ -8,20 +8,23 @@
         "logout": "Gusohoka",
         "logoutConfirm": "Ese urashaka gusohoka koko?",
         "logoutDescription": "Ibyo waba wahinduye bishobora gutakara. Bizasaba ko wongera kwinjira kugira ngo ugera kuri dashboard yawe.",
-        "admin": "Ubuyobozi",
+        "admin": "Umuyobozi",
+
         "activity": "Ibikorwa",
         "administrator": "Umuyobozi",
         "client": "Umukiriya"
     },
     "home": {
         "heroTitle": "Uburyo Bwiza bwo Gukodesha Imodoka i Kigali",
-        "heroSubtitle": "Inamo imodoka zigezweho kandi zihenze make mu Rwanda hamwe na Smart Move Transport. Umufatanyabikorwa wizewe mu kugeza abantu ku kibuga cy'indege i Kigali no gukodesha imodoka za 4x4.",
+        "heroSubtitle": "Inamo imodoka zigezweho kandi zihenze make mu Rwanda. Umufatanyabikorwa wizewe mu ngendo nziza i Kigali n'ahandi.",
+
         "bookNow": "Kodesha ubu",
         "viewCars": "Reba Imodoka Zihari",
         "whyChooseUs": "Kuki Wahitamo Gukodesha Imodoka Natwe i Kigali?",
         "premium": "Imodoka Zigezweho mu Rwanda",
-        "premiumDesc": "Imodoka zo mu bwoko bwa 4x4, SUV, n'izindi nziza cyane zikurikiranwa neza ubutitsa.",
-        "affordable": "Ibiciro Birahendutse i Kigali",
+        "premiumDesc": "Imodoka zo mu bwoko bwa 4x4, SUV,Bus n'izindi nziza cyane zikurikiranwa neza ubutitsa.",
+        "affordable": "Ibiciro Birahendutse ndetse harino kumvikana  i Kigali",
+
         "affordableDesc": "Dufite ibiciro bisobanutse mu gukodesha imodoka mu Rwanda nta yandi mafaranga yihishe.",
         "support": "Ubufasha bwa 24/7 mu Rwanda",
         "supportDesc": "Ubufasha bw'isaha n'isaha ku byerekeye ingendo zawe zose i Kigali no mu bice binyuranye.",
@@ -40,12 +43,13 @@
             "guarantee": "Serivisi nziza iremewe"
         },
         "about": {
-            "title": "Gukodesha Imodoka i Kigali & Serivisi z'Ingendo mu Rwanda",
-            "text1": "Ikaze kuri Smart Move Transport, mu gutanga serivisi zo gukodesha imodoka i Kigali. Waba uri umucuruzi waje mu rugendo, uri mukerarugendo waje gusura, cyangwa uri umunyamahanga utuye mu Rwanda, dufite imodoka hihariye zihura n'ibyo ukeneye byose. Guhera ku gukodesha imodoka ku Kibuga cy'Indege Mpuzamahanga cya Kigali kugeza ku gukodesha imodoka igihe kirekire ku bigo, twizera ko kugenda kwawe mu \"Gihugu cy'Imisozi Igihumbi\" biba bworoshye kandi bifite ishema.",
-            "text2": "Serivisi zacu zo gukodesha imodoka mu Rwanda zibanda ku kwizirwa no mutekano. Buri modoka mu zacu i Kigali—harimo na Toyota Land Cruiser zikomeye zibereye gusura ingagi muri Pariki y'Igihugu y'Ibirunga—zikanika neza kugira ngo ubone serivisi inoze.",
-            "text3": "Ese urashaka gukodesha imodoka mu Rwanda ku giciro kiringaniye? Twishimira ko ibiciro byacu bisobanutse kandi nta mafaranga yihishemo. Hitamo kwitwara cyangwa gukoresha abashoferi bacu bazobereye mu ngendo zo mu mugi cyangwa izambukiranya imipaka.",
-            "service1": "Serivisi za VIP ku Kibuga cy'indege cya Kigali (KGL)",
-            "service2": "Gukodesha imodoka za 4x4 zo gusura n'ubukerarugendo",
+            "title": "Serivisi z'Ingendo mu Rwanda",
+            "text1": "Smart Move Transport ni yo nkingi ikomeye mu gukodesha imodoka mu Rwanda. Dufite imodoka zinyuranye zihura n'ibyo ukeneye byose, haba ku rugendo rw'umunsi umwe cyangwa gukodesha igihe kirekire ku bigo.",
+            "text2": "Wibanda ku kwizirwa no mutekano. Buri modoka mu zacu zikanika neza kugira ngo buri mukiriya wacu agire urugendo rwiza kandi ruzira amakemwa.",
+            "text3": "Dufite ibiciro bisobanutse kandi nta mafaranga yihishemo. Hitamo kwitwara cyangwa gukoresha abashoferi bacu bazobereye akazi.",
+            "service1": "Serivisi z'abashoferi babizobereye",
+            "service2": "Imodoka zinyuranye kandi zikanishijwe neza",
+
             "service3": "Gukodesha imodoka igihe kirekire ku bigo"
         }
     },
@@ -129,8 +133,9 @@
         "notFound": "Imodoka ntiyabonetse",
         "placeholders": {
             "name": "Urugero: John Doe",
-            "phone": "+250 794 800 454",
-            "email": "mugishaleobeni0@gmail.com",
+            "phone": "+250 788 496 641",
+            "email": "smartmovetransportltd@gmail.com",
+
             "pickup": "Aho tugusanga?",
             "dropoff": "Aho uzasoreza (bidategetswe)",
             "selectTime": "Hitamo igihe..."
@@ -200,8 +205,8 @@
         "back": "Subira inyuma",
         "language": "Ururimi",
         "theme": "Uburyo bugaragara",
-        "dark": "Mwijima",
-        "light": "Mweru"
+        "dark": "Mu Mwijima",
+        "light": "Mu Mweru"
     },
     "offline": {
         "banner": "Nta internet ufite ubu",

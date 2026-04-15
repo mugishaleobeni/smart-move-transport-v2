@@ -81,6 +81,10 @@ export const searchApi = {
     global: (query: string) => api.get(`/search?q=${query}`),
 };
 
+export const newsletterApi = {
+    subscribe: (email: string) => api.post('/newsletter/subscribe', { email }),
+};
+
 export const filesApi = {
     getFolders: (parentId?: string) => api.get('/files/folders', { params: { parent_id: parentId } }),
     createFolder: (data: { name: string; parent_id?: string }) => api.post('/files/folders', data),

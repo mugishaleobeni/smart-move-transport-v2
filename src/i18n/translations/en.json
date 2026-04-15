@@ -15,7 +15,8 @@
   },
   "home": {
     "heroTitle": "Best Car Rental in Kigali",
-    "heroSubtitle": "Experience premium luxury and affordable Rwanda car hire with Smart Move Transport. Your trusted partner for Kigali airport transfers and 4x4 rentals.",
+    "heroSubtitle": "Experience premium cars and affordable transport in Rwanda. Your trusted partner for seamless journeys across Kigali and beyond.",
+
     "bookNow": "Book Now",
     "viewCars": "View Our Fleet",
     "whyChooseUs": "Why Choose Our Kigali Car Rental?",
@@ -40,12 +41,13 @@
       "guarantee": "Premium Service Guaranteed"
     },
     "about": {
-      "title": "Premium Car Rental Kigali & Rwanda Travel Services",
-      "text1": "Welcome to Smart Move Transport, your premier provider for car rental in Kigali. Whether you are a business traveler, a tourist on safari, or an expat living in Rwanda, we offer a specialized fleet to meet every need. From Kigali International Airport car rentals with instant pickup to long-term corporate leases, we ensure your mobility in the \"Land of a Thousand Hills\" is seamless and stylish.",
-      "text2": "Our Rwanda car hire services focus on reliability and safety. Every vehicle in our Kigali fleet—including rugged 4x4 Toyota Land Cruisers perfect for gorilla trekking in Volcanoes National Park—undergoes rigorous maintenance to guarantee a professional experience.",
-      "text3": "Looking for affordable car rental in Rwanda? We pride ourselves on transparent pricing with no hidden fees. Choose between self-drive freedom or the convenience of our chauffeur-driven services for city tours or cross-border travel.",
-      "service1": "Kigali Airport VIP Transfers (KGL)",
-      "service2": "4x4 Safari & Tour Vehicle Hire",
+      "title": "Professional Transport Services in Rwanda",
+      "text1": "Smart Move Transport is your premier provider for car rentals in Rwanda. We offer a diverse fleet to meet every need, from individual daily trips to long-term corporate leases.",
+      "text2": "We focus on reliability and safety. Every vehicle in our fleet undergoes rigorous maintenance to ensure a smooth and professional experience for all clients.",
+      "text3": "We pride ourselves on transparent pricing with no hidden fees. Choose between self-drive freedom or the convenience of our professional chauffeur-driven services.",
+      "service1": "Professional chauffeur services",
+      "service2": "Diverse fleet of well-maintained vehicles",
+
       "service3": "Monthly & Long-term Corporate Rental"
     }
   },
@@ -135,8 +137,9 @@
     "notFound": "Car not found",
     "placeholders": {
       "name": "E.g. John Doe",
-      "phone": "+250 794 800 454",
-      "email": "mugishaleobeni0@gmail.com",
+      "phone": "+250 788 496 641",
+      "email": "smartmovetransportltd@gmail.com",
+
       "pickup": "Where to pick you up?",
       "dropoff": "Final destination (optional)",
       "selectTime": "Select Time..."

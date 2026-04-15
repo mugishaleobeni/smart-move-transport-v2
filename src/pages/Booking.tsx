@@ -687,7 +687,8 @@ export default function Booking() {
                 </div>
                 <div>
                   <h4 className="text-xs font-black uppercase tracking-widest">{t('booking.support.title')}</h4>
-                  <p className="text-[10px] opacity-70 font-bold">+250 794 800 454</p>
+                  <p className="text-[10px] opacity-70 font-bold">+250 788 496 641</p>
+
                 </div>
                 <ChevronRight className="w-4 h-4 ml-auto opacity-50" />
               </div>

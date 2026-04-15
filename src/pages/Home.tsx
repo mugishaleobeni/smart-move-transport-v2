@@ -131,13 +131,15 @@ export default function Home() {
 
               {heroCars.length > 0 && (
                 <div className="flex gap-3">
-                  <a href="tel:+250794800454" className="flex-1 sm:flex-none">
+                  <a href="tel:+250788496641" className="flex-1 sm:flex-none">
+
                     <Button variant="ghost" size="icon" className="w-14 h-14 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-accent hover:border-accent transition-all group shadow-xl">
                       <Phone className="w-5 h-5 group-hover:scale-110 transition-transform" />
                     </Button>
                   </a>
                   <a 
-                    href={`https://wa.me/250794800454?text=I'm interested in the ${heroCars[currentSlide].name} currently on display.`} 
+                    href={`https://wa.me/250788496641?text=I'm interested in the ${heroCars[currentSlide].name} currently on display.`} 
+
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="flex-1 sm:flex-none"

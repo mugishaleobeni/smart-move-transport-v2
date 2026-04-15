@@ -26,7 +26,8 @@ interface CarCardProps {
 export function CarCard({ car, priority = false }: CarCardProps) {
   const { t } = useLanguage();
   const carId = car._id || car.id;
-  const phoneNumber = "+250794800454"; // Updated as per requirements
+  const phoneNumber = "+250788496641"; // Updated as per requirements
+
 
   return (
     <div className="glass rounded-3xl overflow-hidden hover-lift group border border-white/10 flex flex-col h-full">

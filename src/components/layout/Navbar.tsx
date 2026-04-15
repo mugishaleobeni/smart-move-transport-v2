@@ -51,11 +51,13 @@ export function Navbar() {
 
             {/* Logo */}
             <Link to="/" className="flex items-center group">
-              <img 
-                src="/logotype.jpg" 
-                alt="Smart Move" 
-                className="h-9 md:h-11 w-auto object-contain group-hover:scale-105 transition-all duration-300 rounded-lg"
-              />
+              <div className="h-14 md:h-16 w-40 md:w-56 flex items-center justify-center overflow-hidden">
+                <img 
+                  src="/logotype.jpg" 
+                  alt="Smart Move" 
+                  className="w-full h-auto scale-[1.8] md:scale-[2.2] mix-blend-multiply dark:mix-blend-plus-lighter transition-all duration-300"
+                />
+              </div>
             </Link>
 
             {/* Desktop Navigation Links */}

@@ -16,9 +16,7 @@ export function Layout({ children }: LayoutProps) {
         {children}
       </main>
       {/* Footer hidden on mobile — bottom nav handles navigation there */}
-      <div className="hidden md:block">
-        <Footer />
-      </div>
+      <Footer />
       <AIAssistant />
     </div>
   );
