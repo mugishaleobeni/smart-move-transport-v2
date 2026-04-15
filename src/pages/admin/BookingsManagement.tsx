@@ -333,6 +333,11 @@ export default function BookingsManagement() {
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-40 bg-background border-border">
+              <div className="flex items-center gap-2">
+                <Filter className="w-3.5 h-3.5" />
+                <SelectValue placeholder={t('admin.bookings.allStatus')} />
+              </div>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t('admin.bookings.allStatus')}</SelectItem>
