@@ -207,34 +207,7 @@ export function Footer() {
                     ))}
                 </motion.div>
 
-<<<<<<< HEAD
-                {/* App Download Mockup */}
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="pb-12 text-center"
-                >
-                    <p className="text-sm font-medium mb-4 text-muted-foreground uppercase tracking-wider">{t('footer.appTitle')}</p>
-                    <div className="flex flex-wrap justify-center gap-4">
-                        <div className="h-12 w-40 bg-black rounded-lg flex items-center px-4 border border-white/10 cursor-pointer hover:bg-black/80 transition-colors">
-                            <div className="mr-3 text-white"><AppleIcon /></div>
-                            <div className="text-left">
-                                <p className="text-[10px] text-white/60 leading-none">{t('footer.appleDownload')}</p>
-                                <p className="text-sm text-white font-semibold">App Store</p>
-                            </div>
-                        </div>
-                        <div className="h-12 w-40 bg-black rounded-lg flex items-center px-4 border border-white/10 cursor-pointer hover:bg-black/80 transition-colors">
-                            <div className="mr-3 text-white"><PlayIcon /></div>
-                            <div className="text-left">
-                                <p className="text-[10px] text-white/60 leading-none">{t('footer.googleDownload')}</p>
-                                <p className="text-sm text-white font-semibold">Google Play</p>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-=======
->>>>>>> 811e4d6 (roll here by leo)
+
 
                 {/* Bottom Bar */}
                 <div className="pt-8 mt-0 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground border-t border-border/30">
