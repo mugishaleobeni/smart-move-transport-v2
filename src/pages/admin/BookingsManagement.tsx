@@ -16,7 +16,10 @@ import {
   Ban,
   Plus,
   Banknote,
-  Trash
+  Trash,
+  Download,
+  AlertTriangle,
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,12 +47,15 @@ interface Booking {
   id?: string;
   client_name: string;
   client_phone: string | null;
+  id_number?: string;
   car_id: string | null;
   booking_date: string;
   pickup_location: string;
   total_price: number;
   status: string;
   driver: string | null;
+  external_car: string | null;
+  has_conflict?: boolean;
 }
 
 interface CarOption { _id: string; id?: string; name: string; }
@@ -176,13 +182,49 @@ export default function BookingsManagement() {
 
   const updateDriver = async (id: string, driver: string) => {
     try {
-      // Backend should support updating driver, or we use a general update route
-      await bookingsApi.updateStatus(id, 'driver_update'); // Temporarily using status update logic if driver update route isn't specific
-      // In reality we should have a generic update route
+      await bookingsApi.updateStatus(id, 'driver_update', { driver });
       toast({ title: t('admin.bookings.toast.driverAssigned') });
     } catch (error: any) {
       toast({ title: t('admin.bookings.toast.assignFailed'), description: error.message, variant: 'destructive' });
     }
+  };
+
+  const updateExternalCar = async (id: string, external_car: string) => {
+    try {
+      await bookingsApi.updateStatus(id, 'external_car_update', { external_car });
+      toast({ title: "External car assigned successfully" });
+    } catch (error: any) {
+      toast({ title: "Failed to assign external car", description: error.message, variant: 'destructive' });
+    }
+  };
+
+  const exportBookings = () => {
+    const headers = ["Client Name", "Phone", "ID Number", "Vehicle", "External Car", "Date", "Pickup", "Total (RWF)", "Status"];
+    const rows = filtered.map(b => [
+      b.client_name,
+      b.client_phone || "",
+      b.id_number || "",
+      carName(b.car_id),
+      b.external_car || "",
+      b.booking_date,
+      b.pickup_location,
+      b.total_price,
+      b.status
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(e => e.join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `bookings_export_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const carName = (id: string | null) => cars.find((c) => (c._id === id || c.id === id))?.name || '—';
@@ -291,11 +333,6 @@ export default function BookingsManagement() {
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40 bg-background border-border">
-              <div className="flex items-center gap-2">
-                <Filter className="w-3.5 h-3.5" />
-                <SelectValue placeholder={t('admin.bookings.allStatus')} />
-              </div>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t('admin.bookings.allStatus')}</SelectItem>
@@ -306,6 +343,11 @@ export default function BookingsManagement() {
               <SelectItem value="cancelled">{t('admin.status.cancelled')}</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={exportBookings} className="h-10 rounded-xl gap-2 font-bold bg-white dark:bg-zinc-900 border-border shadow-sm">
+            <Download className="w-4 h-4" /> Export CSV
+          </Button>
         </div>
       </div>
 
@@ -318,7 +360,8 @@ export default function BookingsManagement() {
               <TableHead className="font-semibold">{t('admin.bookings.table.schedule')}</TableHead>
               <TableHead className="font-semibold">{t('admin.bookings.table.payment')}</TableHead>
               <TableHead className="font-semibold">{t('admin.bookings.table.status')}</TableHead>
-              <TableHead className="font-semibold">{t('admin.bookings.table.attendant')}</TableHead>
+              <TableHead className="font-semibold">Assign Driver</TableHead>
+              <TableHead className="font-semibold">External Car</TableHead>
               <TableHead className="font-semibold text-right px-6">{t('admin.bookings.table.actions')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -340,12 +383,24 @@ export default function BookingsManagement() {
                   <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
                   <TableCell><Skeleton className="h-8 w-32" /></TableCell>
+                  <TableCell><Skeleton className="h-8 w-32" /></TableCell>
                   <TableCell className="text-right px-6"><Skeleton className="h-8 w-8 rounded-full ml-auto" /></TableCell>
                 </TableRow>
               ))
             ) : (
-              filtered.map((b) => (
-                <TableRow key={b._id || b.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors border-zinc-100 dark:border-zinc-800 font-bold">
+              filtered.map((b) => {
+                const isConflict = b.has_conflict || filtered.some(other => 
+                   (other._id || other.id) !== (b._id || b.id) && 
+                   other.car_id === b.car_id && 
+                   other.booking_date === b.booking_date &&
+                   other.status !== 'cancelled'
+                );
+
+                return (
+                <TableRow key={b._id || b.id} className={cn(
+                  "hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors border-zinc-100 dark:border-zinc-800 font-bold",
+                  isConflict && "bg-rose-50/30 dark:bg-rose-950/10 border-l-4 border-l-rose-500"
+                )}>
                   <TableCell className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400 font-black text-xs">
@@ -364,7 +419,10 @@ export default function BookingsManagement() {
                   <TableCell>
                     <div className="flex items-center gap-2 text-sm text-black dark:text-zinc-300">
                       <CarFront className="w-3.5 h-3.5 text-zinc-400" />
-                      <span>{carName(b.car_id)}</span>
+                      <div className="flex flex-col">
+                        <span className={cn(isConflict && "text-rose-500 underline decoration-wavy shadow-rose-500/20")}>{carName(b.car_id)}</span>
+                        {isConflict && <span className="text-[8px] font-black uppercase text-rose-500 animate-pulse">Conflict Error</span>}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -398,8 +456,18 @@ export default function BookingsManagement() {
                       <Input
                         placeholder={t('admin.bookings.assignDriver')}
                         defaultValue={b.driver || ''}
-                        className="h-8 w-32 text-[10px] bg-transparent font-bold focus-visible:ring-1 focus-visible:ring-primary border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2"
+                        className="h-8 w-32 text-[10px] bg-transparent font-bold focus-visible:ring-1 focus-visible:ring-primary border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2 uppercase"
                         onBlur={(e) => updateDriver((b._id || b.id)!, e.target.value)}
+                      />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="relative group">
+                      <Input
+                        placeholder="Assign Ext. Car"
+                        defaultValue={b.external_car || ''}
+                        className="h-8 w-32 text-[10px] bg-transparent font-bold focus-visible:ring-1 focus-visible:ring-emerald-500 border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2 uppercase"
+                        onBlur={(e) => updateExternalCar((b._id || b.id)!, e.target.value)}
                       />
                     </div>
                   </TableCell>
@@ -650,9 +718,14 @@ export default function BookingsManagement() {
                   <p className="font-medium">{selectedBooking.booking_date}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t('admin.bookings.tripTotal')}</p>
                   <p className="font-black text-amber-600 dark:text-amber-500">RWF {Number(selectedBooking.total_price).toLocaleString()}</p>
                 </div>
+                {selectedBooking.id_number && (
+                  <div className="col-span-2 space-y-1">
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">ID Number / Passport</p>
+                    <p className="font-black text-zinc-800 dark:text-zinc-200">{selectedBooking.id_number}</p>
+                  </div>
+                )}
               </div>
               <div className="space-y-1 pt-2 border-t border-zinc-100 dark:border-zinc-800">
                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 mb-1">

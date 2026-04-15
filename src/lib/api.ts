@@ -52,7 +52,7 @@ export const carsApi = {
 export const bookingsApi = {
     getAll: (params?: { limit?: number; page?: number }) => api.get('/bookings', { params }),
     create: (data: any) => api.post('/bookings', data),
-    updateStatus: (id: string, status: string) => api.patch(`/bookings/${id}`, { status }),
+    updateStatus: (id: string, status: string, extraData: any = {}) => api.patch(`/bookings/${id}`, { status, ...extraData }),
     delete: (id: string) => api.delete(`/bookings/${id}`),
 };
 

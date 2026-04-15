@@ -9,7 +9,9 @@ import {
   Users,
   ArrowUpRight,
   ArrowDownRight,
-  Plus
+  Plus,
+  ArrowRight,
+  AlertCircle
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -274,6 +276,36 @@ export default function Dashboard() {
           </motion.div>
         ))}
       </div>
+
+      {/* Upcoming Alerts Section */}
+      {(() => {
+        const today = new Date().toISOString().split('T')[0];
+        const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+        const alerts = recentBookings.filter(b => (b.booking_date === today || b.booking_date === tomorrow) && b.status === 'approved');
+        
+        if (alerts.length === 0) return null;
+
+        return (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-8">
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                  <AlertCircle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-amber-900 dark:text-amber-100 leading-none mb-1 uppercase tracking-tight">System Operational Alert</h3>
+                  <p className="text-amber-700/80 dark:text-amber-400/80 text-xs font-bold">You have <span className="underline underline-offset-4">{alerts.length} upcoming booking(s)</span> for today/tomorrow that need final attendance check.</p>
+                </div>
+              </div>
+              <Link to="/admin/bookings">
+                <Button className="btn-accent text-white font-black uppercase text-[10px] tracking-widest px-8 rounded-xl h-12 shadow-xl shadow-accent/10">
+                  Manage Fleet Requests <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
+        );
+      })()}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Card className="lg:col-span-2 border-none shadow-sm ring-1 ring-zinc-200 dark:ring-zinc-800 overflow-hidden">

@@ -230,14 +230,14 @@ export default function CarDetails() {
                   </Link>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <a href="tel:+250788123456">
+                    <a href="tel:+250788496641">
                       <Button variant="outline" size="lg" className="w-full glass gap-2">
                         <Phone className="w-5 h-5" />
                         {t('cars.call')}
                       </Button>
                     </a>
                     <a
-                      href={`https://wa.me/250788123456?text=I'm interested in ${car.name}`}
+                      href={`https://wa.me/250788496641?text=I'm interested in ${car.name}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

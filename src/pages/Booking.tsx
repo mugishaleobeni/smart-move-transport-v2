@@ -19,11 +19,12 @@ import { cn } from '@/lib/utils';
 
 const STEPS = ['selectCar', 'clientInfo', 'selectDateTime', 'confirm'] as const;
 
-type PricingPlan = 'hour' | 'day' | 'trip';
+type PricingPlan = 'day' | 'month' | 'trip';
 
 interface BookingData {
   carId: string;
   clientName: string;
+  idNumber: string;
   clientEmail: string;
   clientPhone: string;
   pickupLocation: string;
@@ -32,6 +33,7 @@ interface BookingData {
   time: string;
   pricingPlan: PricingPlan;
   duration: number;
+  agreedToTerms: boolean;
 }
 
 export default function Booking() {
@@ -50,14 +52,16 @@ export default function Booking() {
   const [booking, setBooking] = useState<BookingData>({
     carId: searchParams.get('car') || '',
     clientName: user?.name || '',
+    idNumber: '',
     clientEmail: user?.email || '',
     clientPhone: user?.phone || '',
-    pickupLocation: '',
+    pickupLocation: 'Kigali Masaka',
     dropoffLocation: '',
     date: undefined,
     time: '',
-    pricingPlan: 'hour',
+    pricingPlan: 'day',
     duration: 1,
+    agreedToTerms: false,
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -145,13 +149,13 @@ export default function Booking() {
 
   const calculatePrice = () => {
     if (!selectedCarData) return 0;
-    const hourly = selectedCarData.price_per_hour || 50;
-    const daily = selectedCarData.price_per_day || 300;
-    const trip = selectedCarData.price_per_trip || 150;
+    const daily = selectedCarData.price_per_day || 30000;
+    const monthly = selectedCarData.price_per_month || daily * 25; // 25 days if not specified
+    const trip = selectedCarData.price_per_trip || 15000;
 
     switch (booking.pricingPlan) {
-      case 'hour': return hourly * booking.duration;
       case 'day': return daily * booking.duration;
+      case 'month': return monthly * booking.duration;
       case 'trip': return trip * booking.duration;
       default: return 0;
     }
@@ -159,16 +163,16 @@ export default function Booking() {
 
   const getPlanLabel = (plan: PricingPlan) => {
     switch (plan) {
-      case 'hour': return t('booking.perHour') || 'Per Hour';
       case 'day': return t('booking.perDay') || 'Per Day';
+      case 'month': return t('booking.perMonth') || 'Per Month';
       case 'trip': return t('booking.perTrip') || 'Per Trip';
     }
   };
 
   const getDurationLabel = () => {
     switch (booking.pricingPlan) {
-      case 'hour': return booking.duration === 1 ? 'hour' : 'hours';
       case 'day': return booking.duration === 1 ? 'day' : 'days';
+      case 'month': return booking.duration === 1 ? 'month' : 'months';
       case 'trip': return booking.duration === 1 ? 'trip' : 'trips';
     }
   };
@@ -176,8 +180,9 @@ export default function Booking() {
   const canProceed = () => {
     switch (step) {
       case 0: return !!booking.carId;
-      case 1: return !!booking.clientName && !!booking.clientPhone && !!booking.pickupLocation;
+      case 1: return !!booking.clientName && !!booking.clientPhone && !!booking.idNumber;
       case 2: return !!booking.date && !!booking.time && booking.duration > 0;
+      case 3: return booking.agreedToTerms === true;
       default: return true;
     }
   };
@@ -187,13 +192,15 @@ export default function Booking() {
     const bookingPayload = {
       car_id: booking.carId || null,
       client_name: booking.clientName,
+      id_number: booking.idNumber,
       client_email: booking.clientEmail || null,
       client_phone: booking.clientPhone || null,
       pickup_location: booking.pickupLocation,
       dropoff_location: booking.dropoffLocation || null,
       booking_date: booking.date ? format(booking.date, 'yyyy-MM-dd') : '',
       booking_time: booking.time || null,
-      duration_hours: booking.pricingPlan === 'day' ? booking.duration * 24 : booking.duration,
+      duration: booking.duration,
+      pricing_plan: booking.pricingPlan,
       total_price: calculatePrice(),
       status: 'pending',
     };
@@ -336,7 +343,7 @@ export default function Booking() {
                                 <div className="flex-1 space-y-2">
                                   <div className="flex justify-between items-start">
                                     <div className="font-black uppercase tracking-tight text-lg">{car.name}</div>
-                                    <div className="text-accent font-black tracking-tighter text-xl">${car.price_per_hour || 50}<span className="text-[10px] text-muted-foreground ml-1 uppercase">/hr</span></div>
+                                    <div className="text-accent font-black tracking-tighter text-xl">RWF {car.price_per_day || 30000}<span className="text-[10px] text-muted-foreground ml-1 uppercase">/day</span></div>
                                   </div>
                                   <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium uppercase tracking-wider">
                                     <span className="flex items-center gap-1"><User className="w-3 h-3" /> {car.seats} Seats</span>
@@ -403,7 +410,7 @@ export default function Booking() {
                               />
                             </div>
                           </div>
-                          <div className="space-y-2">
+                          <div className="space-y-2 col-span-2">
                             <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">{t('booking.labels.pickup')}</Label>
                             <div className="relative group">
                               <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
@@ -417,6 +424,19 @@ export default function Booking() {
                             </div>
                           </div>
                           <div className="space-y-2">
+                            <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">ID Number</Label>
+                            <div className="relative group">
+                              <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
+                              <Input
+                                value={booking.idNumber}
+                                onChange={(e) => setBooking({ ...booking, idNumber: e.target.value })}
+                                className="h-14 pl-12 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold shadow-inner"
+                                placeholder="ID / Passport Number"
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2 md:col-span-2">
                             <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">{t('booking.labels.dropoff')}</Label>
                             <div className="relative group">
                               <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-accent transition-colors" />
@@ -424,8 +444,7 @@ export default function Booking() {
                                 value={booking.dropoffLocation}
                                 onChange={(e) => setBooking({ ...booking, dropoffLocation: e.target.value })}
                                 className="h-14 pl-12 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold shadow-inner"
-                                placeholder={t('booking.placeholders.dropoff')}
-                                required
+                                placeholder="Destination (Optional)"
                               />
                             </div>
                           </div>
@@ -444,7 +463,7 @@ export default function Booking() {
                         <div className="space-y-4">
                           <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">{t('booking.labels.pricing')}</Label>
                           <div className="grid grid-cols-3 gap-4">
-                            {(['hour', 'day', 'trip'] as PricingPlan[]).map((plan) => (
+                            {(['day', 'month', 'trip'] as PricingPlan[]).map((plan) => (
                               <button
                                 key={plan}
                                 type="button"
@@ -459,7 +478,7 @@ export default function Booking() {
                                 <span className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full transition-colors", booking.pricingPlan === plan ? "bg-accent text-white" : "bg-zinc-200 dark:bg-zinc-800 text-muted-foreground")}>{plan}</span>
                                 {selectedCarData && (
                                   <span className="text-xl font-black tracking-tighter">
-                                    ${plan === 'hour' ? (selectedCarData.price_per_hour || 50) : plan === 'day' ? (selectedCarData.price_per_day || 300) : (selectedCarData.price_per_trip || 150)}
+                                    RWF {plan === 'day' ? (selectedCarData.price_per_day || 30000) : plan === 'month' ? (selectedCarData.price_per_month || (selectedCarData.price_per_day || 30000) * 25) : (selectedCarData.price_per_trip || 15000)}
                                   </span>
                                 )}
                                 {booking.pricingPlan === plan && (
@@ -509,16 +528,16 @@ export default function Booking() {
                             <span className="text-xl font-black text-accent">{booking.duration}</span>
                           </div>
                           <Input
-                            type="range"
+                            type="number"
                             min="1"
-                            max={booking.pricingPlan === 'day' ? 30 : 24}
+                            max={booking.pricingPlan === 'day' ? 30 : booking.pricingPlan === 'month' ? 12 : 24}
                             value={booking.duration}
-                            onChange={(e) => setBooking({ ...booking, duration: parseInt(e.target.value) })}
-                            className="accent-accent h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg cursor-pointer"
+                            onChange={(e) => setBooking({ ...booking, duration: parseInt(e.target.value) || 1 })}
+                            className="h-14 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold"
                           />
                           <div className="flex justify-between text-[8px] font-black text-muted-foreground px-1 uppercase tracking-tighter">
                             <span>Min: 1 {getDurationLabel()}</span>
-                            <span>Max: {booking.pricingPlan === 'day' ? 30 : 24} {getDurationLabel()}</span>
+                            <span>Max: {booking.pricingPlan === 'day' ? 30 : booking.pricingPlan === 'month' ? 12 : 24} {getDurationLabel()}</span>
                           </div>
                         </div>
                       </div>
@@ -566,9 +585,42 @@ export default function Booking() {
                                 <div className="text-xs font-bold text-muted-foreground uppercase">{booking.duration} {getDurationLabel()} × {getPlanLabel(booking.pricingPlan)}</div>
                               </div>
                               <div className="text-5xl font-black tracking-tighter text-accent">
-                                <span className="text-xl align-top mr-1">RWF</span>{calculatePrice()}
+                                <span className="text-xl align-top mr-1">RWF</span>{calculatePrice().toLocaleString()}
                               </div>
                             </div>
+                          </div>
+
+                          {calculatePrice() > 500000 && (
+                            <div className="p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl space-y-4">
+                              <div className="flex items-center gap-3">
+                                <MessageCircle className="w-5 h-5 text-emerald-500" />
+                                <h4 className="font-black uppercase tracking-tight text-sm text-emerald-600">Exclusive Deal Opportunity</h4>
+                              </div>
+                              <p className="text-xs text-emerald-700/80 leading-relaxed font-medium">
+                                High value booking detected. You may be eligible for a specialized discount. Contact our operations team directly for a custom quote.
+                              </p>
+                              <div className="flex gap-3">
+                                <a href="tel:0788496641" className="flex-1">
+                                  <Button className="w-full h-10 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl">Call Now</Button>
+                                </a>
+                                <a href="https://wa.me/250788496641" target="_blank" className="flex-1">
+                                  <Button variant="outline" className="w-full h-10 border-emerald-600 text-emerald-600 bg-white/50 text-[10px] font-black uppercase tracking-widest rounded-xl">WhatsApp</Button>
+                                </a>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex items-center space-x-3 p-2">
+                             <input 
+                               type="checkbox" 
+                               id="terms" 
+                               checked={booking.agreedToTerms}
+                               onChange={(e) => setBooking({...booking, agreedToTerms: e.target.checked})}
+                               className="w-5 h-5 rounded border-zinc-300 text-accent focus:ring-accent accent-accent"
+                             />
+                             <Label htmlFor="terms" className="text-xs font-bold text-muted-foreground uppercase cursor-pointer">
+                               I agree to the <span className="text-accent underline">Terms & Conditions</span> and rental policy
+                             </Label>
                           </div>
                         </div>
                       </div>
@@ -653,7 +705,7 @@ export default function Booking() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center text-xs font-bold uppercase">
                         <span className="text-muted-foreground">{t('booking.summary.rate')}</span>
-                        <span>RWF {selectedCarData ? (booking.pricingPlan === 'hour' ? selectedCarData.price_per_hour : booking.pricingPlan === 'day' ? selectedCarData.price_per_day : selectedCarData.price_per_trip) : '0'}</span>
+                        <span>RWF {selectedCarData ? (booking.pricingPlan === 'day' ? selectedCarData.price_per_day : booking.pricingPlan === 'month' ? selectedCarData.price_per_month || (selectedCarData.price_per_day * 25) : selectedCarData.price_per_trip) : '0'}</span>
                       </div>
                       <div className="flex justify-between items-center text-xs font-bold uppercase">
                         <span className="text-muted-foreground">Duration ({getDurationLabel()})</span>
@@ -661,7 +713,7 @@ export default function Booking() {
                       </div>
                       <div className="pt-4 mt-4 border-t border-border/30 flex justify-between items-end">
                         <span className="text-[10px] font-black uppercase text-foreground tracking-widest">{t('booking.summary.finalAmount')}</span>
-                        <span className="text-3xl font-black tracking-tighter text-foreground">RWF {calculatePrice()}</span>
+                        <span className="text-3xl font-black tracking-tighter text-foreground">RWF {calculatePrice().toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
