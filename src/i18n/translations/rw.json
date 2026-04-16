@@ -273,11 +273,11 @@
             }
         },
         "analytics": {
-            "title": "Isesengurabikorwa",
+            "title": "Isesengura bikorwa",
             "subtitle": "Reba neza inyungu n'imikoreshereze y'umutungo.",
-            "loading": "Gukusanya imibare...",
-            "topPerformer": "Iyitwaye neza uyu kwezi",
-            "earnedMonth": "Yinjije RWF {{amount}} uyu kwezi",
+            "loading": "Turimo gukusanya amakuru mwihangane...",
+            "topPerformer": "Iyitwaye neza uku kwezi",
+            "earnedMonth": "Ayinjije RWF {{amount}} uku kwezi",
             "mostProfitable": "Imodoka itanga inyungu nyinshi",
             "highMargin": "Inyungu nyayo iri hejuru",
             "highCost": "Imodoka isohora menshi",
@@ -307,9 +307,9 @@
             "tripTotal": "Igiteranyo (RWF)",
             "pickupLocation": "Aho ufatira imodoka",
             "addressPlaceholder": "Aho uherereye cyangwa ku Kibuga cy'indege",
-            "completeRegistration": "Andika neza",
+            "completeRegistration": "Rangiza kwiyandikisha",
             "stats": {
-                "total": "Gukodesha Kwose",
+                "total": "Gukodesha Kose",
                 "pending": "Bitegereje Kwemezwa",
                 "completed": "Ingendo Zarangiye"
             },
@@ -319,7 +319,7 @@
                 "client": "Amakuru y'Umukiriya",
                 "vehicle": "Imodoka",
                 "schedule": "Gahunda",
-                "payment": "Kwambura",
+                "payment": "Kwishura",
                 "status": "Imiterere",
                 "attendant": "Umuyobozi",
                 "actions": "Ibikorwa"
@@ -351,9 +351,9 @@
                 "statusUpdate": "Gukodesha ubu kuri {{status}}",
                 "actionFailed": "Igikorwa ntiyashobotse",
                 "missingInfo": "Amakuru manke",
-                "fillRequired": "Nyamuneka andika izina ry'umukiriya, imodoka n'itariki.",
-                "registerSuccess": "Urugendo rwanditswe",
-                "tripConfirmed": "Urugendo rwa {{name}} rwemezwe.",
+                "fillRequired": "Nyaboneka andika izina ry'umukiriya, imodoka n'itariki.",
+                "registerSuccess": "kwiyandikisha byakunze",
+                "tripConfirmed": "Urugendo rwa {{name}} rwemejwe.",
                 "registerFailed": "Kwiyandikisha ntiyashobotse",
                 "driverAssigned": "Umushoferi yagenwe",
                 "assignFailed": "Kugena umushoferi ntiyashobotse"
@@ -371,16 +371,16 @@
             "dailyRate": "Igiciro ku munsi (RWF)",
             "seats": "Imyanya",
             "transmission": "Uburyo ihindura vitesse",
-            "fuelType": "Isanduku ya essence",
+            "fuelType": "ubwoko bwa Esanse",
             "category": "Icyiciro",
             "description": "Ibisobanuro",
-            "features": "Ibiranga imodoka (Tandunyakanya n'akadebe)",
+            "features": "Ibiranga imodoka ",
             "featuresPlaceholder": "AC, GPS, 4x4...",
             "imageUrl": "Ihuza ry'ifoto (Niba urifite)",
             "submit": "Ohereza Imodoka Nshya",
             "stats": {
                 "active": "Imodoka Zikora",
-                "maintenance": "Garashe/Izidakora"
+                "maintenance": "Garaje/Izidakora"
             },
             "searchPlaceholder": "Shakisha imodoka...",
             "perDay": "/ku munsi",
@@ -390,14 +390,14 @@
             },
             "noCars": "Nta modoka yabonetse ihuza n'ibyo ushaka",
             "toast": {
-                "fetchError": "Habaye ikosa mu gushaka imodoka",
-                "deleteSuccess": "Imodoka yasibye",
+                "fetchError": "Habaye ikosa mu gushaka imodoka ongera ugerageze",
+                "deleteSuccess": "Imodoka yasibwe",
                 "addSuccess": "Imodoka yongeweho",
                 "addMessage": "{{name}} yongewe neza.",
                 "addFailed": "Kwinjiza imodoka ntibyashobotse"
             },
             "labels": {
-                "inCity": "Umujyi",
+                "inCity": "mumujyi",
                 "province": "Intara"
             },
             "placeholders": {
@@ -409,7 +409,7 @@
         "expenses": {
             "title": "Ayasohotse",
             "subtitle": "Kurikirana ibikoreshwa n'imirimo yo gusana.",
-            "addExpense": "Ongeramo Ayasohotse",
+            "addExpense": "Ongeramo amafaranga yasohotse",
             "logNew": "Andika ikintu gishya cyasohotsemo amafaranga.",
             "distribution": "Ikwirakwizwa mu modoka",
             "distributionDesc": "Uko amafaranga akoreshwa mu modoka.",
@@ -417,7 +417,7 @@
             "recordsDesc": "Ayakoreshejwe yose yanditswe.",
             "labels": {
                 "description": "Ibisobanuro",
-                "descPlaceholder": "rugero. Guhindura amavuta",
+                "descPlaceholder": "rugero. Guhindura amavuta,ipine...",
                 "vehicle": "Imodoka (Niba ihari)",
                 "amount": "Ayakoreshejwe (RWF)",
                 "date": "Itariki",
@@ -425,13 +425,13 @@
             },
             "categories": {
                 "maintenance": "Gusana",
-                "fuel": "Essence",
+                "fuel": "Esanse",
                 "insurance": "Ubwishingizi",
                 "salary": "Umushahara",
                 "other": "Ibindi"
             },
             "table": {
-                "item": "Ikintu",
+                "item": "Imitungo",
                 "vehicle": "Imodoka",
                 "date": "Itariki",
                 "amount": "Amafaranga",
@@ -440,7 +440,7 @@
             "toast": {
                 "fetchError": "Habaye ikosa mu gushaka amakuru",
                 "saveSuccess": "Amakuru yabitswe",
-                "deleteSuccess": "Amakuru yasibye",
+                "deleteSuccess": "Amakuru yasibwe",
                 "actionFailed": "Igikorwa ntiyashobotse"
             }
         },
@@ -452,7 +452,7 @@
             "activeModels": "Uburyo bw'Ibiciro Bukora",
             "modelsDesc": "Ibiciro birimo gukoreshwa ubu.",
             "placeholders": {
-                "location": "Urugero: Ku Kibuga cy'indege",
+                "location": "Urugero: Ku Kibuga cy'indege cyangwa kigali",
                 "notes": "Urugero: Ibiciro by'impera z'icyumweru..."
             },
             "labels": {
@@ -462,7 +462,7 @@
                 "unit": "Ikigereranyo",
                 "category": "Icyiciro",
                 "description": "Ibisobanuro",
-                "location": "Aho biva / Aho bijya (Niba bihari)",
+                "location": "Aho bava / Aho bajya (Niba bihari)",
                 "notes": "Andi makuru",
                 "units": {
                     "hour": "Igiciro ku isaha",
@@ -506,19 +506,19 @@
                 "income": "Ayinjiye",
                 "expenses": "Ayasohotse",
                 "net": "Inyungu Isigaye",
-                "loading": "Turimo gukusanya imibare...",
+                "loading": "Turimo gukusanya amakuru...",
                 "noData": "Nta makuru ahagije aboneka mu gihe cyashyizweho"
             }
         }
     },
     "footer": {
         "desc": "Serivisi nziza cyane zo gutwara abantu mu Rwanda. Dufite imodoka zigezweho zo gukodesha, kugeza abantu ku kibuga cy'indege, n'abashoferi babizobereye.",
-        "newsletterTitle": "Newsletter",
+        "newsletterTitle": "Ibaruwashya",
         "newsletterSub": "Iyandikishe kugira ngo ubone amakuru mashya n'amatangazo.",
         "emailPlaceholder": "Imeri yawe",
         "spamNote": "* Twanga ubutumwa budakenewe nkawe.",
         "features": {
-            "payment": "Kwambura neza",
+            "payment": "Kwishura",
             "support": "Ubufasha bwa 24/7",
             "price": "Igiciro cyiza",
             "booking": "Gukodesha byihuse"

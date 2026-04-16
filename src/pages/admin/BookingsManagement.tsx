@@ -83,7 +83,7 @@ export default function BookingsManagement() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [pendingAction, setPendingAction] = useState<{ id: string; status: string; label: string } | null>(null);
-  const [form, setForm] = useState({ client_name: '', client_phone: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], pickup_location: '', total_price: 0 });
+  const [form, setForm] = useState({ client_name: '', client_phone: '', id_number: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], pickup_location: '', total_price: 0 });
 
   // ─── QUERIES ───
   const { data: bookingsData, isLoading: bookingsLoading } = useQuery({
@@ -148,7 +148,7 @@ export default function BookingsManagement() {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
       toast({ title: t('admin.bookings.toast.registerSuccess') });
       setOpen(false);
-      setForm({ client_name: '', client_phone: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], pickup_location: '', total_price: 0 });
+      setForm({ client_name: '', client_phone: '', id_number: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], pickup_location: '', total_price: 0 });
     },
     onError: (err) => {
       toast({ title: t('admin.bookings.toast.registerFailed'), description: err.message, variant: 'destructive' });
@@ -165,7 +165,7 @@ export default function BookingsManagement() {
   };
 
   const handleSave = () => {
-    if (!form.client_name || !form.car_id || !form.booking_date) {
+    if (!form.client_name || !form.car_id || !form.booking_date || !form.id_number) {
       toast({ title: t('admin.bookings.toast.missingInfo'), description: t('admin.bookings.toast.fillRequired'), variant: 'destructive' });
       return;
     }
@@ -260,9 +260,15 @@ export default function BookingsManagement() {
               <DialogDescription>{t('admin.bookings.registrationDesc')}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>{t('admin.bookings.clientName')}</Label>
-                <Input value={form.client_name} onChange={(e) => setForm({ ...form, client_name: e.target.value })} placeholder={t('admin.bookings.customerName')} className="bg-background" />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t('admin.bookings.clientName')}</Label>
+                  <Input value={form.client_name} onChange={(e) => setForm({ ...form, client_name: e.target.value })} placeholder={t('admin.bookings.customerName')} className="bg-background" />
+                </div>
+                <div className="space-y-2">
+                  <Label>ID Number / Passport</Label>
+                  <Input value={form.id_number} onChange={(e) => setForm({ ...form, id_number: e.target.value })} placeholder="12345..." className="bg-background" />
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -333,9 +339,9 @@ export default function BookingsManagement() {
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40 bg-background border-border">
+            <SelectTrigger className="w-48 bg-background border-border">
               <div className="flex items-center gap-2">
-                <Filter className="w-3.5 h-3.5" />
+                <Filter className="w-3.5 h-3.5 text-muted-foreground" />
                 <SelectValue placeholder={t('admin.bookings.allStatus')} />
               </div>
             </SelectTrigger>
@@ -393,153 +399,156 @@ export default function BookingsManagement() {
                 </TableRow>
               ))
             ) : (
-              filtered.map((b) => {
-                const isConflict = b.has_conflict || filtered.some(other => 
-                   (other._id || other.id) !== (b._id || b.id) && 
-                   other.car_id === b.car_id && 
-                   other.booking_date === b.booking_date &&
-                   other.status !== 'cancelled'
-                );
+              <>
+                {filtered.map((b) => {
+                  const isConflict = b.has_conflict || filtered.some(other => 
+                     (other._id || other.id) !== (b._id || b.id) && 
+                     other.car_id === b.car_id && 
+                     other.booking_date === b.booking_date &&
+                     other.status !== 'cancelled'
+                  );
 
-                return (
-                <TableRow key={b._id || b.id} className={cn(
-                  "hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors border-zinc-100 dark:border-zinc-800 font-bold",
-                  isConflict && "bg-rose-50/30 dark:bg-rose-950/10 border-l-4 border-l-rose-500"
-                )}>
-                  <TableCell className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400 font-black text-xs">
-                        {b.client_name.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm text-black dark:text-zinc-100">{b.client_name}</p>
-                        {b.client_phone && (
-                          <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5 font-medium">
-                            <User className="w-3 h-3" /> {b.client_phone}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 text-sm text-black dark:text-zinc-300">
-                      <CarFront className="w-3.5 h-3.5 text-zinc-400" />
-                      <div className="flex flex-col">
-                        <span className={cn(isConflict && "text-rose-500 underline decoration-wavy shadow-rose-500/20")}>{carName(b.car_id)}</span>
-                        {isConflict && <span className="text-[8px] font-black uppercase text-rose-500 animate-pulse">Conflict Error</span>}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-xs font-bold text-black dark:text-zinc-200">
-                        <Calendar className="w-3 h-3 text-zinc-400" />
-                        <span>{b.booking_date}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-[10px] text-zinc-500 max-w-[140px] truncate font-medium">
-                        <MapPin className="w-3 h-3 text-zinc-400 shrink-0" />
-                        {b.pickup_location}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="font-black text-sm text-zinc-900 dark:text-zinc-100">
-                      RWF {Number(b.total_price).toLocaleString()}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={cn("h-6 text-[10px] px-2 font-bold gap-1 border-none", statusMap[b.status]?.color)}>
-                      {(() => {
-                        const Icon = statusMap[b.status]?.icon;
-                        return Icon && <Icon className="w-3 h-3" />;
-                      })()}
-                      {statusMap[b.status]?.label || b.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="relative group">
-                      <Input
-                        placeholder={t('admin.bookings.assignDriver')}
-                        defaultValue={b.driver || ''}
-                        className="h-8 w-32 text-[10px] bg-transparent font-bold focus-visible:ring-1 focus-visible:ring-primary border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2 uppercase"
-                        onBlur={(e) => updateDriver((b._id || b.id)!, e.target.value)}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="relative group">
-                      <Input
-                        placeholder="Assign Ext. Car"
-                        defaultValue={b.external_car || ''}
-                        className="h-8 w-32 text-[10px] bg-transparent font-bold focus-visible:ring-1 focus-visible:ring-emerald-500 border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2 uppercase"
-                        onBlur={(e) => updateExternalCar((b._id || b.id)!, e.target.value)}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right px-6">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800">
-                          <MoreVertical className="w-4 h-4" />
+                  return (
+                    <TableRow key={b._id || b.id} className={cn(
+                      "hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors border-zinc-100 dark:border-zinc-800 font-bold",
+                      isConflict && "bg-rose-50/30 dark:bg-rose-950/10 border-l-4 border-l-rose-500"
+                    )}>
+                      <TableCell className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400 font-black text-xs">
+                            {b.client_name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm text-black dark:text-zinc-100">{b.client_name}</p>
+                            {b.client_phone && (
+                              <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5 font-medium">
+                                <User className="w-3 h-3" /> {b.client_phone}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm text-black dark:text-zinc-300">
+                          <CarFront className="w-3.5 h-3.5 text-zinc-400" />
+                          <div className="flex flex-col">
+                            <span className={cn(isConflict && "text-rose-500 underline decoration-wavy shadow-rose-500/20")}>{carName(b.car_id)}</span>
+                            {isConflict && <span className="text-[8px] font-black uppercase text-rose-500 animate-pulse">Conflict Error</span>}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-xs font-bold text-black dark:text-zinc-200">
+                            <Calendar className="w-3 h-3 text-zinc-400" />
+                            <span>{b.booking_date}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] text-zinc-500 max-w-[140px] truncate font-medium">
+                            <MapPin className="w-3 h-3 text-zinc-400 shrink-0" />
+                            {b.pickup_location}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-black text-sm text-zinc-900 dark:text-zinc-100">
+                          RWF {Number(b.total_price).toLocaleString()}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={cn("h-6 text-[10px] px-2 font-bold gap-1 border-none", statusMap[b.status]?.color)}>
+                          {(() => {
+                            const Icon = statusMap[b.status]?.icon;
+                            return Icon && <Icon className="w-3 h-3" />;
+                          })()}
+                          {statusMap[b.status]?.label || b.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="relative group">
+                          <Input
+                            placeholder={t('admin.bookings.assignDriver')}
+                            defaultValue={b.driver || ''}
+                            className="h-8 w-32 text-[10px] bg-transparent font-bold focus-visible:ring-1 focus-visible:ring-primary border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2 uppercase"
+                            onBlur={(e) => updateDriver((b._id || b.id)!, e.target.value)}
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="relative group">
+                          <Input
+                            placeholder="Assign Ext. Car"
+                            defaultValue={b.external_car || ''}
+                            className="h-8 w-32 text-[10px] bg-transparent font-bold focus-visible:ring-1 focus-visible:ring-emerald-500 border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2 uppercase"
+                            onBlur={(e) => updateExternalCar((b._id || b.id)!, e.target.value)}
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right px-6">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-40 rounded-xl overflow-hidden border-zinc-200 dark:border-zinc-800 shadow-xl bg-white dark:bg-zinc-950">
+                            {b.status === 'pending' && (
+                              <>
+                                <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'approved', t('admin.bookings.actions.approve'))} className="gap-2 text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 cursor-pointer font-bold">
+                                  <Check className="w-4 h-4" /> {t('admin.bookings.actions.approve')}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'rejected', t('admin.bookings.actions.reject'))} className="gap-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer font-bold">
+                                  <Ban className="w-4 h-4" /> {t('admin.bookings.actions.reject')}
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                            {b.status === 'approved' && (
+                              <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'completed', t('admin.bookings.actions.finalize'))} className="gap-2 focus:bg-blue-50 dark:focus:bg-blue-950/20 cursor-pointer font-bold text-blue-600">
+                                <Check className="w-4 h-4" /> {t('admin.bookings.actions.finalize')}
+                              </DropdownMenuItem>
+                            )}
+                            {(b.status === 'pending' || b.status === 'approved') && (
+                              <DropdownMenuItem
+                                onClick={() => handleStatusUpdate((b._id || b.id)!, 'completed', t('admin.bookings.actions.complete'))}
+                                className="gap-2 text-blue-600 focus:text-blue-600 focus:bg-blue-50 dark:focus:bg-blue-950/20 cursor-pointer font-bold"
+                              >
+                                <CheckCircle2 className="w-4 h-4" /> {t('admin.bookings.actions.complete')}
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              onClick={() => { setSelectedBooking(b); setDetailsOpen(true); }}
+                              className="gap-2 cursor-pointer dark:focus:bg-zinc-800 font-bold"
+                            >
+                              <User className="w-4 h-4" /> {t('admin.bookings.actions.viewDetails')}
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                              onClick={() => handleStatusUpdate((b._id || b.id)!, 'delete', t('admin.status.delete'))}
+                              className="gap-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer font-bold"
+                            >
+                              <Trash className="w-4 h-4" /> {t('admin.bookings.actions.delete')}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {filtered.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-20">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="p-3 rounded-full bg-zinc-50 dark:bg-zinc-800/50">
+                          <Search className="w-6 h-6 text-zinc-300" />
+                        </div>
+                        <p className="text-sm font-medium text-zinc-500">{t('admin.bookings.noBookings')}</p>
+                        <Button variant="link" onClick={() => { setSearch(''); setStatusFilter('all'); }} className="text-primary text-xs h-auto p-0">
+                          {t('admin.bookings.clearFilters')}
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-40 rounded-xl overflow-hidden border-zinc-200 dark:border-zinc-800 shadow-xl bg-white dark:bg-zinc-950">
-                        {b.status === 'pending' && (
-                          <>
-                            <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'approved', t('admin.bookings.actions.approve'))} className="gap-2 text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 cursor-pointer font-bold">
-                              <Check className="w-4 h-4" /> {t('admin.bookings.actions.approve')}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'rejected', t('admin.bookings.actions.reject'))} className="gap-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer font-bold">
-                              <Ban className="w-4 h-4" /> {t('admin.bookings.actions.reject')}
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                        {b.status === 'approved' && (
-                          <DropdownMenuItem onClick={() => handleStatusUpdate((b._id || b.id)!, 'completed', t('admin.bookings.actions.finalize'))} className="gap-2 focus:bg-blue-50 dark:focus:bg-blue-950/20 cursor-pointer font-bold text-blue-600">
-                            <Check className="w-4 h-4" /> {t('admin.bookings.actions.finalize')}
-                          </DropdownMenuItem>
-                        )}
-                        {(b.status === 'pending' || b.status === 'approved') && (
-                          <DropdownMenuItem
-                            onClick={() => handleStatusUpdate((b._id || b.id)!, 'completed', t('admin.bookings.actions.complete'))}
-                            className="gap-2 text-blue-600 focus:text-blue-600 focus:bg-blue-50 dark:focus:bg-blue-950/20 cursor-pointer font-bold"
-                          >
-                            <CheckCircle2 className="w-4 h-4" /> {t('admin.bookings.actions.complete')}
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem
-                          onClick={() => { setSelectedBooking(b); setDetailsOpen(true); }}
-                          className="gap-2 cursor-pointer dark:focus:bg-zinc-800 font-bold"
-                        >
-                          <User className="w-4 h-4" /> {t('admin.bookings.actions.viewDetails')}
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem
-                          onClick={() => handleStatusUpdate((b._id || b.id)!, 'delete', t('admin.status.delete'))}
-                          className="gap-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer font-bold"
-                        >
-                          <Trash className="w-4 h-4" /> {t('admin.bookings.actions.delete')}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-            {!bookingsLoading && filtered.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-20">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="p-3 rounded-full bg-zinc-50 dark:bg-zinc-800/50">
-                      <Search className="w-6 h-6 text-zinc-300" />
-                    </div>
-                    <p className="text-sm font-medium text-zinc-500">{t('admin.bookings.noBookings')}</p>
-                    <Button variant="link" onClick={() => { setSearch(''); setStatusFilter('all'); }} className="text-primary text-xs h-auto p-0">
-                      {t('admin.bookings.clearFilters')}
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
             )}
           </TableBody>
         </Table>
