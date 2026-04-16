@@ -51,14 +51,18 @@ export default function PricingManagement() {
   const { t } = useLanguage();
 
   useEffect(() => {
-    carsApi.getAll().then(({ data }) => { if (data) setCars(data as CarOption[]); });
+    carsApi.getAll().then((res) => {
+      const carsList = res.data?.data || res.data || [];
+      if (carsList) setCars(carsList as CarOption[]);
+    });
     fetchRules();
   }, []);
 
   const fetchRules = async () => {
     try {
-      const { data } = await pricingApi.getAll();
-      if (data) setRules(data as PricingRule[]);
+      const response = await pricingApi.getAll();
+      const pricingRules = response.data?.data || response.data || [];
+      if (pricingRules) setRules(pricingRules as PricingRule[]);
     } catch (error: any) {
       toast({ title: t('admin.pricing.toast.fetchError'), description: error.message, variant: 'destructive' });
     }

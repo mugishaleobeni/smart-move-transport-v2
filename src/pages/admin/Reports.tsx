@@ -49,11 +49,15 @@ export default function Reports() {
   const fetchReport = async () => {
     setIsLoading(true);
     try {
-      const [{ data: cars }, { data: bookings }, { data: expenses }] = await Promise.all([
+      const [carsRes, bookingsRes, expensesRes] = await Promise.all([
         carsApi.getAll(),
         bookingsApi.getAll(),
         expensesApi.getAll(),
       ]);
+
+      const cars = carsRes.data?.data || carsRes.data || [];
+      const bookings = bookingsRes.data?.data || bookingsRes.data || [];
+      const expenses = expensesRes.data?.data || expensesRes.data || [];
 
       const carMap: Record<string, string> = {};
       (cars || []).forEach((c: any) => { carMap[c._id || c.id] = c.name; });
@@ -109,8 +113,9 @@ export default function Reports() {
 
   const exportCompletedBookings = async () => {
     try {
-      const { data: bookings } = await bookingsApi.getAll();
-      const completed = (bookings || []).filter((b: any) => b.status === 'completed');
+      const response = await bookingsApi.getAll();
+      const bookings = response.data?.data || response.data || [];
+      const completed = bookings.filter((b: any) => b.status === 'completed');
 
       const headers = ['Client', 'Date', 'Pickup', 'Price (RWF)', 'Driver'];
       const rows = completed.map((b: any) => [
@@ -130,9 +135,10 @@ export default function Reports() {
 
   const exportCarsList = async () => {
     try {
-      const { data: cars } = await carsApi.getAll();
+      const response = await carsApi.getAll();
+      const cars = response.data?.data || response.data || [];
       const headers = ['Vehicle Name', 'Type', 'Seats', 'Status', 'Daily Rate'];
-      const rows = (cars || []).map((c: any) => [
+      const rows = cars.map((c: any) => [
         c.name,
         c.type,
         c.seats,

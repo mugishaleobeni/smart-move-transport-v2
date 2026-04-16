@@ -24,12 +24,13 @@ export default function Home() {
   useEffect(() => {
     const loadHomeData = async () => {
       try {
-        const { data } = await carsApi.getAll();
-        if (data && data.length > 0) {
-          setFeaturedCars(data.slice(0, 3));
+        const response = await carsApi.getAll();
+        const cars = response.data?.data || response.data || [];
+        if (cars && cars.length > 0) {
+          setFeaturedCars(cars.slice(0, 3));
 
           // Use cars for hero section if they have images
-          const carsWithImages = data
+          const carsWithImages = cars
             .filter((car: any) => car.image !== null)
             .slice(0, 5);
 
