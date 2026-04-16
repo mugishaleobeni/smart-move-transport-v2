@@ -215,7 +215,7 @@
         "syncing": "Turimo kohereza impinduka {{count}}...",
         "syncSuccess": "Imashini yujujwe neza!",
         "partialSuccess": "Byagenze gato. Impinduka {{count}} ziracyategereja.",
-        "connected": "Wongeye guhura na sisitemu",
+        "connected": "internet yaje ",
         "enteringOffline": "Ubu nta internet ufite"
     },
     "contact": {
@@ -228,8 +228,8 @@
         "email": "Imeri",
         "address": "Aho dukorera",
         "hours": "Amasaha y'akazi",
-        "hoursValue": "Mbere – Gatandatu: 6:00 AM – 9:00 PM",
-        "successMessage": "Ubutumwa bwawe bwoherejwe. Tuzagusubiza vuba!"
+        "hoursValue": "24/7",
+        "successMessage": "Ubutumwa bwawe bwoherejwe. Turagusubiza vuba!"
     },
     "admin": {
         "status": {
@@ -249,7 +249,7 @@
             "stats": {
                 "activeFleet": "Imodoka Zihari",
                 "activeFleetSub": "Igiteranyo cy'imodoka",
-                "currentBookings": "Gukodesha gukorwa",
+                "currentBookings": "Gukodesha Akakanya",
                 "currentBookingsSub": "Abategerejwe",
                 "grossRevenue": "Ayinjiye Yose",
                 "grossRevenueSub": "Igiteranyo cyose",
@@ -269,7 +269,7 @@
                 "title": "Gukodesha vuba aha",
                 "subtitle": "Gukodesha kwaherutse gukorwa uyu munsi.",
                 "noBookings": "Nta gukodesha kwabonetse",
-                "viewFullHistory": "Reba amateka yose"
+                "viewFullHistory": "Reba abakodesheheje bose"
             }
         },
         "analytics": {
@@ -303,7 +303,7 @@
             "phoneNumber": "Nomero ya Terefone",
             "selectVehicle": "Hitamo Imodoka",
             "chooseCar": "Hitamo imodoka",
-            "pickupDate": "Itariki yo gufata",
+            "pickupDate": "Itariki yo gufata imidoka",
             "tripTotal": "Igiteranyo (RWF)",
             "pickupLocation": "Aho ufatira imodoka",
             "addressPlaceholder": "Aho uherereye cyangwa ku Kibuga cy'indege",
@@ -347,10 +347,10 @@
             },
             "toast": {
                 "fetchError": "Habaye ikosa mu gushaka amakuru",
-                "deleteSuccess": "Gukodesha kwasibye",
+                "deleteSuccess": "Gukodesha kwasibwe ",
                 "statusUpdate": "Gukodesha ubu kuri {{status}}",
                 "actionFailed": "Igikorwa ntiyashobotse",
-                "missingInfo": "Amakuru manke",
+                "missingInfo": "Amakuru yabuze",
                 "fillRequired": "Nyaboneka andika izina ry'umukiriya, imodoka n'itariki.",
                 "registerSuccess": "kwiyandikisha byakunze",
                 "tripConfirmed": "Urugendo rwa {{name}} rwemejwe.",

@@ -41,6 +41,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ActionConfirmation } from '@/components/dashboard/ActionConfirmation';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { motion } from 'framer-motion';
