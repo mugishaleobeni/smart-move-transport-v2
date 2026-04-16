@@ -167,7 +167,7 @@ export default function PricingManagement() {
               </DialogHeader>
               <div className="p-6 space-y-5">
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold">{t('admin.bookings.vehicle')}</Label>
+                  <Label className="text-sm font-semibold">{t('admin.bookings.selectVehicle')}</Label>
                   <Select value={form.car_id} onValueChange={(v) => setForm({ ...form, car_id: v })}>
                     <SelectTrigger className="h-11 rounded-lg">
                       <SelectValue placeholder={t('admin.bookings.chooseCar')} />
@@ -185,7 +185,7 @@ export default function PricingManagement() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold">{t('admin.bookings.labels.clientName')}</Label>
+                  <Label className="text-sm font-semibold">{t('admin.bookings.clientName')}</Label>
                   <div className="relative">
                     <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <Input 
@@ -197,7 +197,7 @@ export default function PricingManagement() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold">{t('admin.bookings.labels.date')}</Label>
+                  <Label className="text-sm font-semibold">{t('admin.expenses.labels.date')}</Label>
                   <div className="relative">
                     <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <Input 
@@ -216,10 +216,10 @@ export default function PricingManagement() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="hour">{t('admin.pricing.units.hour')}</SelectItem>
-                        <SelectItem value="day">{t('admin.pricing.units.day')}</SelectItem>
-                        <SelectItem value="month">{t('admin.pricing.units.month') || 'Monthly Rate'}</SelectItem>
-                        <SelectItem value="trip">{t('admin.pricing.units.trip')}</SelectItem>
+                        <SelectItem value="hour">{t('admin.pricing.labels.units.hour')}</SelectItem>
+                        <SelectItem value="day">{t('admin.pricing.labels.units.day')}</SelectItem>
+                        <SelectItem value="month">{t('admin.pricing.labels.units.month')}</SelectItem>
+                        <SelectItem value="trip">{t('admin.pricing.labels.units.trip')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -232,14 +232,14 @@ export default function PricingManagement() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-slate-700 dark:text-zinc-300">{t('admin.pricing.location')}</Label>
+                  <Label className="text-sm font-semibold text-slate-700 dark:text-zinc-300">{t('admin.pricing.labels.location')}</Label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder={t('admin.pricing.placeholders.location')} className="h-11 pl-9 rounded-lg" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-slate-700 dark:text-zinc-300">{t('admin.pricing.notes')}</Label>
+                  <Label className="text-sm font-semibold text-slate-700 dark:text-zinc-300">{t('admin.pricing.labels.notes')}</Label>
                   <div className="relative">
                     <FileText className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
                     <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder={t('admin.pricing.placeholders.notes')} className="h-11 pl-9 rounded-lg" />
@@ -259,9 +259,9 @@ export default function PricingManagement() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {[
-          { label: t('admin.pricing.units.hour'), value: rules.filter(r => r.pricing_type === 'hour').length, icon: Clock, color: 'text-blue-600 bg-blue-50' },
-          { label: t('admin.pricing.units.day'), value: rules.filter(r => r.pricing_type === 'day').length, icon: Calendar, color: 'text-amber-600 bg-amber-50' },
-          { label: t('admin.pricing.units.trip'), value: rules.filter(r => r.pricing_type === 'trip').length, icon: MapPin, color: 'text-emerald-600 bg-emerald-50' },
+          { label: t('admin.pricing.labels.units.hour'), value: rules.filter(r => r.pricing_type === 'hour').length, icon: Clock, color: 'text-blue-600 bg-blue-50' },
+          { label: t('admin.pricing.labels.units.day'), value: rules.filter(r => r.pricing_type === 'day').length, icon: Calendar, color: 'text-amber-600 bg-amber-50' },
+          { label: t('admin.pricing.labels.units.trip'), value: rules.filter(r => r.pricing_type === 'trip').length, icon: MapPin, color: 'text-emerald-600 bg-emerald-50' },
         ].map((s, i) => (
           <Card key={i} className="border-none card-premium overflow-hidden bg-white dark:bg-zinc-900">
             <CardContent className="p-6 flex items-center justify-between">
@@ -282,7 +282,7 @@ export default function PricingManagement() {
           <TableHeader className="bg-zinc-50/50 dark:bg-zinc-800/50">
             <TableRow className="hover:bg-transparent border-zinc-100 dark:border-zinc-800">
               <TableHead className="font-bold text-xs uppercase px-6 py-4">{t('admin.bookings.table.vehicle')}</TableHead>
-              <TableHead className="font-bold text-xs uppercase">{t('admin.bookings.labels.clientName')}</TableHead>
+              <TableHead className="font-bold text-xs uppercase">{t('admin.bookings.clientName')}</TableHead>
               <TableHead className="font-bold text-xs uppercase">{t('admin.pricing.labels.unit')}</TableHead>
               <TableHead className="font-bold text-xs uppercase">{t('admin.expenses.table.amount')}</TableHead>
               <TableHead className="font-bold text-xs uppercase">{t('admin.bookings.table.date')}</TableHead>
@@ -305,13 +305,13 @@ export default function PricingManagement() {
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className="h-6 text-[10px] font-bold border-none bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-400 capitalize">
-                    {t(`admin.pricing.units.${rule.pricing_type}`)}
+                    {t(`admin.pricing.labels.units.${rule.pricing_type}`)}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-baseline gap-1">
                     <span className="text-lg font-black text-primary">RWF {rule.amount.toLocaleString()}</span>
-                    <span className="text-[10px] font-medium text-slate-400 capitalize">/{t(`admin.pricing.units.${rule.pricing_type}`)}</span>
+                    <span className="text-[10px] font-medium text-slate-400 capitalize">/{t(`admin.pricing.labels.units.${rule.pricing_type}`)}</span>
                   </div>
                 </TableCell>
                 <TableCell>
