@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { notificationsApi } from '@/lib/api';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Input } from '@/components/ui/input';
 import {
   Sheet,
   SheetContent,
