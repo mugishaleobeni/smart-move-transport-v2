@@ -99,8 +99,10 @@ export default function BookingsManagement() {
     staleTime: 300000, // Cars don't change often
   });
 
-  const bookings = (bookingsData?.data as any)?.data || [];
-  const cars = (carsData?.data as any)?.data || [];
+  const bookingsDataBody = bookingsData?.data;
+  const bookings = Array.isArray(bookingsDataBody?.data) ? bookingsDataBody.data : (Array.isArray(bookingsDataBody) ? bookingsDataBody : []);
+  const carsDataBody = carsData?.data;
+  const cars = Array.isArray(carsDataBody?.data) ? carsDataBody.data : (Array.isArray(carsDataBody) ? carsDataBody : []);
 
   // ─── MUTATIONS (OPTIMISTIC UI) ───
   const updateStatusMutation = useMutation({

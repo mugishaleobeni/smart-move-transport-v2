@@ -116,7 +116,8 @@ export default function CarsManagement() {
     staleTime: 60000,
   });
 
-  const cars = (carsData?.data as any)?.data || [];
+  const carsDataBody = carsData?.data;
+  const cars = Array.isArray(carsDataBody?.data) ? carsDataBody.data : (Array.isArray(carsDataBody) ? carsDataBody : []);
 
   // ─── MUTATIONS (OPTIMISTIC UI) ───
   const deleteMutation = useMutation({

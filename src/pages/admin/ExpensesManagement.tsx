@@ -65,8 +65,10 @@ export default function ExpensesManagement() {
     staleTime: 300000,
   });
 
-  const expenses = (expensesData?.data as any)?.data || [];
-  const cars = (carsData?.data as any)?.data || [];
+  const expensesDataBody = expensesData?.data;
+  const expenses = Array.isArray(expensesDataBody?.data) ? expensesDataBody.data : (Array.isArray(expensesDataBody) ? expensesDataBody : []);
+  const carsDataBody = carsData?.data;
+  const cars = Array.isArray(carsDataBody?.data) ? carsDataBody.data : (Array.isArray(carsDataBody) ? carsDataBody : []);
 
   // ─── MUTATIONS ───
   const deleteMutation = useMutation({

@@ -27,7 +27,8 @@ export default function Login() {
     const fetchImages = async () => {
       try {
         const response = await carsApi.getAll();
-        images = response.data.map((c: any) => c.image).filter(Boolean);
+        const cars = Array.isArray(response.data?.data) ? response.data.data : (Array.isArray(response.data) ? response.data : []);
+        images = cars.map((c: any) => c.image).filter(Boolean);
         if (images.length > 0) {
           setBgImage(images[0]);
         }
