@@ -22,6 +22,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { NavProgressBar } from "./components/layout/NavProgressBar";
+import PWAUpdater from "./components/offline/PWAUpdater";
 
 const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
 const CarsManagement = lazy(() => import("./pages/admin/CarsManagement"));
@@ -90,6 +91,7 @@ const App = () => (
       <LanguageProvider>
         <AuthProvider>
           <OfflineProvider>
+            <PWAUpdater />
             <TooltipProvider>
               <Toaster />
               <Sonner />
