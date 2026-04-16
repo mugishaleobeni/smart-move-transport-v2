@@ -120,8 +120,9 @@ export default function Booking() {
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const { data } = await carsApi.getAll();
-        const activeCars = data.filter((c: any) => c.status !== 'garage');
+        const response = await carsApi.getAll();
+        const cars = response.data?.data || response.data || [];
+        const activeCars = cars.filter((c: any) => c.status !== 'garage');
         setAvailableCars(activeCars);
         const initialCarId = searchParams.get('car');
         if (initialCarId) {

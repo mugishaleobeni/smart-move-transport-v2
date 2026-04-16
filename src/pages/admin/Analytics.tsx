@@ -57,11 +57,15 @@ export default function Analytics() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [{ data: cars }, { data: bookings }, { data: expenses }] = await Promise.all([
+      const [carsRes, bookingsRes, expensesRes] = await Promise.all([
         carsApi.getAll(),
         bookingsApi.getAll(),
         expensesApi.getAll(),
       ]);
+
+      const cars = carsRes.data?.data || carsRes.data || [];
+      const bookings = bookingsRes.data?.data || bookingsRes.data || [];
+      const expenses = expensesRes.data?.data || expensesRes.data || [];
 
       const carMap: Record<string, string> = {};
       (cars || []).forEach((c: any) => { carMap[c._id || c.id] = c.name; });

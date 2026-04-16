@@ -88,12 +88,15 @@ export default function Dashboard() {
         carsApi.getAll(),
         bookingsApi.getAll(),
         expensesApi.getAll(),
-      ]);
-      const totalIncome = (bookingsRes.data || []).reduce((sum: number, b: any) => sum + Number(b.total_price || 0), 0);
-      const totalExpenses = (expensesRes.data || []).reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0);
+      const bookings = bookingsRes.data?.data || bookingsRes.data || [];
+      const expenses = expensesRes.data?.data || expensesRes.data || [];
+      const cars = carsRes.data?.data || carsRes.data || [];
+
+      const totalIncome = bookings.reduce((sum: number, b: any) => sum + Number(b.total_price || 0), 0);
+      const totalExpenses = expenses.reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0);
       setStats({
-        totalCars: carsRes.data?.length || 0,
-        totalBookings: bookingsRes.data?.length || 0,
+        totalCars: cars.length,
+        totalBookings: bookings.length,
         totalIncome: totalIncome,
         totalExpenses: totalExpenses,
       });
@@ -105,7 +108,8 @@ export default function Dashboard() {
   const fetchRecentBookings = async () => {
     try {
       const response = await bookingsApi.getAll();
-      setRecentBookings((response.data || []).slice(0, 6));
+      const bookings = response.data?.data || response.data || [];
+      setRecentBookings(bookings.slice(0, 6));
     } catch (error) {
       console.error('Recent bookings fetch failed', error);
     }
@@ -117,8 +121,8 @@ export default function Dashboard() {
         bookingsApi.getAll(),
         expensesApi.getAll()
       ]);
-      const bookings = bookingsRes.data || [];
-      const expenses = expensesRes.data || [];
+      const bookings = bookingsRes.data?.data || bookingsRes.data || [];
+      const expenses = expensesRes.data?.data || expensesRes.data || [];
 
       // Get last 6 months list as baseline
       const last6Months: Record<string, { income: number; expense: number }> = {};

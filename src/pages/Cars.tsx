@@ -30,8 +30,9 @@ export default function Cars() {
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const { data } = await carsApi.getAll();
-        if (data) setCarsList(data as CarItem[]);
+        const response = await carsApi.getAll();
+        const cars = response.data?.data || response.data || [];
+        if (cars) setCarsList(cars as CarItem[]);
       } catch (error) {
         console.error('Failed to fetch cars:', error);
       } finally {
