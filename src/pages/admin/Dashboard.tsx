@@ -359,7 +359,9 @@ export default function Dashboard() {
                       axisLine={false}
                       tickLine={false}
                       tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                      tickFormatter={(value) => `RWF ${value}`}
+                      tickFormatter={(value) => `RWF ${value.toLocaleString()}`}
+                      domain={[0, (dataMax: number) => Math.max(dataMax, 15000)]}
+                      ticks={[0, 5000, 10000, 15000]}
                     />
                     <Tooltip
                       contentStyle={{

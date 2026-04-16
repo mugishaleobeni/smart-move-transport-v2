@@ -266,7 +266,7 @@
       },
       "financial": {
         "title": "Financial Performance",
-        "subtitle": "Income and operation costs for the last few months.",
+        "subtitle": "Income and operation costs for the last few months. IN RWF",
         "income": "Income",
         "expense": "Expense",
         "noData": "No financial data recorded yet"
