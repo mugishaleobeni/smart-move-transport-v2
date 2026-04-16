@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Star, Shield, Clock, ImageIcon, Phone, Messa
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { Layout } from '@/components/layout/Layout';
-import { carsApi } from '@/lib/api';
+import { carsApi, pricingApi } from '@/lib/api';
 import { CarCard } from '@/components/ui/CarCard';
 
 const defaultHeroImages = [

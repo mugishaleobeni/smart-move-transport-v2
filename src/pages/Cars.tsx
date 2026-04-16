@@ -5,7 +5,7 @@ import { Users, Phone, MessageCircle, Clock, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { Layout } from '@/components/layout/Layout';
-import { carsApi } from '@/lib/api';
+import { carsApi, pricingApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { CarCard } from '@/components/ui/CarCard';
 
