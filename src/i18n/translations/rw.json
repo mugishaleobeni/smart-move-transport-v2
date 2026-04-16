@@ -56,14 +56,15 @@
     "cars": {
         "title": "Kodesha Imodoka i Kigali - Imodoka Zacu",
         "subtitle": "Hitamo mu modoka zacu zigezweho za 4x4 n'izindi nziza ku rugendo rwawe mu Rwanda.",
-        "seats": "imyanya",
         "perDay": "/ku munsi",
         "perHour": "/ku isaha",
         "perTrip": "/ku rugendo",
+        "perMonth": "/ku kwezi",
         "viewDetails": "Reba Ibisobanuro",
         "bookNow": "Kodesha ubu",
         "call": "Hamagara",
         "whatsapp": "WhatsApp",
+        "whatsappDeal": "Bona Poromosyo",
         "features": "Ibiranga imodoka",
         "pricing": "Ibiciro",
         "description": "Ibisobanuro",
@@ -467,9 +468,11 @@
                 "units": {
                     "hour": "Igiciro ku isaha",
                     "day": "Igiciro ku munsi",
+                    "month": "Igiciro ku kwezi",
                     "trip": "Igiciro ku rugendo",
                     "hourShort": "/ isaha",
                     "dayShort": "/ munsi",
+                    "monthShort": "/ kwezi",
                     "tripShort": "/ urugendo"
                 },
                 "planTitle": "Andi makuru kuri gahunda",

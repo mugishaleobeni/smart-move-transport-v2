@@ -27,7 +27,7 @@ import { ActionConfirmation } from '@/components/dashboard/ActionConfirmation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/i18n/LanguageContext';
 
-interface CarOption { _id: string; id?: string; name: string; }
+interface CarOption { _id: string; id?: string; name: string; image: string | null; }
 interface PricingRule { id: string; car_id: string; pricing_type: string; amount: number; location: string | null; notes: string | null; client_name?: string; date?: string; }
 
 export default function PricingManagement() {
@@ -50,10 +50,9 @@ export default function PricingManagement() {
   const { toast } = useToast();
   const { t } = useLanguage();
 
-  useEffect(() => {
     carsApi.getAll().then((res) => {
       const carsList = Array.isArray(res.data?.data) ? res.data.data : (Array.isArray(res.data) ? res.data : []);
-      if (carsList) setCars(carsList as CarOption[]);
+      if (carsList) setCars(carsList.map((c: any) => ({ ...c, id: c._id || c.id })) as CarOption[]);
     });
     fetchRules();
   }, []);
@@ -143,7 +142,14 @@ export default function PricingManagement() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t('admin.bookings.allStatus')}</SelectItem>
-              {cars.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+              {cars.map((c) => (
+                <SelectItem key={c.id} value={c.id || ''}>
+                  <div className="flex items-center gap-2">
+                    <img src={c.image || 'https://via.placeholder.com/40'} alt="" className="w-5 h-5 rounded-sm object-cover" />
+                    {c.name}
+                  </div>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setEditId(null); } }}>
@@ -165,7 +171,14 @@ export default function PricingManagement() {
                       <SelectValue placeholder={t('admin.bookings.chooseCar')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {cars.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                      {cars.map((c) => (
+                        <SelectItem key={c.id} value={c.id || ''}>
+                          <div className="flex items-center gap-2">
+                            <img src={c.image || 'https://via.placeholder.com/40'} alt="" className="w-5 h-5 rounded-sm object-cover" />
+                            {c.name}
+                          </div>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -203,6 +216,7 @@ export default function PricingManagement() {
                       <SelectContent>
                         <SelectItem value="hour">{t('admin.pricing.units.hour')}</SelectItem>
                         <SelectItem value="day">{t('admin.pricing.units.day')}</SelectItem>
+                        <SelectItem value="month">{t('admin.pricing.units.month') || 'Monthly Rate'}</SelectItem>
                         <SelectItem value="trip">{t('admin.pricing.units.trip')}</SelectItem>
                       </SelectContent>
                     </Select>

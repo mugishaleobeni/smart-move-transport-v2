@@ -24,13 +24,34 @@ export default function Home() {
   useEffect(() => {
     const loadHomeData = async () => {
       try {
-        const response = await carsApi.getAll();
-        const cars = Array.isArray(response.data?.data) ? response.data.data : (Array.isArray(response.data) ? response.data : []);
-        if (cars && cars.length > 0) {
-          setFeaturedCars(cars.slice(0, 3));
+        const [carsRes, pricingRes] = await Promise.all([
+          carsApi.getAll(),
+          pricingApi.getAll()
+        ]);
+        
+        const rawCars = Array.isArray(carsRes.data?.data) ? carsRes.data.data : (Array.isArray(carsRes.data) ? carsRes.data : []);
+        const pricingRules = Array.isArray(pricingRes.data?.data) ? pricingRes.data.data : (Array.isArray(pricingRes.data) ? pricingRes.data : []);
 
-          // Use cars for hero section if they have images
-          const carsWithImages = cars
+        const carsWithPrices = rawCars.map((car: any) => {
+          const carId = car._id || car.id;
+          const carRules = pricingRules.filter((r: any) => r.car_id === carId);
+          
+          // Find standard day and month rates
+          const dayRule = carRules.find((r: any) => r.pricing_type === 'day');
+          const monthRule = carRules.find((r: any) => r.pricing_type === 'month');
+          
+          return {
+            ...car,
+            price: dayRule ? dayRule.amount : car.pricePerDay,
+            pricePerDay: dayRule ? dayRule.amount : car.pricePerDay,
+            pricePerMonth: monthRule ? monthRule.amount : null
+          };
+        });
+
+        if (carsWithPrices && carsWithPrices.length > 0) {
+          setFeaturedCars(carsWithPrices.slice(0, 3));
+
+          const carsWithImages = carsWithPrices
             .filter((car: any) => car.image !== null)
             .slice(0, 5);
 

@@ -30,9 +30,30 @@ export default function Cars() {
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const response = await carsApi.getAll();
-        const cars = Array.isArray(response.data?.data) ? response.data.data : (Array.isArray(response.data) ? response.data : []);
-        if (cars) setCarsList(cars as CarItem[]);
+        const [carsRes, pricingRes] = await Promise.all([
+          carsApi.getAll(),
+          pricingApi.getAll()
+        ]);
+        
+        const rawCars = Array.isArray(carsRes.data?.data) ? carsRes.data.data : (Array.isArray(carsRes.data) ? carsRes.data : []);
+        const pricingRules = Array.isArray(pricingRes.data?.data) ? pricingRes.data.data : (Array.isArray(pricingRes.data) ? pricingRes.data : []);
+
+        const carsWithPrices = rawCars.map((car: any) => {
+          const carId = car._id || car.id;
+          const carRules = pricingRules.filter((r: any) => r.car_id === carId);
+          
+          const dayRule = carRules.find((r: any) => r.pricing_type === 'day');
+          const monthRule = carRules.find((r: any) => r.pricing_type === 'month');
+          
+          return {
+            ...car,
+            price: dayRule ? dayRule.amount : car.pricePerDay,
+            pricePerDay: dayRule ? dayRule.amount : car.pricePerDay,
+            pricePerMonth: monthRule ? monthRule.amount : null
+          };
+        });
+        
+        setCarsList(carsWithPrices as CarItem[]);
       } catch (error) {
         console.error('Failed to fetch cars:', error);
       } finally {

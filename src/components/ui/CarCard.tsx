@@ -26,8 +26,16 @@ interface CarCardProps {
 export function CarCard({ car, priority = false }: CarCardProps) {
   const { t } = useLanguage();
   const carId = car._id || car.id;
-  const phoneNumber = "+250788496641"; // Updated as per requirements
+  const phoneNumber = "250788496641"; // Cleaned for links
+  const formattedDayPrice = (car as any).pricePerDay ? Number((car as any).pricePerDay).toLocaleString() : '30,000';
+  const formattedMonthPrice = (car as any).pricePerMonth ? Number((car as any).pricePerMonth).toLocaleString() : null;
 
+  const whatsappMessage = encodeURIComponent(
+    `Hello Smart Move! I'm interested in the hot deal for ${car.name}.` +
+    (formattedMonthPrice ? ` \n- Monthly: RWF ${formattedMonthPrice}` : '') +
+    ` \n- Daily: RWF ${formattedDayPrice}` +
+    ` \n\nPlease provide more details.`
+  );
 
   return (
     <div className="glass rounded-3xl overflow-hidden hover-lift group border border-white/10 flex flex-col h-full">
@@ -39,14 +47,21 @@ export function CarCard({ car, priority = false }: CarCardProps) {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading={priority ? 'eager' : 'lazy'}
         />
-        {car.images && car.images.length > 1 && (
-          <div className="absolute top-4 left-4 glass-dark px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-white/10 z-10">
-            <ImageIcon className="w-3 h-3 text-white" />
-            <span className="text-[10px] font-bold text-white uppercase tracking-tighter">
-              {car.images.length} {t('cars.photos')}
-            </span>
-          </div>
-        )}
+        <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+          {car.images && car.images.length > 1 && (
+            <div className="glass-dark px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-white/10">
+              <ImageIcon className="w-3 h-3 text-white" />
+              <span className="text-[10px] font-bold text-white uppercase tracking-tighter">
+                {car.images.length} {t('cars.photos')}
+              </span>
+            </div>
+          )}
+          {formattedMonthPrice && (
+            <Badge className="bg-emerald-500/90 hover:bg-emerald-500 text-white border-none font-black px-3 py-1 rounded-lg text-[8px] shadow-lg uppercase tracking-wider">
+              SAVE ON MONTHLY
+            </Badge>
+          )}
+        </div>
         <div className={cn(
           "absolute top-4 right-4 glass px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
           car.status === 'garage' ? "bg-rose-500/80 text-white" : "bg-black/40 text-white"
@@ -64,15 +79,20 @@ export function CarCard({ car, priority = false }: CarCardProps) {
           <span className="font-medium">{car.seats} {t('cars.seats')}</span>
         </div>
 
-        {/* Starting From label */}
+        {/* Pricing Architecture */}
         <div className="mt-auto">
           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] block mb-2">
-            {t('cars.startingFrom')}
+            Pricing Architecture
           </span>
-          <div className="flex mb-6">
+          <div className="flex flex-wrap gap-2 mb-6">
             <Badge className="bg-accent hover:bg-accent/90 text-white border-none font-black px-4 py-1.5 rounded-full text-xs shadow-lg shadow-accent/20">
-              RWF {car.price || car.pricePerDay || '30,000'} {t('cars.perDay')}
+              RWF {formattedDayPrice} {t('cars.perDay')}
             </Badge>
+            {formattedMonthPrice && (
+              <Badge className="bg-zinc-800 hover:bg-zinc-700 text-white border-none font-black px-4 py-1.5 rounded-full text-xs shadow-lg">
+                RWF {formattedMonthPrice} {t('cars.perMonth') || '/month'}
+              </Badge>
+            )}
           </div>
         </div>
 
@@ -83,36 +103,35 @@ export function CarCard({ car, priority = false }: CarCardProps) {
               {t('cars.viewDetails')}
             </Button>
           </Link>
-          <Link 
-            to={car.status === 'garage' ? '#' : `/booking?car=${carId}`} 
-            className={cn("flex-1", car.status === 'garage' && "pointer-events-none opacity-50")}
-          >
-            <Button
-              className="w-full btn-accent text-white text-xs font-black py-5 rounded-xl shadow-lg"
-              disabled={car.status === 'garage'}
-            >
-              {car.status === 'garage' ? 'In Garage' : t('cars.bookNow')}
-            </Button>
-          </Link>
-        </div>
-
-        {/* Communication Actions */}
-        <div className="grid grid-cols-2 gap-3 border-t border-white/5 pt-4">
-          <a href={`tel:${phoneNumber}`} className="flex-1">
-            <Button variant="ghost" size="sm" className="w-full gap-2 text-[10px] font-bold text-muted-foreground hover:text-foreground hover:bg-white/5">
-              <Phone className="w-3.5 h-3.5" />
-              {t('cars.call')}
-            </Button>
-          </a>
           <a
-            href={`https://wa.me/${phoneNumber.replace('+', '')}?text=I'm interested in ${car.name}`}
+            href={`https://wa.me/${phoneNumber}?text=${whatsappMessage}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1"
           >
-            <Button variant="ghost" size="sm" className="w-full gap-2 text-[10px] font-bold text-muted-foreground hover:text-foreground hover:bg-white/5">
-              <MessageCircle className="w-3.5 h-3.5" />
-              {t('cars.whatsapp')}
+            <Button
+              className="w-full bg-green-600 hover:bg-green-700 text-white text-xs font-black py-5 rounded-xl shadow-lg border-none animate-pulse-subtle"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              {t('cars.whatsappDeal') || 'HOT DEAL'}
+            </Button>
+          </a>
+        </div>
+
+        {/* Secondary Actions */}
+        <div className="grid grid-cols-2 gap-3 border-t border-white/5 pt-4">
+          <Link 
+            to={car.status === 'garage' ? '#' : `/booking?car=${carId}`} 
+            className={cn("flex-1", car.status === 'garage' && "pointer-events-none opacity-50")}
+          >
+            <Button variant="ghost" size="sm" className="w-full text-[10px] font-bold text-muted-foreground hover:text-foreground">
+              {car.status === 'garage' ? 'In Garage' : t('cars.bookNow')}
+            </Button>
+          </Link>
+          <a href={`tel:+${phoneNumber}`} className="flex-1">
+            <Button variant="ghost" size="sm" className="w-full gap-2 text-[10px] font-bold text-muted-foreground hover:text-foreground">
+              <Phone className="w-3.5 h-3.5" />
+              {t('cars.call')}
             </Button>
           </a>
         </div>
