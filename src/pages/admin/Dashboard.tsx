@@ -88,6 +88,7 @@ export default function Dashboard() {
         carsApi.getAll(),
         bookingsApi.getAll(),
         expensesApi.getAll(),
+      ]);
       const bookings = bookingsRes.data?.data || bookingsRes.data || [];
       const expenses = expensesRes.data?.data || expensesRes.data || [];
       const cars = carsRes.data?.data || carsRes.data || [];
