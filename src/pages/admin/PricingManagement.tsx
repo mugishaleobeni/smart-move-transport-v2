@@ -50,6 +50,7 @@ export default function PricingManagement() {
   const { toast } = useToast();
   const { t } = useLanguage();
 
+  // Initial data fetching for cars and pricing rules
   useEffect(() => {
     carsApi.getAll().then((res) => {
       const carsList = Array.isArray(res.data?.data) ? res.data.data : (Array.isArray(res.data) ? res.data : []);
