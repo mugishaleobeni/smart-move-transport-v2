@@ -115,16 +115,20 @@ export default function BookingsManagement() {
       // Optimistically update the cache
       queryClient.setQueryData(['bookings', statusFilter, search, page], (old: any) => {
         if (!old) return old;
-        if (status === 'delete') {
-          return { ...old, data: { ...old.data, data: old.data.data.filter((b: any) => (b._id || b.id) !== id) } };
-        }
-        return {
-          ...old,
-          data: {
-            ...old.data,
-            data: old.data.data.map((b: any) => (b._id || b.id) === id ? { ...b, status } : b)
+        const oldBody = old.data;
+        const updateList = (list: any[]) => {
+          if (status === 'delete') {
+            return list.filter((b: any) => (b._id || b.id) !== id);
           }
+          return list.map((b: any) => (b._id || b.id) === id ? { ...b, status } : b);
         };
+
+        if (Array.isArray(oldBody?.data)) {
+          return { ...old, data: { ...oldBody, data: updateList(oldBody.data) } };
+        } else if (Array.isArray(oldBody)) {
+          return { ...old, data: updateList(oldBody) };
+        }
+        return old;
       });
 
       return { previousBookings };

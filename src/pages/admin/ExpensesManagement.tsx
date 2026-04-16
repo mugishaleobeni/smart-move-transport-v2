@@ -78,13 +78,15 @@ export default function ExpensesManagement() {
       const previous = queryClient.getQueryData(['expenses', filterCar, search, page]);
       queryClient.setQueryData(['expenses', filterCar, search, page], (old: any) => {
         if (!old) return old;
-        return { 
-          ...old, 
-          data: { 
-            ...old.data, 
-            data: old.data.data.filter((e: any) => (e._id || e.id) !== id) 
-          } 
-        };
+        const oldBody = old.data;
+        const updateList = (list: any[]) => list.filter((e: any) => (e._id || e.id) !== id);
+
+        if (Array.isArray(oldBody?.data)) {
+          return { ...old, data: { ...oldBody, data: updateList(oldBody.data) } };
+        } else if (Array.isArray(oldBody)) {
+          return { ...old, data: updateList(oldBody) };
+        }
+        return old;
       });
       return { previous };
     },

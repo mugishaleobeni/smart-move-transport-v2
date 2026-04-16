@@ -127,7 +127,15 @@ export default function CarsManagement() {
       const previousCars = queryClient.getQueryData(['cars', statusFilter, search, page]);
       queryClient.setQueryData(['cars', statusFilter, search, page], (old: any) => {
         if (!old) return old;
-        return { ...old, data: { ...old.data, data: old.data.data.filter((c: any) => (c._id || c.id) !== id) } };
+        const oldBody = old.data;
+        const updateList = (list: any[]) => list.filter((c: any) => (c._id || c.id) !== id);
+        
+        if (Array.isArray(oldBody?.data)) {
+          return { ...old, data: { ...oldBody, data: updateList(oldBody.data) } };
+        } else if (Array.isArray(oldBody)) {
+          return { ...old, data: updateList(oldBody) };
+        }
+        return old;
       });
       return { previousCars };
     },
