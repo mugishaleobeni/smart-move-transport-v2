@@ -403,7 +403,6 @@ export default function BookingsManagement() {
                 {filtered.map((b) => {
                   const isConflict = b.has_conflict || filtered.some(other => 
                      (other._id || other.id) !== (b._id || b.id) && 
-                     other.car_id === b.car_id && 
                      other.booking_date === b.booking_date &&
                      other.status !== 'cancelled'
                   );

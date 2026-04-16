@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 
 const STEPS = ['selectCar', 'clientInfo', 'selectDateTime', 'confirm'] as const;
 
-type PricingPlan = 'day' | 'month' | 'trip';
+type PricingPlan = 'day' | 'month';
 
 interface BookingData {
   carId: string;
@@ -151,12 +151,10 @@ export default function Booking() {
     if (!selectedCarData) return 0;
     const daily = selectedCarData.price_per_day || 30000;
     const monthly = selectedCarData.price_per_month || daily * 25; // 25 days if not specified
-    const trip = selectedCarData.price_per_trip || 15000;
 
     switch (booking.pricingPlan) {
       case 'day': return daily * booking.duration;
       case 'month': return monthly * booking.duration;
-      case 'trip': return trip * booking.duration;
       default: return 0;
     }
   };
@@ -165,7 +163,6 @@ export default function Booking() {
     switch (plan) {
       case 'day': return t('booking.perDay') || 'Per Day';
       case 'month': return t('booking.perMonth') || 'Per Month';
-      case 'trip': return t('booking.perTrip') || 'Per Trip';
     }
   };
 
@@ -173,7 +170,6 @@ export default function Booking() {
     switch (booking.pricingPlan) {
       case 'day': return booking.duration === 1 ? 'day' : 'days';
       case 'month': return booking.duration === 1 ? 'month' : 'months';
-      case 'trip': return booking.duration === 1 ? 'trip' : 'trips';
     }
   };
 
@@ -444,7 +440,7 @@ export default function Booking() {
                                 value={booking.dropoffLocation}
                                 onChange={(e) => setBooking({ ...booking, dropoffLocation: e.target.value })}
                                 className="h-14 pl-12 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold shadow-inner"
-                                placeholder="Destination (Optional)"
+                                placeholder="Where you go / Destination"
                               />
                             </div>
                           </div>
@@ -462,28 +458,28 @@ export default function Booking() {
 
                         <div className="space-y-4">
                           <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground pl-1">{t('booking.labels.pricing')}</Label>
-                          <div className="grid grid-cols-3 gap-4">
-                            {(['day', 'month', 'trip'] as PricingPlan[]).map((plan) => (
+                          <div className="grid grid-cols-2 gap-4">
+                            {(['day', 'month'] as PricingPlan[]).map((plan) => (
                               <button
                                 key={plan}
                                 type="button"
                                 onClick={() => setBooking({ ...booking, pricingPlan: plan, duration: 1 })}
                                 className={cn(
-                                  'group px-4 py-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 overflow-hidden relative',
+                                  'group px-4 py-8 rounded-2xl border-2 transition-all flex flex-col items-center gap-3 overflow-hidden relative',
                                   booking.pricingPlan === plan
                                     ? 'border-accent bg-accent/5 shadow-lg'
                                     : 'border-border/50 bg-white dark:bg-zinc-900 border-dashed hover:border-accent/40'
                                 )}
                               >
-                                <span className={cn("text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full transition-colors", booking.pricingPlan === plan ? "bg-accent text-white" : "bg-zinc-200 dark:bg-zinc-800 text-muted-foreground")}>{plan}</span>
+                                <span className={cn("text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full transition-colors", booking.pricingPlan === plan ? "bg-accent text-white" : "bg-zinc-200 dark:bg-zinc-800 text-muted-foreground uppercase")}>{plan}</span>
                                 {selectedCarData && (
                                   <span className="text-xl font-black tracking-tighter">
-                                    RWF {plan === 'day' ? (selectedCarData.price_per_day || 30000) : plan === 'month' ? (selectedCarData.price_per_month || (selectedCarData.price_per_day || 30000) * 25) : (selectedCarData.price_per_trip || 15000)}
+                                    RWF {plan === 'day' ? (selectedCarData.price_per_day || 30000).toLocaleString() : (selectedCarData.price_per_month || (selectedCarData.price_per_day || 30000) * 25).toLocaleString()}
                                   </span>
                                 )}
                                 {booking.pricingPlan === plan && (
-                                  <div className="absolute bottom-0 right-0 p-1">
-                                    <Check className="w-3 h-3 text-accent" />
+                                  <div className="absolute bottom-2 right-2 p-1">
+                                    <Check className="w-4 h-4 text-accent" />
                                   </div>
                                 )}
                               </button>
@@ -530,14 +526,14 @@ export default function Booking() {
                           <Input
                             type="number"
                             min="1"
-                            max={booking.pricingPlan === 'day' ? 30 : booking.pricingPlan === 'month' ? 12 : 24}
+                            max={booking.pricingPlan === 'day' ? 30 : 12}
                             value={booking.duration}
                             onChange={(e) => setBooking({ ...booking, duration: parseInt(e.target.value) || 1 })}
                             className="h-14 rounded-xl bg-zinc-50 dark:bg-zinc-800 border-border/50 focus:border-accent transition-all text-sm font-bold"
                           />
                           <div className="flex justify-between text-[8px] font-black text-muted-foreground px-1 uppercase tracking-tighter">
                             <span>Min: 1 {getDurationLabel()}</span>
-                            <span>Max: {booking.pricingPlan === 'day' ? 30 : booking.pricingPlan === 'month' ? 12 : 24} {getDurationLabel()}</span>
+                            <span>Max: {booking.pricingPlan === 'day' ? 30 : 12} {getDurationLabel()}</span>
                           </div>
                         </div>
                       </div>
@@ -597,7 +593,7 @@ export default function Booking() {
                                 <h4 className="font-black uppercase tracking-tight text-sm text-emerald-600">Exclusive Deal Opportunity</h4>
                               </div>
                               <p className="text-xs text-emerald-700/80 leading-relaxed font-medium">
-                                High value booking detected. You may be eligible for a specialized discount. Contact our operations team directly for a custom quote.
+                                High value booking detected. You may be eligible for a specialized discount. Contact our operations team directly via WhatsApp or Call for a custom quote and deal.
                               </p>
                               <div className="flex gap-3">
                                 <a href="tel:0788496641" className="flex-1">
