@@ -50,6 +50,7 @@ export default function PricingManagement() {
   const { toast } = useToast();
   const { t } = useLanguage();
 
+  useEffect(() => {
     carsApi.getAll().then((res) => {
       const carsList = Array.isArray(res.data?.data) ? res.data.data : (Array.isArray(res.data) ? res.data : []);
       if (carsList) setCars(carsList.map((c: any) => ({ ...c, id: c._id || c.id })) as CarOption[]);
