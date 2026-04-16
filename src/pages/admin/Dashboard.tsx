@@ -89,9 +89,9 @@ export default function Dashboard() {
         bookingsApi.getAll(),
         expensesApi.getAll(),
       ]);
-      const bookings = bookingsRes.data?.data || bookingsRes.data || [];
-      const expenses = expensesRes.data?.data || expensesRes.data || [];
-      const cars = carsRes.data?.data || carsRes.data || [];
+      const bookings = Array.isArray(bookingsRes.data?.data) ? bookingsRes.data.data : (Array.isArray(bookingsRes.data) ? bookingsRes.data : []);
+      const expenses = Array.isArray(expensesRes.data?.data) ? expensesRes.data.data : (Array.isArray(expensesRes.data) ? expensesRes.data : []);
+      const cars = Array.isArray(carsRes.data?.data) ? carsRes.data.data : (Array.isArray(carsRes.data) ? carsRes.data : []);
 
       const totalIncome = bookings.reduce((sum: number, b: any) => sum + Number(b.total_price || 0), 0);
       const totalExpenses = expenses.reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0);
@@ -109,8 +109,8 @@ export default function Dashboard() {
   const fetchRecentBookings = async () => {
     try {
       const response = await bookingsApi.getAll();
-      const bookings = response.data?.data || response.data || [];
-      setRecentBookings(bookings.slice(0, 6));
+      const bookings = Array.isArray(response.data?.data) ? response.data.data : (Array.isArray(response.data) ? response.data : []);
+      setRecentBookings(bookings.slice(0, 5));
     } catch (error) {
       console.error('Recent bookings fetch failed', error);
     }
@@ -122,8 +122,8 @@ export default function Dashboard() {
         bookingsApi.getAll(),
         expensesApi.getAll()
       ]);
-      const bookings = bookingsRes.data?.data || bookingsRes.data || [];
-      const expenses = expensesRes.data?.data || expensesRes.data || [];
+      const bookings = Array.isArray(bookingsRes.data?.data) ? bookingsRes.data.data : (Array.isArray(bookingsRes.data) ? bookingsRes.data : []);
+      const expenses = Array.isArray(expensesRes.data?.data) ? expensesRes.data.data : (Array.isArray(expensesRes.data) ? expensesRes.data : []);
 
       // Get last 6 months list as baseline
       const last6Months: Record<string, { income: number; expense: number }> = {};

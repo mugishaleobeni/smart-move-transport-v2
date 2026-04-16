@@ -52,7 +52,7 @@ export default function PricingManagement() {
 
   useEffect(() => {
     carsApi.getAll().then((res) => {
-      const carsList = res.data?.data || res.data || [];
+      const carsList = Array.isArray(res.data?.data) ? res.data.data : (Array.isArray(res.data) ? res.data : []);
       if (carsList) setCars(carsList as CarOption[]);
     });
     fetchRules();
@@ -61,7 +61,7 @@ export default function PricingManagement() {
   const fetchRules = async () => {
     try {
       const response = await pricingApi.getAll();
-      const pricingRules = response.data?.data || response.data || [];
+      const pricingRules = Array.isArray(response.data?.data) ? response.data.data : (Array.isArray(response.data) ? response.data : []);
       if (pricingRules) setRules(pricingRules as PricingRule[]);
     } catch (error: any) {
       toast({ title: t('admin.pricing.toast.fetchError'), description: error.message, variant: 'destructive' });

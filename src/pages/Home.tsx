@@ -25,7 +25,7 @@ export default function Home() {
     const loadHomeData = async () => {
       try {
         const response = await carsApi.getAll();
-        const cars = response.data?.data || response.data || [];
+        const cars = Array.isArray(response.data?.data) ? response.data.data : (Array.isArray(response.data) ? response.data : []);
         if (cars && cars.length > 0) {
           setFeaturedCars(cars.slice(0, 3));
 

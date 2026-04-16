@@ -55,9 +55,9 @@ export default function Reports() {
         expensesApi.getAll(),
       ]);
 
-      const cars = carsRes.data?.data || carsRes.data || [];
-      const bookings = bookingsRes.data?.data || bookingsRes.data || [];
-      const expenses = expensesRes.data?.data || expensesRes.data || [];
+      const cars = Array.isArray(carsRes.data?.data) ? carsRes.data.data : (Array.isArray(carsRes.data) ? carsRes.data : []);
+      const bookings = Array.isArray(bookingsRes.data?.data) ? bookingsRes.data.data : (Array.isArray(bookingsRes.data) ? bookingsRes.data : []);
+      const expenses = Array.isArray(expensesRes.data?.data) ? expensesRes.data.data : (Array.isArray(expensesRes.data) ? expensesRes.data : []);
 
       const carMap: Record<string, string> = {};
       (cars || []).forEach((c: any) => { carMap[c._id || c.id] = c.name; });

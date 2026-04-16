@@ -31,7 +31,7 @@ export default function Cars() {
     const fetchCars = async () => {
       try {
         const response = await carsApi.getAll();
-        const cars = response.data?.data || response.data || [];
+        const cars = Array.isArray(response.data?.data) ? response.data.data : (Array.isArray(response.data) ? response.data : []);
         if (cars) setCarsList(cars as CarItem[]);
       } catch (error) {
         console.error('Failed to fetch cars:', error);

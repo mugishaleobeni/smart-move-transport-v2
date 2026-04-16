@@ -121,7 +121,7 @@ export default function Booking() {
     const fetchCars = async () => {
       try {
         const response = await carsApi.getAll();
-        const cars = response.data?.data || response.data || [];
+        const cars = Array.isArray(response.data?.data) ? response.data.data : (Array.isArray(response.data) ? response.data : []);
         const activeCars = cars.filter((c: any) => c.status !== 'garage');
         setAvailableCars(activeCars);
         const initialCarId = searchParams.get('car');
