@@ -73,7 +73,9 @@ export default function Analytics() {
       const incomeMap: Record<string, number> = {};
       const expenseMap: Record<string, number> = {};
 
-      (bookings || []).forEach((b: any) => {
+      const confirmedBookings = (bookings || []).filter((b: any) => b.payment_status === 'confirmed');
+
+      confirmedBookings.forEach((b: any) => {
         if (b.car_id) incomeMap[b.car_id] = (incomeMap[b.car_id] || 0) + Number(b.total_price || 0);
       });
 
@@ -99,7 +101,7 @@ export default function Analytics() {
       const currentYear = now.getFullYear();
 
       const monthlyIncomeMap: Record<string, number> = {};
-      (bookings || []).forEach((b: any) => {
+      confirmedBookings.forEach((b: any) => {
         const bDate = new Date(b.created_at || b.booking_date);
         if (b.car_id && bDate.getMonth() === currentMonth && bDate.getFullYear() === currentYear) {
           monthlyIncomeMap[b.car_id] = (monthlyIncomeMap[b.car_id] || 0) + Number(b.total_price || 0);

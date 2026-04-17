@@ -16,11 +16,16 @@ import {
   Ban,
   Plus,
   Banknote,
-  Trash,
-  Download,
   AlertTriangle,
-  ExternalLink
+  ExternalLink,
+  CreditCard,
+  FileDown,
+  Coins,
+  ShieldCheck,
+  Printer
 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -53,7 +58,11 @@ interface Booking {
   pickup_location: string;
   total_price: number;
   status: string;
-  driver: string | null;
+  payment_status?: string;
+  payment_method?: string;
+  paid_amount?: number;
+  balance?: number;
+  confirmed_at?: string;
   external_car: string | null;
   has_conflict?: boolean;
 }
@@ -180,27 +189,19 @@ export default function BookingsManagement() {
     }
   });
 
-  const updateDriverMutation = useMutation({
-    mutationFn: ({ id, driver }: { id: string; driver: string }) => bookingsApi.updateStatus(id, 'driver_update', { driver }),
-    onMutate: async ({ id, driver }) => {
-      await queryClient.cancelQueries({ queryKey: ['bookings'] });
-      const previousBookings = queryClient.getQueryData(['bookings', statusFilter, search, page]);
-      queryClient.setQueryData(['bookings', statusFilter, search, page], (old: any) => {
-        if (!old) return old;
-        const updateList = (list: any[]) => list.map((b: any) => (b._id || b.id) === id ? { ...b, driver } : b);
-        const oldBody = old.data;
-        if (Array.isArray(oldBody?.data)) return { ...old, data: { ...oldBody, data: updateList(oldBody.data) } };
-        if (Array.isArray(oldBody)) return { ...old, data: updateList(oldBody) };
-        return old;
-      });
-      return { previousBookings };
+  const confirmPaymentMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => bookingsApi.update(id, { 
+      payment_status: 'confirmed', 
+      confirmed_at: new Date().toISOString(),
+      ...data 
+    }),
+    onSuccess: () => {
+      toast({ title: "Payment Confirmed Successfully" });
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
-    onSuccess: () => toast({ title: t('admin.bookings.toast.driverAssigned') }),
-    onError: (err, _, context) => {
-      queryClient.setQueryData(['bookings', statusFilter, search, page], context?.previousBookings);
-      toast({ title: t('admin.bookings.toast.assignFailed'), description: err.message, variant: 'destructive' });
-    },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['bookings'] })
+    onError: (err: any) => {
+      toast({ title: "Failed to confirm payment", description: err.message, variant: 'destructive' });
+    }
   });
 
   const updateExternalCarMutation = useMutation({
@@ -235,57 +236,109 @@ export default function BookingsManagement() {
     }
   };
 
-  const handleSave = () => {
-    if (!form.client_name || !form.car_id || !form.booking_date || !form.id_number) {
-      toast({ title: t('admin.bookings.toast.missingInfo'), description: t('admin.bookings.toast.fillRequired'), variant: 'destructive' });
-      return;
-    }
-    createBookingMutation.mutate({
-      ...form,
-      total_price: Number(form.total_price),
-      status: 'approved'
+  const handleConfirmPayment = (bookingId: string, paidAmount: number, method: string) => {
+    const booking = bookings.find(b => (b._id || b.id) === bookingId);
+    if (!booking) return;
+
+    const balance = Number(booking.total_price) - Number(paidAmount);
+    confirmPaymentMutation.mutate({
+      id: bookingId,
+      data: {
+        paid_amount: Number(paidAmount),
+        payment_method: method,
+        balance: balance
+      }
     });
   };
 
-  const updateStatus = (id: string, status: string) => updateStatusMutation.mutate({ id, status });
+  const generatePDF = async (booking: Booking) => {
+    const car = cars.find(c => (c._id === booking.car_id || c.id === booking.car_id));
+    const doc = new jsPDF() as any;
+    const logoUrl = '/smartmovelogo.png';
 
-  const updateDriver = (id: string, driver: string) => {
-    if (!driver) return;
-    updateDriverMutation.mutate({ id, driver });
-  };
+    // Add Brand Header
+    try {
+      doc.addImage(logoUrl, 'PNG', 15, 15, 40, 15);
+    } catch (e) { console.warn("Logo failed to load for PDF"); }
 
-  const updateExternalCar = (id: string, external_car: string) => {
-    if (!external_car) return;
-    updateExternalCarMutation.mutate({ id, external_car });
-  };
+    doc.setFontSize(22);
+    doc.setTextColor(0, 0, 0);
+    doc.text("VEHICLE RENTAL CONTRACT", 105, 25, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Booking ID: ${booking._id || booking.id}`, 195, 15, { align: 'right' });
+    doc.text(`Date of Issue: ${new Date().toLocaleDateString()}`, 195, 20, { align: 'right' });
 
-  const exportBookings = () => {
-    const headers = ["Client Name", "Phone", "ID Number", "Vehicle", "External Car", "Date", "Pickup", "Total (RWF)", "Status"];
-    const rows = filtered.map(b => [
-      b.client_name,
-      b.client_phone || "",
-      b.id_number || "",
-      carName(b.car_id),
-      b.external_car || "",
-      b.booking_date,
-      b.pickup_location,
-      b.total_price,
-      b.status
-    ]);
+    doc.setDrawColor(200);
+    doc.line(15, 35, 195, 35);
 
-    const csvContent = [
-      headers.join(","),
-      ...rows.map(e => e.join(","))
-    ].join("\n");
+    // Section 1: Parties
+    doc.setFontSize(12);
+    doc.setTextColor(0);
+    doc.text("1. THE PARTIES", 15, 45);
+    doc.setFontSize(10);
+    doc.text(`OWNER: SMART MOVE TRANSPORT LTD (Kigali, Rwanda)`, 20, 52);
+    doc.text(`CLIENT: ${booking.client_name.toUpperCase()}`, 20, 58);
+    doc.text(`PHONE: ${booking.client_phone || 'N/A'}`, 20, 64);
+    doc.text(`ID/PASSPORT: ${booking.id_number || 'N/A'}`, 20, 70);
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `bookings_export_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Section 2: Vehicle
+    doc.setFontSize(12);
+    doc.text("2. THE VEHICLE", 15, 80);
+    doc.setFontSize(10);
+    doc.text(`MODEL: ${car?.name || 'Assigned Vehicle'}`, 20, 87);
+    doc.text(`PLATE NUMBER: ${car?.plate_number || 'TBD'}`, 20, 93);
+    doc.text(`YEAR: ${car?.year || 'N/A'}`, 20, 99);
+
+    // Section 3: Payment Details
+    doc.setFontSize(12);
+    doc.text("3. PAYMENT DETAILS", 15, 110);
+    doc.autoTable({
+      startY: 115,
+      head: [['Description', 'Amount (RWF)']],
+      body: [
+        ['Total Rental Fee', Number(booking.total_price).toLocaleString()],
+        ['Paid Amount', Number(booking.paid_amount || 0).toLocaleString()],
+        ['Remaining Balance', Number(booking.balance || 0).toLocaleString()],
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [59, 130, 246] },
+      styles: { fontSize: 9 }
+    });
+
+    // Legal Terms (Sections 4-13)
+    let finalY = (doc as any).lastAutoTable.finalY + 15;
+    doc.setFontSize(12);
+    doc.text("4. TERMS & CONDITIONS", 15, finalY);
+    doc.setFontSize(8);
+    doc.setTextColor(50);
+    const splitText = doc.splitTextToSize(
+      "5. DRIVER QUALIFICATIONS: The Client must hold a valid driver's license. " +
+      "6. VEHICLE USE: The Vehicle shall be used only for legal purposes within Rwanda. " +
+      "7. FUEL & MAINTENANCE: The Client is responsible for fuel used during the rental period. " +
+      "8. ACCIDENTS: Any accident must be reported to the Owner and Police immediately. " +
+      "9. DAMAGE: The Client is liable for all damages not covered by insurance. " +
+      "10. RETURN: The Vehicle must be returned on the agreed date and time. " +
+      "11. LATE FEES: Late returns will attract an additional charge per hour. " +
+      "12. INSURANCE: The vehicle is covered by comprehensive insurance. 10% deduction applies on claims. " +
+      "13. DISPUTES: Any legal dispute shall be resolved according to the laws of Rwanda.",
+      180
+    );
+    doc.text(splitText, 15, finalY + 7);
+
+    // Signatures
+    finalY += 60;
+    doc.setTextColor(0);
+    doc.setFontSize(10);
+    doc.text("__________________________", 20, finalY);
+    doc.text("Owner Signature (SMT LTD)", 20, finalY + 5);
+    
+    doc.text("__________________________", 130, finalY);
+    doc.text("Client Signature", 130, finalY + 5);
+    doc.text(booking.client_name, 130, finalY + 10);
+
+    doc.save(`SMT_Rental_Contract_${booking.client_name.replace(/\s+/g, '_')}.pdf`);
   };
 
   const carName = (id: string | null) => cars.find((c) => (c._id === id || c.id === id))?.name || '—';
@@ -434,9 +487,9 @@ export default function BookingsManagement() {
               <TableHead className="font-semibold">{t('admin.bookings.table.vehicle')}</TableHead>
               <TableHead className="font-semibold">{t('admin.bookings.table.schedule')}</TableHead>
               <TableHead className="font-semibold">{t('admin.bookings.table.payment')}</TableHead>
+              <TableHead className="font-semibold">Balance</TableHead>
               <TableHead className="font-semibold">{t('admin.bookings.table.status')}</TableHead>
-              <TableHead className="font-semibold">Assign Driver</TableHead>
-              <TableHead className="font-semibold">External Car</TableHead>
+              <TableHead className="font-semibold">Payment Status</TableHead>
               <TableHead className="font-semibold text-right px-6">{t('admin.bookings.table.actions')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -456,9 +509,9 @@ export default function BookingsManagement() {
                   <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                   <TableCell><Skeleton className="h-10 w-32" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-32" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
                   <TableCell className="text-right px-6"><Skeleton className="h-8 w-8 rounded-full ml-auto" /></TableCell>
                 </TableRow>
               ))
@@ -518,6 +571,11 @@ export default function BookingsManagement() {
                         </span>
                       </TableCell>
                       <TableCell>
+                        <span className="font-black text-sm text-zinc-900 dark:text-zinc-100 italic">
+                          RWF {Number(b.balance || 0).toLocaleString()}
+                        </span>
+                      </TableCell>
+                      <TableCell>
                         <Badge variant="outline" className={cn("h-6 text-[10px] px-2 font-bold gap-1 border-none", statusMap[b.status]?.color)}>
                           {(() => {
                             const Icon = statusMap[b.status]?.icon;
@@ -527,32 +585,16 @@ export default function BookingsManagement() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="relative group">
-                          <Input
-                            placeholder={t('admin.bookings.assignDriver')}
-                            defaultValue={b.driver || ''}
-                            className="h-8 w-32 text-[10px] bg-transparent font-bold focus-visible:ring-1 focus-visible:ring-primary border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2 uppercase"
-                            onBlur={(e) => updateDriver((b._id || b.id)!, e.target.value)}
-                            disabled={updateDriverMutation.isPending && updateDriverMutation.variables?.id === (b._id || b.id)}
-                          />
-                          {updateDriverMutation.isPending && updateDriverMutation.variables?.id === (b._id || b.id) && (
-                            <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 animate-spin text-primary" />
+                        <Badge 
+                          variant="outline" 
+                          className={cn(
+                            "h-6 text-[10px] px-2 font-black uppercase border-none gap-1", 
+                            b.payment_status === 'confirmed' ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30"
                           )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="relative group">
-                          <Input
-                            placeholder="Assign Ext. Car"
-                            defaultValue={b.external_car || ''}
-                            className="h-8 w-32 text-[10px] bg-transparent font-bold focus-visible:ring-1 focus-visible:ring-emerald-500 border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2 uppercase"
-                            onBlur={(e) => updateExternalCar((b._id || b.id)!, e.target.value)}
-                            disabled={updateExternalCarMutation.isPending && updateExternalCarMutation.variables?.id === (b._id || b.id)}
-                          />
-                          {updateExternalCarMutation.isPending && updateExternalCarMutation.variables?.id === (b._id || b.id) && (
-                            <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 animate-spin text-emerald-500" />
-                          )}
-                        </div>
+                        >
+                          {b.payment_status === 'confirmed' ? <ShieldCheck className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                          {b.payment_status || 'Pending'}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right px-6">
                         <DropdownMenu>
@@ -593,6 +635,20 @@ export default function BookingsManagement() {
                             </DropdownMenuItem>
 
                             <DropdownMenuItem
+                              onClick={() => generatePDF(b)}
+                              className="gap-2 text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 cursor-pointer font-bold"
+                            >
+                              <FileDown className="w-4 h-4" /> Export Contract PDF
+                            </DropdownMenuItem>
+
+                            {b.payment_status !== 'confirmed' && (
+                              <ConfirmPaymentDialog 
+                                booking={b} 
+                                onConfirm={(amount, method) => handleConfirmPayment((b._id || b.id)!, amount, method)}
+                              />
+                            )}
+
+                            <DropdownMenuItem
                               onClick={() => handleStatusUpdate((b._id || b.id)!, 'delete', t('admin.status.delete'))}
                               className="gap-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer font-bold"
                             >
@@ -606,7 +662,7 @@ export default function BookingsManagement() {
                 })}
                 {filtered.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-20">
+                    <TableCell colSpan={8} className="text-center py-20">
                       <div className="flex flex-col items-center gap-2">
                         <div className="p-3 rounded-full bg-zinc-50 dark:bg-zinc-800/50">
                           <Search className="w-6 h-6 text-zinc-300" />
@@ -709,7 +765,22 @@ export default function BookingsManagement() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">{t('admin.bookings.table.payment')}</p>
-                  <p className="text-xs font-black text-amber-600">RWF {Number(b.total_price).toLocaleString()}</p>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xs font-black text-zinc-900 dark:text-zinc-100">Total: RWF {Number(b.total_price).toLocaleString()}</p>
+                    <p className="text-[10px] font-bold text-amber-600">Balance: RWF {Number(b.balance || 0).toLocaleString()}</p>
+                  </div>
+                </div>
+                <div className="col-span-1 space-y-1">
+                  <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Payment Status</p>
+                  <Badge 
+                    variant="outline" 
+                    className={cn(
+                      "h-5 text-[8px] px-1.5 font-black uppercase border-none mt-1 shadow-sm", 
+                      b.payment_status === 'confirmed' ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30"
+                    )}
+                  >
+                    {b.payment_status || 'Pending'}
+                  </Badge>
                 </div>
                 <div className="col-span-2 space-y-1">
                   <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">{t('admin.bookings.table.schedule')}</p>
@@ -836,5 +907,75 @@ export default function BookingsManagement() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function ConfirmPaymentDialog({ booking, onConfirm }: { booking: Booking; onConfirm: (amount: number, method: string) => void }) {
+  const [amount, setAmount] = useState(booking.total_price);
+  const [method, setMethod] = useState('MTN MoMo');
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="gap-2 text-blue-600 focus:text-blue-600 focus:bg-blue-50 cursor-pointer font-bold">
+          <CreditCard className="w-4 h-4" /> Confirm Payment
+        </DropdownMenuItem>
+      </DialogTrigger>
+      <DialogContent className="max-w-sm rounded-3xl p-6 bg-white dark:bg-zinc-900 border-none shadow-2xl">
+        <DialogHeader>
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4 shadow-inner">
+            <Coins className="w-6 h-6" />
+          </div>
+          <DialogTitle className="text-xl font-bold">Confirm Payment</DialogTitle>
+          <DialogDescription className="font-medium">
+            Record payment for {booking.client_name}. Total due is RWF {booking.total_price.toLocaleString()}.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-5 py-4">
+          <div className="space-y-2">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Payment Method</Label>
+            <Select value={method} onValueChange={setMethod}>
+              <SelectTrigger className="h-11 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                <SelectItem value="MTN MoMo">MTN MoMo</SelectItem>
+                <SelectItem value="Code">Merchant Code</SelectItem>
+                <SelectItem value="Cash">Cash Payment</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Paid Amount (RWF)</Label>
+            <Input 
+              type="number" 
+              value={amount} 
+              onChange={(e) => setAmount(Number(e.target.value))} 
+              className="h-11 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800 font-bold"
+            />
+          </div>
+          <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-bold text-amber-700 dark:text-amber-400">Remaining Balance</span>
+              <span className="text-sm font-black text-amber-900 dark:text-amber-200">
+                RWF {(Number(booking.total_price) - amount).toLocaleString()}
+              </span>
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button 
+            className="w-full h-12 rounded-xl font-bold shadow-lg"
+            onClick={() => {
+              onConfirm(amount, method);
+              setOpen(false);
+            }}
+          >
+            Confirm & Save Payment
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

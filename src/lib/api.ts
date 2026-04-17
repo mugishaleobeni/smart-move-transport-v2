@@ -52,6 +52,7 @@ export const carsApi = {
 export const bookingsApi = {
     getAll: (params?: { limit?: number; page?: number }) => api.get('/bookings', { params }),
     create: (data: any) => api.post('/bookings', data),
+    update: (id: string, data: any) => api.patch(`/bookings/${id}`, data),
     updateStatus: (id: string, status: string, extraData: any = {}) => api.patch(`/bookings/${id}`, { status, ...extraData }),
     delete: (id: string) => api.delete(`/bookings/${id}`),
 };
@@ -93,6 +94,11 @@ export const filesApi = {
         headers: { 'Content-Type': 'multipart/form-data' }
     }),
     deleteFile: (id: string) => api.delete(`/files/${id}`),
+};
+
+export const settingsApi = {
+    getAgreement: () => api.get('/settings/agreement'),
+    updateAgreement: (text: string) => api.post('/settings/agreement', { text }),
 };
 
 export default api;

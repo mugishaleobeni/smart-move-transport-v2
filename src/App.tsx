@@ -33,6 +33,7 @@ const Analytics = lazy(() => import("./pages/admin/Analytics"));
 const Reports = lazy(() => import("./pages/admin/Reports"));
 const Settings = lazy(() => import("./pages/admin/Settings"));
 const FileManager = lazy(() => import("./pages/admin/FileManager"));
+const AgreementManagement = lazy(() => import("./pages/admin/AgreementManagement"));
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,7 @@ const AppContent = () => {
           <Route path="reports" element={<Suspense fallback={<Loading t={t} />}><Reports /></Suspense>} />
           <Route path="settings" element={<Suspense fallback={<Loading t={t} />}><Settings /></Suspense>} />
           <Route path="files" element={<Suspense fallback={<Loading t={t} />}><FileManager /></Suspense>} />
+          <Route path="agreement" element={<Suspense fallback={<Loading t={t} />}><AgreementManagement /></Suspense>} />
         </Route>
       </Route>
       <Route path="*" element={<NotFound />} />

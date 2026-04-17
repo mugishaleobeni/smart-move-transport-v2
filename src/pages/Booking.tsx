@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, MapPin, Clock, Check, ChevronRight, ChevronLeft, User, Mail, Phone, Shield } from 'lucide-react';
+import { Calendar as CalendarIcon, MapPin, Clock, Check, ChevronRight, ChevronLeft, User, Mail, Phone, Shield, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,7 +10,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { bookingsApi, carsApi } from '@/lib/api';
+import { bookingsApi, carsApi, settingsApi } from '@/lib/api';
 import { Layout } from '@/components/layout/Layout';
 import { useOnlineStatus } from '@/components/offline/OfflineBanner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -65,6 +65,7 @@ export default function Booking() {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [agreementText, setAgreementText] = useState('');
   
   const pickupRef = useRef<HTMLInputElement>(null);
   const dropoffRef = useRef<HTMLInputElement>(null);
@@ -138,7 +139,14 @@ export default function Booking() {
         setLoadingCars(false);
       }
     };
+    const fetchAgreement = async () => {
+      try {
+        const res = await settingsApi.getAgreement();
+        setAgreementText(res.data?.agreement || '');
+      } catch (err) { console.error('Failed to fetch agreement', err); }
+    };
     fetchCars();
+    fetchAgreement();
   }, [searchParams]);
 
   useEffect(() => {

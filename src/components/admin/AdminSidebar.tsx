@@ -34,6 +34,7 @@ const menuItems = [
   { title: 'Analytics', icon: BarChart3, to: '/admin/analytics' },
   { title: 'Reports', icon: FileText, to: '/admin/reports' },
   { title: 'Files', icon: FolderOpen, to: '/admin/files' },
+  { title: 'Agreement', icon: FileText, to: '/admin/agreement' },
 ];
 
 export function AdminSidebar() {
