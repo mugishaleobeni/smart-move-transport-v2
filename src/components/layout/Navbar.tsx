@@ -53,7 +53,7 @@ export function Navbar() {
             <Link to="/" className="flex items-center group">
               <div className="h-14 md:h-16 w-40 md:w-56 flex items-center justify-center overflow-hidden">
                 <img 
-                  src="/logotype.jpg" 
+                  src="/smartmovelogo.png" 
                   alt="Smart Move" 
                   className="w-full h-auto scale-[1.8] md:scale-[2.2] mix-blend-multiply dark:mix-blend-plus-lighter transition-all duration-300"
                 />

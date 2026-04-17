@@ -80,7 +80,7 @@ export function Footer() {
                         <Link to="/" className="flex items-center group">
                             <div className="h-10 md:h-14 w-full max-w-[200px] flex items-center justify-start overflow-hidden ml-[-10px] md:ml-[-20px]">
                                 <img 
-                                    src="/logotype.jpg" 
+                                    src="/smartmovelogo.png" 
                                     alt="Smart Move" 
                                     className="w-full h-auto scale-[1.3] md:scale-[1.6] mix-blend-multiply dark:mix-blend-plus-lighter transition-all duration-300 transform-gpu" 
                                 />
