@@ -243,17 +243,23 @@ export default function BookingsManagement() {
     }
   };
 
-  const handleConfirmPayment = (bookingId: string, paidAmount: number, method: string) => {
+  const handleConfirmPayment = (bookingId: string, newPayment: number, method: string) => {
     const booking = bookings.find(b => (b._id || b.id) === bookingId);
     if (!booking) return;
 
-    const balance = Number(booking.total_price) - Number(paidAmount);
+    const currentPaid = Number(booking.paid_amount || 0);
+    const currentBalance = Number(booking.balance !== undefined ? booking.balance : (Number(booking.total_price) - currentPaid));
+    
+    const updatedPaid = currentPaid + newPayment;
+    const updatedBalance = Math.max(0, currentBalance - newPayment);
+
     confirmPaymentMutation.mutate({
       id: bookingId,
       data: {
-        paid_amount: Number(paidAmount),
+        paid_amount: updatedPaid,
         payment_method: method,
-        balance: balance
+        balance: updatedBalance,
+        payment_status: updatedBalance === 0 ? 'confirmed' : 'pending'
       }
     });
   };
@@ -1084,12 +1090,36 @@ export default function BookingsManagement() {
 }
 
 function ConfirmPaymentDialog({ booking, onConfirm }: { booking: Booking; onConfirm: (amount: number, method: string) => void }) {
-  const [amount, setAmount] = useState(booking.total_price);
+  const currentBalance = Number(booking.balance !== undefined ? booking.balance : booking.total_price);
+  const [amount, setAmount] = useState(currentBalance);
   const [method, setMethod] = useState('MTN MoMo');
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleOpenChange = (v: boolean) => {
+    setOpen(v);
+    if (v) {
+      setAmount(currentBalance);
+      setError(null);
+    }
+  };
+
+  const validateAndSubmit = () => {
+    if (amount <= 0) {
+      setError("Please enter a valid amount greater than 0");
+      return;
+    }
+    if (amount > currentBalance) {
+      setError(`Amount exceeds remaining balance (MAX: RWF ${currentBalance.toLocaleString()})`);
+      return;
+    }
+    setError(null);
+    onConfirm(amount, method);
+    setOpen(false);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="gap-2 text-blue-600 focus:text-blue-600 focus:bg-blue-50 cursor-pointer font-bold">
           <CreditCard className="w-4 h-4" /> Confirm Payment
@@ -1100,12 +1130,17 @@ function ConfirmPaymentDialog({ booking, onConfirm }: { booking: Booking; onConf
           <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4 shadow-inner">
             <Coins className="w-6 h-6" />
           </div>
-          <DialogTitle className="text-xl font-bold">Confirm Payment</DialogTitle>
+          <DialogTitle className="text-xl font-bold">Record Payment</DialogTitle>
           <DialogDescription className="font-medium">
-            Record payment for {booking.client_name}. Total due is RWF {booking.total_price.toLocaleString()}.
+            Adding payment for {booking.client_name}.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-5 py-4">
+          <div className="flex justify-between items-center p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800">
+            <span className="text-[10px] font-black uppercase text-zinc-400">Current Balance</span>
+            <span className="text-sm font-black text-slate-900 dark:text-zinc-100">RWF {currentBalance.toLocaleString()}</span>
+          </div>
+
           <div className="space-y-2">
             <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Payment Method</Label>
             <Select value={method} onValueChange={setMethod}>
@@ -1116,23 +1151,34 @@ function ConfirmPaymentDialog({ booking, onConfirm }: { booking: Booking; onConf
                 <SelectItem value="MTN MoMo">MTN MoMo</SelectItem>
                 <SelectItem value="Code">Merchant Code</SelectItem>
                 <SelectItem value="Cash">Cash Payment</SelectItem>
+                <SelectItem value="Bank">Bank Transfer</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Paid Amount (RWF)</Label>
+            <div className="flex justify-between">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Processing Amount (RWF)</Label>
+              {error && <span className="text-[9px] font-bold text-rose-500 animate-pulse">{error}</span>}
+            </div>
             <Input 
               type="number" 
               value={amount} 
-              onChange={(e) => setAmount(Number(e.target.value))} 
-              className="h-11 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800 font-bold"
+              onChange={(e) => {
+                setAmount(Number(e.target.value));
+                setError(null);
+              }} 
+              className={cn(
+                "h-11 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-800 font-bold",
+                error && "border-rose-500 ring-1 ring-rose-500/20"
+              )}
             />
           </div>
+          
           <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-amber-700 dark:text-amber-400">Remaining Balance</span>
+              <span className="text-xs font-bold text-amber-700 dark:text-amber-400">New Balance</span>
               <span className="text-sm font-black text-amber-900 dark:text-amber-200">
-                RWF {(Number(booking.total_price) - amount).toLocaleString()}
+                RWF {Math.max(0, currentBalance - amount).toLocaleString()}
               </span>
             </div>
           </div>
@@ -1140,10 +1186,8 @@ function ConfirmPaymentDialog({ booking, onConfirm }: { booking: Booking; onConf
         <DialogFooter>
           <Button 
             className="w-full h-12 rounded-xl font-bold shadow-lg"
-            onClick={() => {
-              onConfirm(amount, method);
-              setOpen(false);
-            }}
+            onClick={validateAndSubmit}
+            disabled={amount <= 0 || amount > currentBalance}
           >
             Confirm & Save Payment
           </Button>
