@@ -138,28 +138,28 @@ export function AdminSidebar() {
               className="flex-shrink-0 w-20 snap-center flex flex-col items-center justify-center relative group"
             >
               {({ isActive }) => (
-                <div className="flex flex-col items-center justify-center h-full w-full">
+                <div className="flex flex-col items-center justify-center h-full w-full py-1">
                   {isActive && (
                     <motion.div
-                      layoutId="admin-mobile-nav-active-pill"
-                      className="absolute inset-x-1.5 inset-y-1.5 rounded-xl bg-primary/10 dark:bg-primary/20"
+                      layoutId="admin-mobile-nav-active-line"
+                      className="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
                   <item.icon
                     className={cn(
-                      'w-5 h-5 transition-smooth relative z-10',
+                      'w-5 h-5 transition-all duration-300 relative z-10',
                       isActive
-                        ? 'text-primary'
+                        ? 'text-primary scale-110'
                         : 'text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200'
                     )}
                   />
                   <span
                     className={cn(
-                      'text-[9px] font-bold leading-none transition-smooth relative z-10 mt-1',
+                      'text-[10px] transition-all duration-300 relative z-10 mt-1.5',
                       isActive
-                        ? 'text-primary'
-                        : 'text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200'
+                        ? 'text-primary font-black scale-105'
+                        : 'text-zinc-400 font-bold group-hover:text-zinc-700 dark:group-hover:text-zinc-200'
                     )}
                   >
                     {item.title}
