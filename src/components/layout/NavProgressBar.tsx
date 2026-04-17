@@ -1,12 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 
 export function NavProgressBar() {
     const location = useLocation();
+    const isFetching = useIsFetching();
+    const isMutating = useIsMutating();
+    
     const [isAnimating, setIsAnimating] = useState(false);
     const [progress, setProgress] = useState(0);
 
+    const isLoading = isFetching > 0 || isMutating > 0;
+
+    // Handle Route Changes
     useEffect(() => {
         setIsAnimating(true);
         setProgress(30);
@@ -25,6 +32,32 @@ export function NavProgressBar() {
         };
     }, [location.pathname]);
 
+    // Handle Global Data Sync / CRUD
+    useEffect(() => {
+        if (isLoading) {
+            setIsAnimating(true);
+            setProgress(40);
+            
+            // Slow crawl while loading
+            const interval = setInterval(() => {
+                setProgress(prev => {
+                    if (prev >= 90) return 90;
+                    return prev + 2;
+                });
+            }, 500);
+
+            return () => clearInterval(interval);
+        } else {
+            // Finish animation
+            setProgress(100);
+            const finishTimer = setTimeout(() => {
+                setIsAnimating(false);
+                setProgress(0);
+            }, 400);
+            return () => clearTimeout(finishTimer);
+        }
+    }, [isLoading]);
+
     return (
         <AnimatePresence>
             {isAnimating && (
@@ -32,7 +65,10 @@ export function NavProgressBar() {
                     initial={{ width: '0%', opacity: 1 }}
                     animate={{ width: `${progress}%`, opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                    transition={{ 
+                        width: { duration: 0.3, ease: "easeOut" },
+                        opacity: { duration: 0.2 }
+                    }}
                     className="fixed top-0 left-0 h-[3px] bg-primary z-[9999] shadow-[0_0_15px_rgba(59,130,246,0.8)]"
                     style={{
                         background: 'linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%)',

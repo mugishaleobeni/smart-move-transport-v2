@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Bell, User, Sun, Moon, Search, Command, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Bell, User, Sun, Moon, Search, Command, Settings, LogOut, ChevronDown, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -39,6 +40,7 @@ interface Notification {
 }
 
 export function AdminTopbar() {
+  const queryClient = useQueryClient();
   const { theme, toggleTheme } = useTheme();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -107,6 +109,16 @@ export function AdminTopbar() {
       </div>
 
       <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => queryClient.invalidateQueries()}
+          title="Refresh Data"
+          className="h-10 w-10 rounded-xl text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all active:scale-95 group"
+        >
+          <RefreshCw className="w-4 h-4 group-active:rotate-180 transition-transform duration-500" />
+        </Button>
+
         <Button
           variant="ghost"
           size="icon"
