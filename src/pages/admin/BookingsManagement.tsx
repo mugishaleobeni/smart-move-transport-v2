@@ -251,6 +251,25 @@ export default function BookingsManagement() {
     });
   };
 
+  const handleSave = () => {
+    if (!form.client_name || !form.car_id || !form.booking_date || !form.id_number) {
+      toast({ title: t('admin.bookings.toast.missingInfo'), description: t('admin.bookings.toast.fillRequired'), variant: 'destructive' });
+      return;
+    }
+    createBookingMutation.mutate({
+      ...form,
+      total_price: Number(form.total_price),
+      status: 'approved'
+    });
+  };
+
+  const updateStatus = (id: string, status: string) => updateStatusMutation.mutate({ id, status });
+
+  const updateExternalCar = (id: string, external_car: string) => {
+    if (!external_car) return;
+    updateExternalCarMutation.mutate({ id, external_car });
+  };
+
   const generatePDF = async (booking: Booking) => {
     const car = cars.find(c => (c._id === booking.car_id || c.id === booking.car_id));
     const doc = new jsPDF() as any;
@@ -489,7 +508,8 @@ export default function BookingsManagement() {
               <TableHead className="font-semibold">{t('admin.bookings.table.payment')}</TableHead>
               <TableHead className="font-semibold">Balance</TableHead>
               <TableHead className="font-semibold">{t('admin.bookings.table.status')}</TableHead>
-              <TableHead className="font-semibold">Payment Status</TableHead>
+              <TableHead className="font-semibold">Payment</TableHead>
+              <TableHead className="font-semibold">External Car</TableHead>
               <TableHead className="font-semibold text-right px-6">{t('admin.bookings.table.actions')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -512,6 +532,7 @@ export default function BookingsManagement() {
                   <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
+                  <TableCell><Skeleton className="h-8 w-32" /></TableCell>
                   <TableCell className="text-right px-6"><Skeleton className="h-8 w-8 rounded-full ml-auto" /></TableCell>
                 </TableRow>
               ))
@@ -595,6 +616,20 @@ export default function BookingsManagement() {
                           {b.payment_status === 'confirmed' ? <ShieldCheck className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
                           {b.payment_status || 'Pending'}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="relative group">
+                          <Input
+                            placeholder="Assign Ext. Car"
+                            defaultValue={b.external_car || ''}
+                            className="h-8 w-32 text-[10px] bg-transparent font-bold focus-visible:ring-1 focus-visible:ring-emerald-500 border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2 uppercase"
+                            onBlur={(e) => updateExternalCar((b._id || b.id)!, e.target.value)}
+                            disabled={updateExternalCarMutation.isPending && updateExternalCarMutation.variables?.id === (b._id || b.id)}
+                          />
+                          {updateExternalCarMutation.isPending && updateExternalCarMutation.variables?.id === (b._id || b.id) && (
+                            <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 animate-spin text-emerald-500" />
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right px-6">
                         <DropdownMenu>
