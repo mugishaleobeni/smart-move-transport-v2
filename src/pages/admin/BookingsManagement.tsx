@@ -22,7 +22,10 @@ import {
   FileDown,
   Coins,
   ShieldCheck,
-  Printer
+  Printer,
+  Trash,
+  Loader2,
+  Download
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -367,6 +370,33 @@ export default function BookingsManagement() {
     if (search && !b.client_name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
+
+  const exportBookings = () => {
+    const headers = ['Client Name', 'Phone', 'Vehicle', 'Date', 'Location', 'Price', 'Paid', 'Balance', 'Status', 'Payment Status'];
+    const csvData = filtered.map(b => [
+      b.client_name,
+      b.client_phone || 'N/A',
+      carName(b.car_id),
+      b.booking_date,
+      `"${(b.pickup_location || '').replace(/"/g, '""')}"`,
+      b.total_price,
+      b.paid_amount || 0,
+      b.balance || 0,
+      b.status,
+      b.payment_status || 'Pending'
+    ]);
+
+    const csvContent = [headers, ...csvData].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `bookings_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const summary = {
     total: bookings.length,
