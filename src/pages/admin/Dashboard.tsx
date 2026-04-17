@@ -358,10 +358,9 @@ export default function Dashboard() {
                     <YAxis
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                      tickFormatter={(value) => `RWF ${value.toLocaleString()}`}
-                      domain={[0, (dataMax: number) => Math.max(dataMax, 15000)]}
-                      ticks={[0, 5000, 10000, 15000]}
+                      tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                      tickFormatter={(value) => `${value.toLocaleString()} rwf`}
+                      domain={[0, 'auto']}
                     />
                     <Tooltip
                       contentStyle={{
