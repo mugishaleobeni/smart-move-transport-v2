@@ -155,6 +155,9 @@ export default function BookingsManagement() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
     },
     onSuccess: (_, variables) => {
       const msg = variables.status === 'delete' 
@@ -193,6 +196,9 @@ export default function BookingsManagement() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
     }
   });
 
@@ -205,6 +211,9 @@ export default function BookingsManagement() {
     onSuccess: () => {
       toast({ title: "Payment Confirmed Successfully" });
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
     },
     onError: (err: any) => {
       toast({ title: "Failed to confirm payment", description: err.message, variant: 'destructive' });
@@ -231,7 +240,11 @@ export default function BookingsManagement() {
       queryClient.setQueryData(['bookings', statusFilter, search, page], context?.previousBookings);
       toast({ title: "Failed to assign external car", description: err.message, variant: 'destructive' });
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['bookings'] })
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
+    }
   });
 
   const handleStatusUpdate = (id: string, status: string, label: string) => {

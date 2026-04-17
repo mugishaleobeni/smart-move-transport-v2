@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import {
   Car,
@@ -11,7 +11,8 @@ import {
   ArrowDownRight,
   Plus,
   ArrowRight,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,58 +33,15 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
-interface Stats {
-  totalCars: number;
-  totalBookings: number;
-  totalIncome: number;
-  totalExpenses: number;
-}
-
-interface RecentBooking {
-  _id?: string;
-  id?: string;
-  client_name: string;
-  booking_date: string;
-  total_price: number;
-  status: string;
-}
-
 export default function Dashboard() {
   const { t } = useLanguage();
-  const [stats, setStats] = useState<Stats>({ totalCars: 0, totalBookings: 0, totalIncome: 0, totalExpenses: 0 });
-  const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([]);
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadDashboardData = async (showLoading = true) => {
-      if (showLoading) setLoading(true);
-      try {
-        await Promise.all([
-          fetchStats(),
-          fetchRecentBookings(),
-          fetchChartData()
-        ]);
-      } catch (err) {
-        console.error('Final Dashboard Error:', err);
-      } finally {
-        if (showLoading) setLoading(false);
-      }
-    };
-
-    loadDashboardData();
-
-    // Real-time polling: Refresh data every 10 seconds for a snappy experience
-    const interval = setInterval(() => {
-      console.log('Refreshing dashboard data...');
-      loadDashboardData(false); // Silent refresh in background
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchStats = async () => {
-    try {
+  // ─── QUERIES ───
+  
+  // 1. Core Stats
+  const { data: statsData, isLoading: statsLoading } = useQuery({
+    queryKey: ['dashboard', 'stats'],
+    queryFn: async () => {
       const [carsRes, bookingsRes, expensesRes] = await Promise.all([
         carsApi.getAll(),
         bookingsApi.getAll(),
@@ -95,29 +53,33 @@ export default function Dashboard() {
 
       const totalIncome = bookings.reduce((sum: number, b: any) => sum + Number(b.total_price || 0), 0);
       const totalExpenses = expenses.reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0);
-      setStats({
+      
+      return {
         totalCars: cars.length,
         totalBookings: bookings.length,
-        totalIncome: totalIncome,
-        totalExpenses: totalExpenses,
-      });
-    } catch (error) {
-      console.error('Stats fetch failed', error);
-    }
-  };
+        totalIncome,
+        totalExpenses,
+        netProfit: totalIncome - totalExpenses
+      };
+    },
+    staleTime: 60000, // 1 minute
+  });
 
-  const fetchRecentBookings = async () => {
-    try {
+  // 2. Recent Bookings
+  const { data: recentBookingsData, isLoading: recentLoading } = useQuery({
+    queryKey: ['dashboard', 'recent'],
+    queryFn: async () => {
       const response = await bookingsApi.getAll();
       const bookings = Array.isArray(response.data?.data) ? response.data.data : (Array.isArray(response.data) ? response.data : []);
-      setRecentBookings(bookings.slice(0, 5));
-    } catch (error) {
-      console.error('Recent bookings fetch failed', error);
-    }
-  };
+      return bookings.slice(0, 5);
+    },
+    staleTime: 60000,
+  });
 
-  const fetchChartData = async () => {
-    try {
+  // 3. Chart Data
+  const { data: chartData, isLoading: chartLoading } = useQuery({
+    queryKey: ['dashboard', 'chart'],
+    queryFn: async () => {
       const [bookingsRes, expensesRes] = await Promise.all([
         bookingsApi.getAll(),
         expensesApi.getAll()
@@ -125,12 +87,11 @@ export default function Dashboard() {
       const bookings = Array.isArray(bookingsRes.data?.data) ? bookingsRes.data.data : (Array.isArray(bookingsRes.data) ? bookingsRes.data : []);
       const expenses = Array.isArray(expensesRes.data?.data) ? expensesRes.data.data : (Array.isArray(expensesRes.data) ? expensesRes.data : []);
 
-      // Get last 6 months list as baseline
       const last6Months: Record<string, { income: number; expense: number }> = {};
       for (let i = 5; i >= 0; i--) {
         const d = new Date();
         d.setMonth(d.getMonth() - i);
-        const key = d.toISOString().slice(0, 7); // YYYY-MM
+        const key = d.toISOString().slice(0, 7); 
         last6Months[key] = { income: 0, expense: 0 };
       }
 
@@ -147,10 +108,9 @@ export default function Dashboard() {
         }
       });
 
-      const sorted = Object.entries(last6Months)
+      return Object.entries(last6Months)
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([month, val]) => {
-          // Robust date parsing (YYYY-MM-01)
           const date = new Date(month + '-01');
           return {
             month: date.toLocaleString('default', { month: 'short' }),
@@ -158,23 +118,14 @@ export default function Dashboard() {
             ...val
           };
         });
-      setChartData(sorted);
-    } catch (error) {
-      console.error('Chart data fetch failed', error);
-      // Fallback: Show empty baseline
-      const fallback: any[] = [];
-      for (let i = 5; i >= 0; i--) {
-        const d = new Date();
-        d.setMonth(d.getMonth() - i);
-        fallback.push({
-          month: d.toLocaleString('default', { month: 'short' }),
-          income: 0,
-          expense: 0
-        });
-      }
-      setChartData(fallback);
-    }
-  };
+    },
+    staleTime: 300000, // 5 minutes
+  });
+
+  const stats = statsData || { totalCars: 0, totalBookings: 0, totalIncome: 0, totalExpenses: 0, netProfit: 0 };
+  const recentBookings = recentBookingsData || [];
+  const loading = statsLoading || recentLoading || chartLoading;
+
 
   const statCards = [
     {

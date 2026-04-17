@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { carsApi, bookingsApi, expensesApi } from '@/lib/api';
 import {
@@ -25,7 +25,8 @@ import {
   ArrowUpRight,
   ChevronRight,
   PieChart as PieChartIcon,
-  BarChart3
+  BarChart3,
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -40,23 +41,10 @@ const COLORS = [
 
 export default function Analytics() {
   const { t } = useLanguage();
-  const [incomePerCar, setIncomePerCar] = useState<any[]>([]);
-  const [expensePerCar, setExpensePerCar] = useState<any[]>([]);
-  const [insights, setInsights] = useState({
-    mostProfitable: '',
-    highestCost: '',
-    totalBookings: 0,
-    monthlyBest: { name: '', amount: 0 }
-  });
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
+  const { data: analyticsData, isLoading } = useQuery({
+    queryKey: ['analytics'],
+    queryFn: async () => {
       const [carsRes, bookingsRes, expensesRes] = await Promise.all([
         carsApi.getAll(),
         bookingsApi.getAll(),
@@ -83,10 +71,8 @@ export default function Analytics() {
         if (e.car_id) expenseMap[e.car_id] = (expenseMap[e.car_id] || 0) + Number(e.amount || 0);
       });
 
-      const incData = Object.entries(incomeMap).map(([id, val]) => ({ name: carMap[id] || 'Unknown', value: val }));
-      const expData = Object.entries(expenseMap).map(([id, val]) => ({ name: carMap[id] || 'Unknown', value: val }));
-      setIncomePerCar(incData);
-      setExpensePerCar(expData);
+      const incomePerCar = Object.entries(incomeMap).map(([id, val]) => ({ name: carMap[id] || 'Unknown', value: val }));
+      const expensePerCar = Object.entries(expenseMap).map(([id, val]) => ({ name: carMap[id] || 'Unknown', value: val }));
 
       const profitMap: Record<string, number> = {};
       Object.keys({ ...incomeMap, ...expenseMap }).forEach((id) => {
@@ -95,7 +81,6 @@ export default function Analytics() {
       const sorted = Object.entries(profitMap).sort(([, a], [, b]) => b - a);
       const highCost = Object.entries(expenseMap).sort(([, a], [, b]) => b - a);
 
-      // Calculate monthly best
       const now = new Date();
       const currentMonth = now.getMonth();
       const currentYear = now.getFullYear();
@@ -110,20 +95,23 @@ export default function Analytics() {
 
       const monthlySorted = Object.entries(monthlyIncomeMap).sort(([, a], [, b]) => b - a);
 
-      setInsights({
-        mostProfitable: sorted[0] ? carMap[sorted[0][0]] || 'N/A' : 'N/A',
-        highestCost: highCost[0] ? carMap[highCost[0][0]] || 'N/A' : 'N/A',
-        totalBookings: bookings?.length || 0,
-        monthlyBest: monthlySorted[0] ? { name: carMap[monthlySorted[0][0]] || 'N/A', amount: monthlySorted[0][1] } : { name: 'N/A', amount: 0 }
-      });
-    } catch (error) {
-      console.error('Analytics fetch failed', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return {
+        incomePerCar,
+        expensePerCar,
+        insights: {
+          mostProfitable: sorted[0] ? carMap[sorted[0][0]] || 'N/A' : 'N/A',
+          highestCost: highCost[0] ? carMap[highCost[0][0]] || 'N/A' : 'N/A',
+          totalBookings: bookings?.length || 0,
+          monthlyBest: monthlySorted[0] ? { name: carMap[monthlySorted[0][0]] || 'N/A', amount: monthlySorted[0][1] } : { name: 'N/A', amount: 0 }
+        }
+      };
+    },
+    staleTime: 300000,
+  });
 
-  if (loading) {
+  const { incomePerCar = [], expensePerCar = [], insights = { mostProfitable: 'N/A', highestCost: 'N/A', totalBookings: 0, monthlyBest: { name: 'N/A', amount: 0 } } } = analyticsData || {};
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-pulse flex flex-col items-center gap-2">

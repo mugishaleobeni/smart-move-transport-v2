@@ -159,6 +159,8 @@ export default function CarsManagement() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['cars'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
     },
     onSuccess: (_, id) => {
       toast({ title: t('admin.cars.toast.deleteSuccess'), variant: 'destructive' });
@@ -204,6 +206,8 @@ export default function CarsManagement() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['cars'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
     }
   });
 

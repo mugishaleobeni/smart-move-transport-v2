@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +17,8 @@ import {
   CheckCircle2,
   ChevronDown,
   Car,
-  Filter
+  Filter,
+  Loader2
 } from 'lucide-react';
 import { carsApi, bookingsApi, expensesApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -32,23 +34,17 @@ import {
 interface CarProfit { name: string; income: number; expense: number; profit: number; }
 
 export default function Reports() {
+  const { t } = useLanguage();
   const [startDate, setStartDate] = useState(() => {
     const d = new Date(); d.setMonth(d.getMonth() - 1);
     return d.toISOString().split('T')[0];
   });
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
-  const [carProfits, setCarProfits] = useState<CarProfit[]>([]);
-  const [summary, setSummary] = useState({ bookings: 0, income: 0, expenses: 0 });
-  const [isLoading, setIsLoading] = useState(false);
-  const { t } = useLanguage();
 
-  useEffect(() => {
-    fetchReport();
-  }, [startDate, endDate]);
-
-  const fetchReport = async () => {
-    setIsLoading(true);
-    try {
+  // ─── QUERIES ───
+  const { data: reportData, isLoading } = useQuery({
+    queryKey: ['reports', startDate, endDate],
+    queryFn: async () => {
       const [carsRes, bookingsRes, expensesRes] = await Promise.all([
         carsApi.getAll(),
         bookingsApi.getAll(),
@@ -62,7 +58,6 @@ export default function Reports() {
       const carMap: Record<string, string> = {};
       (cars || []).forEach((c: any) => { carMap[c._id || c.id] = c.name; });
 
-      // Filter by date
       const filteredBookings = (bookings || []).filter((b: any) => {
         const date = b.booking_date || b.created_at;
         return date >= startDate && date <= endDate;
@@ -96,20 +91,22 @@ export default function Reports() {
         profit: (incomeMap[id] || 0) - (expenseMap[id] || 0),
       })).sort((a, b) => b.profit - a.profit);
 
-      setCarProfits(profits);
-      setSummary({ bookings: filteredBookings.length, income: totalIncome, expenses: totalExpense });
-    } catch (error) {
-      console.error('Report fetch failed:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return {
+        carProfits: profits,
+        summary: { bookings: filteredBookings.length, income: totalIncome, expenses: totalExpense }
+      };
+    },
+    staleTime: 60000,
+  });
+
+  const { carProfits = [], summary = { bookings: 0, income: 0, expenses: 0 } } = reportData || {};
 
   const exportCSV = () => {
     const rows = [['Car', 'Income', 'Expenses', 'Profit'], ...carProfits.map((c) => [c.name, c.income, c.expense, c.profit])];
     const csvContent = rows.map((r) => r.map(v => `"${v}"`).join(',')).join('\n');
     downloadFile(csvContent, `fleet_performance_${startDate}_${endDate}.csv`);
   };
+
 
   const exportCompletedBookings = async () => {
     try {

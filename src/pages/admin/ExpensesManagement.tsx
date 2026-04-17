@@ -100,6 +100,8 @@ export default function ExpensesManagement() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
     },
     onSuccess: () => {
       toast({ 
@@ -150,7 +152,9 @@ export default function ExpensesManagement() {
       });
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: [ 'expenses' ] });
+      queryClient.invalidateQueries({ queryKey: [ 'dashboard' ] });
+      queryClient.invalidateQueries({ queryKey: [ 'analytics' ] });
     }
   });
 
@@ -184,6 +188,8 @@ export default function ExpensesManagement() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: [ 'dashboard' ] });
+      queryClient.invalidateQueries({ queryKey: [ 'analytics' ] });
     }
   });
 
