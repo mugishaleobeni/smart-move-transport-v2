@@ -123,7 +123,8 @@ export default function Dashboard() {
   });
 
   const stats = statsData || { totalCars: 0, totalBookings: 0, totalIncome: 0, totalExpenses: 0, netProfit: 0 };
-  const recentBookings = recentBookingsData || [];
+  const recentBookings = Array.isArray(recentBookingsData) ? recentBookingsData : [];
+  const displayChartData = Array.isArray(chartData) ? chartData : [];
   const loading = statsLoading || recentLoading || chartLoading;
 
 
@@ -284,10 +285,10 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent className="p-6">
-            {chartData.length > 0 ? (
+            {displayChartData.length > 0 ? (
               <div className="h-[350px] w-full pt-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <AreaChart data={displayChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
