@@ -111,8 +111,24 @@ export default function ExpensesManagement() {
 
   const createMutation = useMutation({
     mutationFn: (payload: any) => expensesApi.create(payload),
+    onMutate: async (newExpense) => {
+      await queryClient.cancelQueries({ queryKey: ['expenses'] });
+      const previous = queryClient.getQueryData(['expenses', filterCar, search, page]);
+      queryClient.setQueryData(['expenses', filterCar, search, page], (old: any) => {
+        if (!old) return old;
+        const oldBody = old.data;
+        const updateList = (list: any[]) => [{ ...newExpense, _id: 'temp-' + Date.now() }, ...list];
+
+        if (Array.isArray(oldBody?.data)) {
+          return { ...old, data: { ...oldBody, data: updateList(oldBody.data) } };
+        } else if (Array.isArray(oldBody)) {
+          return { ...old, data: updateList(oldBody) };
+        }
+        return old;
+      });
+      return { previous };
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
       toast({ 
         title: t('admin.expenses.toast.saveSuccess'), 
         description: t('admin.expenses.logNew') 
@@ -125,12 +141,49 @@ export default function ExpensesManagement() {
         expense_date: new Date().toISOString().split('T')[0] 
       });
     },
-    onError: (err) => {
+    onError: (err, _, context) => {
+      queryClient.setQueryData(['expenses', filterCar, search, page], context?.previous);
       toast({ 
         title: t('common.error'), 
         description: err.message, 
         variant: 'destructive' 
       });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+    }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: any }) => expensesApi.update(id, payload),
+    onMutate: async ({ id, payload }) => {
+      await queryClient.cancelQueries({ queryKey: ['expenses'] });
+      const previous = queryClient.getQueryData(['expenses', filterCar, search, page]);
+      queryClient.setQueryData(['expenses', filterCar, search, page], (old: any) => {
+        if (!old) return old;
+        const oldBody = old.data;
+        const updateList = (list: any[]) => list.map(e => (e._id === id || e.id === id) ? { ...e, ...payload } : e);
+
+        if (Array.isArray(oldBody?.data)) {
+          return { ...old, data: { ...oldBody, data: updateList(oldBody.data) } };
+        } else if (Array.isArray(oldBody)) {
+          return { ...old, data: updateList(oldBody) };
+        }
+        return old;
+      });
+      return { previous };
+    },
+    onSuccess: () => {
+      toast({ title: t('admin.expenses.toast.saveSuccess') });
+      setOpen(false);
+      setEditId(null);
+    },
+    onError: (err, _, context) => {
+      queryClient.setQueryData(['expenses', filterCar, search, page], context?.previous);
+      toast({ title: t('common.error'), description: err.message, variant: 'destructive' });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
     }
   });
 
@@ -152,10 +205,7 @@ export default function ExpensesManagement() {
     };
     
     if (editId) {
-      toast({ 
-        title: 'Update not yet implemented on backend', 
-        variant: 'default' 
-      });
+      updateMutation.mutate({ id: editId, payload });
     } else {
       createMutation.mutate(payload);
     }
@@ -286,7 +336,8 @@ export default function ExpensesManagement() {
               <Button variant="ghost" onClick={() => setOpen(false)} className="h-11 px-6 rounded-lg">
                 {t('common.cancel')}
               </Button>
-              <Button onClick={handleSave} className="h-11 px-8 rounded-lg shadow-lg shadow-primary/20">
+              <Button onClick={handleSave} className="h-11 px-8 rounded-lg shadow-lg shadow-primary/20" disabled={createMutation.isPending || updateMutation.isPending}>
+                {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 {editId ? t('common.save') : t('admin.bookings.completeRegistration')}
               </Button>
             </DialogFooter>
@@ -432,10 +483,15 @@ export default function ExpensesManagement() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        disabled={deleteMutation.isPending && expenseToDelete === (e._id || e.id)}
                         onClick={() => handleDelete((e._id || e.id)!)}
                         className="h-8 w-8 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        {deleteMutation.isPending && expenseToDelete === (e._id || e.id) ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
                       </Button>
                     </div>
                   </TableCell>

@@ -150,15 +150,80 @@ export default function BookingsManagement() {
 
   const createBookingMutation = useMutation({
     mutationFn: (newBooking: any) => bookingsApi.create(newBooking),
+    onMutate: async (newBooking) => {
+      await queryClient.cancelQueries({ queryKey: ['bookings'] });
+      const previousBookings = queryClient.getQueryData(['bookings', statusFilter, search, page]);
+      
+      queryClient.setQueryData(['bookings', statusFilter, search, page], (old: any) => {
+        if (!old) return old;
+        const oldBody = old.data;
+        const updateList = (list: any[]) => [{ ...newBooking, _id: 'temp-' + Date.now(), status: 'approved' }, ...list];
+        
+        if (Array.isArray(oldBody?.data)) return { ...old, data: { ...oldBody, data: updateList(oldBody.data) } };
+        if (Array.isArray(oldBody)) return { ...old, data: updateList(oldBody) };
+        return old;
+      });
+
+      return { previousBookings };
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bookings'] });
       toast({ title: t('admin.bookings.toast.registerSuccess') });
       setOpen(false);
       setForm({ client_name: '', client_phone: '', id_number: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], pickup_location: '', total_price: 0 });
     },
-    onError: (err) => {
+    onError: (err, _, context) => {
+      queryClient.setQueryData(['bookings', statusFilter, search, page], context?.previousBookings);
       toast({ title: t('admin.bookings.toast.registerFailed'), description: err.message, variant: 'destructive' });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
     }
+  });
+
+  const updateDriverMutation = useMutation({
+    mutationFn: ({ id, driver }: { id: string; driver: string }) => bookingsApi.updateStatus(id, 'driver_update', { driver }),
+    onMutate: async ({ id, driver }) => {
+      await queryClient.cancelQueries({ queryKey: ['bookings'] });
+      const previousBookings = queryClient.getQueryData(['bookings', statusFilter, search, page]);
+      queryClient.setQueryData(['bookings', statusFilter, search, page], (old: any) => {
+        if (!old) return old;
+        const updateList = (list: any[]) => list.map((b: any) => (b._id || b.id) === id ? { ...b, driver } : b);
+        const oldBody = old.data;
+        if (Array.isArray(oldBody?.data)) return { ...old, data: { ...oldBody, data: updateList(oldBody.data) } };
+        if (Array.isArray(oldBody)) return { ...old, data: updateList(oldBody) };
+        return old;
+      });
+      return { previousBookings };
+    },
+    onSuccess: () => toast({ title: t('admin.bookings.toast.driverAssigned') }),
+    onError: (err, _, context) => {
+      queryClient.setQueryData(['bookings', statusFilter, search, page], context?.previousBookings);
+      toast({ title: t('admin.bookings.toast.assignFailed'), description: err.message, variant: 'destructive' });
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['bookings'] })
+  });
+
+  const updateExternalCarMutation = useMutation({
+    mutationFn: ({ id, external_car }: { id: string; external_car: string }) => bookingsApi.updateStatus(id, 'external_car_update', { external_car }),
+    onMutate: async ({ id, external_car }) => {
+      await queryClient.cancelQueries({ queryKey: ['bookings'] });
+      const previousBookings = queryClient.getQueryData(['bookings', statusFilter, search, page]);
+      queryClient.setQueryData(['bookings', statusFilter, search, page], (old: any) => {
+        if (!old) return old;
+        const updateList = (list: any[]) => list.map((b: any) => (b._id || b.id) === id ? { ...b, external_car } : b);
+        const oldBody = old.data;
+        if (Array.isArray(oldBody?.data)) return { ...old, data: { ...oldBody, data: updateList(oldBody.data) } };
+        if (Array.isArray(oldBody)) return { ...old, data: updateList(oldBody) };
+        return old;
+      });
+      return { previousBookings };
+    },
+    onSuccess: () => toast({ title: "External car assigned successfully" }),
+    onError: (err, _, context) => {
+      queryClient.setQueryData(['bookings', statusFilter, search, page], context?.previousBookings);
+      toast({ title: "Failed to assign external car", description: err.message, variant: 'destructive' });
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['bookings'] })
   });
 
   const handleStatusUpdate = (id: string, status: string, label: string) => {
@@ -182,26 +247,16 @@ export default function BookingsManagement() {
     });
   };
 
-  const updateStatus = (id: string, status: string) => {
-    updateStatusMutation.mutate({ id, status });
+  const updateStatus = (id: string, status: string) => updateStatusMutation.mutate({ id, status });
+
+  const updateDriver = (id: string, driver: string) => {
+    if (!driver) return;
+    updateDriverMutation.mutate({ id, driver });
   };
 
-  const updateDriver = async (id: string, driver: string) => {
-    try {
-      await bookingsApi.updateStatus(id, 'driver_update', { driver });
-      toast({ title: t('admin.bookings.toast.driverAssigned') });
-    } catch (error: any) {
-      toast({ title: t('admin.bookings.toast.assignFailed'), description: error.message, variant: 'destructive' });
-    }
-  };
-
-  const updateExternalCar = async (id: string, external_car: string) => {
-    try {
-      await bookingsApi.updateStatus(id, 'external_car_update', { external_car });
-      toast({ title: "External car assigned successfully" });
-    } catch (error: any) {
-      toast({ title: "Failed to assign external car", description: error.message, variant: 'destructive' });
-    }
+  const updateExternalCar = (id: string, external_car: string) => {
+    if (!external_car) return;
+    updateExternalCarMutation.mutate({ id, external_car });
   };
 
   const exportBookings = () => {
@@ -307,7 +362,10 @@ export default function BookingsManagement() {
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleSave} className="w-full h-11">{t('admin.bookings.completeRegistration')}</Button>
+              <Button onClick={handleSave} className="w-full h-11" disabled={createBookingMutation.isPending}>
+                {createBookingMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {t('admin.bookings.completeRegistration')}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -475,7 +533,11 @@ export default function BookingsManagement() {
                             defaultValue={b.driver || ''}
                             className="h-8 w-32 text-[10px] bg-transparent font-bold focus-visible:ring-1 focus-visible:ring-primary border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2 uppercase"
                             onBlur={(e) => updateDriver((b._id || b.id)!, e.target.value)}
+                            disabled={updateDriverMutation.isPending && updateDriverMutation.variables?.id === (b._id || b.id)}
                           />
+                          {updateDriverMutation.isPending && updateDriverMutation.variables?.id === (b._id || b.id) && (
+                            <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 animate-spin text-primary" />
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -485,7 +547,11 @@ export default function BookingsManagement() {
                             defaultValue={b.external_car || ''}
                             className="h-8 w-32 text-[10px] bg-transparent font-bold focus-visible:ring-1 focus-visible:ring-emerald-500 border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-all pl-2 uppercase"
                             onBlur={(e) => updateExternalCar((b._id || b.id)!, e.target.value)}
+                            disabled={updateExternalCarMutation.isPending && updateExternalCarMutation.variables?.id === (b._id || b.id)}
                           />
+                          {updateExternalCarMutation.isPending && updateExternalCarMutation.variables?.id === (b._id || b.id) && (
+                            <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 animate-spin text-emerald-500" />
+                          )}
                         </div>
                       </TableCell>
                       <TableCell className="text-right px-6">

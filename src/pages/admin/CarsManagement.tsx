@@ -159,15 +159,43 @@ export default function CarsManagement() {
 
   const saveMutation = useMutation({
     mutationFn: (payload: any) => editId ? carsApi.update(editId, payload) : carsApi.create(payload),
+    onMutate: async (newCar) => {
+      await queryClient.cancelQueries({ queryKey: ['cars'] });
+      const previousCars = queryClient.getQueryData(['cars', statusFilter, search, page]);
+      
+      queryClient.setQueryData(['cars', statusFilter, search, page], (old: any) => {
+        if (!old) return old;
+        const oldBody = old.data;
+        const updateList = (list: any[]) => {
+          if (editId) {
+            return list.map((c: any) => (c._id || c.id) === editId ? { ...c, ...newCar } : c);
+          }
+          // For new cars, we add a temporary item
+          return [{ ...newCar, _id: 'temp-' + Date.now() }, ...list];
+        };
+
+        if (Array.isArray(oldBody?.data)) {
+          return { ...old, data: { ...oldBody, data: updateList(oldBody.data) } };
+        } else if (Array.isArray(oldBody)) {
+          return { ...old, data: updateList(oldBody) };
+        }
+        return old;
+      });
+
+      return { previousCars };
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cars'] });
       toast({ title: editId ? t('admin.cars.actions.edit') : t('admin.cars.toast.addSuccess') });
       setOpen(false);
       setEditId(null);
       setForm(emptyForm);
     },
-    onError: (err) => {
+    onError: (err, _, context) => {
+      queryClient.setQueryData(['cars', statusFilter, search, page], context?.previousCars);
       toast({ title: 'Save failed', description: err.message, variant: 'destructive' });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['cars'] });
     }
   });
 
@@ -592,7 +620,8 @@ export default function CarsManagement() {
           </div>
           <DialogFooter className="p-6 bg-zinc-50/80 dark:bg-zinc-800/80 border-t border-zinc-100 dark:border-zinc-800 backdrop-blur-md">
               <Button variant="ghost" onClick={() => setOpen(false)} className="rounded-lg h-11 px-6">{t('common.cancel')}</Button>
-              <Button onClick={handleSave} className="rounded-lg px-8 h-11 shadow-lg shadow-primary/20" disabled={uploading}>
+              <Button onClick={handleSave} className="rounded-lg px-8 h-11 shadow-lg shadow-primary/20" disabled={uploading || saveMutation.isPending}>
+                {saveMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 {editId ? t('common.save') : t('admin.bookings.completeRegistration')}
               </Button>
             </DialogFooter>
