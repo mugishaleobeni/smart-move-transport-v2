@@ -314,138 +314,181 @@ export default function CarsManagement() {
               <DialogDescription>{t('admin.cars.additionDesc')}</DialogDescription>
             </DialogHeader>
             <div className="p-6 max-h-[75vh] overflow-y-auto space-y-8">
-              {/* Row 1: Brand, Type and Rates */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.carName')}</Label>
-                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t('admin.cars.namePlaceholder')} className="h-10 rounded-lg" />
+              {/* Section 1: Car Information */}
+              <div className="space-y-5">
+                <div className="flex items-center gap-2 pb-2 border-b border-zinc-100 dark:border-zinc-800">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <CarFront className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-700 dark:text-zinc-200">{t('admin.cars.carInfo') || 'Car Information'}</h3>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.category')}</Label>
-                  <Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder={t('admin.cars.placeholders.type')} className="h-10 rounded-lg" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.dailyRate')}</Label>
-                  <Input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="30,000" className="h-10 rounded-lg" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.inCity') || 'In City'}</Label>
-                  <Input value={form.priceInCity} onChange={(e) => setForm({ ...form, priceInCity: e.target.value })} placeholder="15,000" className="h-10 rounded-lg" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.province') || 'Province'}</Label>
-                  <Input value={form.priceProvince} onChange={(e) => setForm({ ...form, priceProvince: e.target.value })} placeholder="25,000" className="h-10 rounded-lg" />
-                </div>
-              </div>
-
-              {/* Caution Pricing Section */}
-              <div className="space-y-4">
-                <Label className="text-sm font-black text-rose-500 uppercase tracking-widest flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4" />
-                  {t('admin.cars.labels.caution')}
-                </Label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-rose-50/30 dark:bg-rose-900/10 rounded-xl border border-rose-100 dark:border-rose-900/20">
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('admin.cars.labels.cautionDay')}</Label>
-                    <Input value={form.cautionDay} onChange={(e) => setForm({ ...form, cautionDay: e.target.value })} placeholder="50,000RWF" className="h-10 rounded-lg border-rose-100 dark:border-rose-900/30 focus-visible:ring-rose-500" />
+                    <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.cars.carName')}</Label>
+                    <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t('admin.cars.namePlaceholder')} className="h-12 rounded-xl border-zinc-200 dark:border-zinc-700 focus-visible:ring-primary focus-visible:border-primary transition-all shadow-sm" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('admin.cars.labels.cautionWeek')}</Label>
-                    <Input value={form.cautionWeek} onChange={(e) => setForm({ ...form, cautionWeek: e.target.value })} placeholder="350,000RWF" className="h-10 rounded-lg border-rose-100 dark:border-rose-900/30 focus-visible:ring-rose-500" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('admin.cars.labels.cautionLongTerm')}</Label>
-                    <Input value={form.cautionLongTerm} onChange={(e) => setForm({ ...form, cautionLongTerm: e.target.value })} placeholder="100,000RWF" className="h-10 rounded-lg border-rose-100 dark:border-rose-900/30 focus-visible:ring-rose-500" />
+                    <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.cars.category')}</Label>
+                    <Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder={t('admin.cars.placeholders.type')} className="h-12 rounded-xl border-zinc-200 dark:border-zinc-700 focus-visible:ring-primary focus-visible:border-primary transition-all shadow-sm" />
                   </div>
                 </div>
               </div>
 
-              {/* Row 2: Status, Seats and Description */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-3 space-y-4">
+              {/* Section 2: Pricing */}
+              <div className="space-y-5">
+                <div className="flex items-center gap-2 pb-2 border-b border-zinc-100 dark:border-zinc-800">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                    <Grid className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-700 dark:text-zinc-200">{t('admin.cars.pricing') || 'Pricing'}</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.bookings.table.status')}</Label>
-                    <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-                      <SelectTrigger className="h-10 rounded-lg">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="available">{t('admin.status.approved')}</SelectItem>
-                        <SelectItem value="garage">{t('admin.cars.stats.maintenance')}</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.cars.dailyRate')}</Label>
+                    <Input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="30,000" className="h-12 rounded-xl border-zinc-200 dark:border-zinc-700 focus-visible:ring-emerald-500 transition-all shadow-sm" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.seating')}</Label>
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-slate-400" />
-                      <Input type="number" value={form.seats} onChange={(e) => setForm({ ...form, seats: parseInt(e.target.value) || 5 })} className="h-10 rounded-lg" />
+                    <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.cars.labels.inCity') || 'In City'}</Label>
+                    <Input value={form.priceInCity} onChange={(e) => setForm({ ...form, priceInCity: e.target.value })} placeholder="15,000" className="h-12 rounded-xl border-zinc-200 dark:border-zinc-700 focus-visible:ring-emerald-500 transition-all shadow-sm" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.cars.labels.province') || 'Province'}</Label>
+                    <Input value={form.priceProvince} onChange={(e) => setForm({ ...form, priceProvince: e.target.value })} placeholder="25,000" className="h-12 rounded-xl border-zinc-200 dark:border-zinc-700 focus-visible:ring-emerald-500 transition-all shadow-sm" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Caution Pricing */}
+              <div className="space-y-5">
+                <div className="flex items-center gap-2 pb-2 border-b border-zinc-100 dark:border-zinc-800">
+                  <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500">
+                    <AlertCircle className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-700 dark:text-zinc-200">{t('admin.cars.labels.caution')}</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-5 bg-rose-50/20 dark:bg-rose-950/10 rounded-2xl border border-rose-100/50 dark:border-rose-900/20">
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.cars.labels.cautionDay')}</Label>
+                    <Input value={form.cautionDay} onChange={(e) => setForm({ ...form, cautionDay: e.target.value })} placeholder="50,000RWF" className="h-12 rounded-xl border-rose-100 dark:border-rose-900/40 focus-visible:ring-rose-500 transition-all shadow-sm" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.cars.labels.cautionWeek')}</Label>
+                    <Input value={form.cautionWeek} onChange={(e) => setForm({ ...form, cautionWeek: e.target.value })} placeholder="350,000RWF" className="h-12 rounded-xl border-rose-100 dark:border-rose-900/40 focus-visible:ring-rose-500 transition-all shadow-sm" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.cars.labels.cautionLongTerm')}</Label>
+                    <Input value={form.cautionLongTerm} onChange={(e) => setForm({ ...form, cautionLongTerm: e.target.value })} placeholder="100,000RWF" className="h-12 rounded-xl border-rose-100 dark:border-rose-900/40 focus-visible:ring-rose-500 transition-all shadow-sm" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 4: Details & Status */}
+              <div className="space-y-5">
+                <div className="flex items-center gap-2 pb-2 border-b border-zinc-100 dark:border-zinc-800">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600">
+                    <Info className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-700 dark:text-zinc-200">{t('admin.cars.details') || 'Details & Status'}</h3>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-4 space-y-5">
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.bookings.table.status')}</Label>
+                      <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+                        <SelectTrigger className="h-12 rounded-xl border-zinc-200 dark:border-zinc-700 shadow-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                          <SelectItem value="available">{t('admin.status.approved')}</SelectItem>
+                          <SelectItem value="garage">{t('admin.cars.stats.maintenance')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.cars.labels.seating')}</Label>
+                      <div className="relative group">
+                        <Users className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+                        <Input type="number" value={form.seats} onChange={(e) => setForm({ ...form, seats: parseInt(e.target.value) || 5 })} className="h-12 pl-10 rounded-xl border-zinc-200 dark:border-zinc-700 shadow-sm" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="lg:col-span-8 space-y-5">
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.cars.description')}</Label>
+                      <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t('admin.cars.placeholders.description')} className="min-h-[120px] rounded-xl border-zinc-200 dark:border-zinc-700 focus-visible:ring-primary shadow-sm resize-none" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.cars.labels.note')}</Label>
+                      <Textarea value={form.note || ''} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="e.g. Return with same fuel level..." className="min-h-[100px] rounded-xl border-blue-100 dark:border-blue-900/30 bg-blue-50/10 focus-visible:ring-blue-500 shadow-sm resize-none" />
                     </div>
                   </div>
                 </div>
-                <div className="lg:col-span-9 space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.description')}</Label>
-                    <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t('admin.cars.placeholders.description')} className="min-h-[105px] rounded-lg resize-none" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.note')}</Label>
-                    <Textarea value={form.note || ''} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="e.g. Return with same fuel level..." className="min-h-[80px] rounded-lg resize-none border-blue-50 dark:border-blue-900/20" />
-                  </div>
-                </div>
               </div>
 
-              {/* Row 3: Features and Media */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.standardFeatures')}</Label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-zinc-50 dark:bg-zinc-800/30 rounded-xl border border-zinc-100 dark:border-zinc-800">
-                    {STANDARD_FEATURES.map((feature) => {
-                      const isChecked = form.features.split(',').map(f => f.trim()).includes(feature.label);
-                      return (
-                        <div key={feature.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={feature.id}
-                            checked={isChecked}
-                            onCheckedChange={(checked) => {
-                              let featuresArr = form.features.split(',').map(f => f.trim()).filter(Boolean);
-                              if (checked) {
-                                if (!featuresArr.includes(feature.label)) featuresArr.push(feature.label);
-                              } else {
-                                featuresArr = featuresArr.filter(f => f !== feature.label);
-                              }
-                              setForm({ ...form, features: featuresArr.join(', ') });
-                            }}
-                          />
-                          <label
-                            htmlFor={feature.id}
-                            className="text-[11px] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-1.5 cursor-pointer"
-                          >
-                            <feature.icon className="w-3 h-3 text-slate-400" />
-                            {feature.label}
-                          </label>
-                        </div>
-                      );
-                    })}
+              {/* Section 5: Features & Media */}
+              <div className="space-y-5">
+                <div className="flex items-center gap-2 pb-2 border-b border-zinc-100 dark:border-zinc-800">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600">
+                    <CheckCircle2 className="w-4 h-4" />
                   </div>
-                  <Input
-                    value={form.features}
-                    onChange={(e) => setForm({ ...form, features: e.target.value })}
-                    placeholder={t('admin.cars.featuresPlaceholder')}
-                    className="h-9 rounded-lg text-[11px]"
-                  />
+                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-700 dark:text-zinc-200">{t('admin.cars.labels.media') || 'Features & Media'}</h3>
                 </div>
 
-                <div className="space-y-4">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.media')}</Label>
-                  <Tabs defaultValue="upload" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 rounded-lg p-1 bg-zinc-100 dark:bg-zinc-800">
-                      <TabsTrigger value="upload" className="rounded-md text-[11px]">{t('admin.cars.labels.directUpload')}</TabsTrigger>
-                      <TabsTrigger value="url" className="rounded-md text-[11px]">{t('admin.cars.labels.externalUrl')}</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="upload" className="space-y-4 pt-2">
-                      <div className="border-2 border-dashed border-zinc-200 dark:border-zinc-700 rounded-xl p-4 flex flex-col items-center justify-center bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all cursor-pointer relative overflow-hidden group min-h-[140px]">
-                        <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" multiple onChange={handleFileUpload} disabled={uploading} />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                  <div className="space-y-5">
+                    <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.cars.labels.standardFeatures')}</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-5 bg-zinc-50 dark:bg-zinc-800/30 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                      {STANDARD_FEATURES.map((feature) => {
+                        const isChecked = form.features.split(',').map(f => f.trim()).includes(feature.label);
+                        return (
+                          <div key={feature.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={feature.id}
+                              checked={isChecked}
+                              onCheckedChange={(checked) => {
+                                let featuresArr = form.features.split(',').map(f => f.trim()).filter(Boolean);
+                                if (checked) {
+                                  if (!featuresArr.includes(feature.label)) featuresArr.push(feature.label);
+                                } else {
+                                  featuresArr = featuresArr.filter(f => f !== feature.label);
+                                }
+                                setForm({ ...form, features: featuresArr.join(', ') });
+                              }}
+                              className="rounded-md"
+                            />
+                            <label
+                              htmlFor={feature.id}
+                              className="text-[11px] font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-1.5 cursor-pointer text-slate-600 dark:text-zinc-400"
+                            >
+                              <feature.icon className="w-3 h-3 opacity-60" />
+                              {feature.label}
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <Input
+                      value={form.features}
+                      onChange={(e) => setForm({ ...form, features: e.target.value })}
+                      placeholder={t('admin.cars.featuresPlaceholder')}
+                      className="h-10 rounded-xl text-[11px] border-zinc-200 dark:border-zinc-700"
+                    />
+                  </div>
+
+                  <div className="space-y-5">
+                    <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.cars.labels.media')}</Label>
+                    <Tabs defaultValue="upload" className="w-full">
+                      <TabsList className="grid w-full grid-cols-2 rounded-xl p-1 bg-zinc-100 dark:bg-zinc-800/50">
+                        <TabsTrigger value="upload" className="rounded-lg text-[11px] h-9">{t('admin.cars.labels.directUpload')}</TabsTrigger>
+                        <TabsTrigger value="url" className="rounded-lg text-[11px] h-9">{t('admin.cars.labels.externalUrl')}</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="upload" className="space-y-4 pt-2">
+                        <div className="border-2 border-dashed border-zinc-200 dark:border-zinc-700/50 rounded-2xl p-6 flex flex-col items-center justify-center bg-zinc-50/50 dark:bg-zinc-900/40 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/60 transition-all cursor-pointer relative overflow-hidden group min-h-[160px]">
+                          <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" multiple onChange={handleFileUpload} disabled={uploading} />
                         {uploading ? (
                           <div className="flex flex-col items-center gap-4 w-full max-w-[200px]">
                             <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -546,7 +589,8 @@ export default function CarsManagement() {
                 </div>
               </div>
             </div>
-            <DialogFooter className="p-6 bg-zinc-50/80 dark:bg-zinc-800/80 border-t border-zinc-100 dark:border-zinc-800 backdrop-blur-md">
+          </div>
+          <DialogFooter className="p-6 bg-zinc-50/80 dark:bg-zinc-800/80 border-t border-zinc-100 dark:border-zinc-800 backdrop-blur-md">
               <Button variant="ghost" onClick={() => setOpen(false)} className="rounded-lg h-11 px-6">{t('common.cancel')}</Button>
               <Button onClick={handleSave} className="rounded-lg px-8 h-11 shadow-lg shadow-primary/20" disabled={uploading}>
                 {editId ? t('common.save') : t('admin.bookings.completeRegistration')}
@@ -554,7 +598,7 @@ export default function CarsManagement() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+               </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[

@@ -86,7 +86,7 @@ export function AdminTopbar() {
   };
 
   return (
-    <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white/90 dark:bg-black/90 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-40 transition-colors duration-300">
+    <header className="fixed top-0 left-0 right-0 md:sticky md:top-0 z-40 h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white/90 dark:bg-black/90 backdrop-blur-md flex items-center justify-between px-6 transition-colors duration-300">
       <div className="flex items-center gap-4 flex-1">
         <SidebarTrigger className="h-9 w-9 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors" />
         <div
