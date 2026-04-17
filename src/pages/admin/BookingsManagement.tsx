@@ -68,6 +68,10 @@ interface Booking {
   confirmed_at?: string;
   external_car: string | null;
   has_conflict?: boolean;
+  end_date?: string;
+  driving_license_number?: string;
+  client_surname?: string;
+  physical_address?: string;
 }
 
 interface CarOption { _id: string; id?: string; name: string; }
@@ -95,7 +99,7 @@ export default function BookingsManagement() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [pendingAction, setPendingAction] = useState<{ id: string; status: string; label: string } | null>(null);
-  const [form, setForm] = useState({ client_name: '', client_phone: '', id_number: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], pickup_location: '', total_price: 0 });
+  const [form, setForm] = useState({ client_name: '', client_surname: '', client_phone: '', id_number: '', driving_license_number: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], end_date: new Date(Date.now() + 86400000).toISOString().split('T')[0], pickup_location: '', physical_address: '', total_price: 0 });
 
   // ─── QUERIES ───
   const { data: bookingsData, isLoading: bookingsLoading } = useQuery({
@@ -181,7 +185,7 @@ export default function BookingsManagement() {
     onSuccess: () => {
       toast({ title: t('admin.bookings.toast.registerSuccess') });
       setOpen(false);
-      setForm({ client_name: '', client_phone: '', id_number: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], pickup_location: '', total_price: 0 });
+      setForm({ client_name: '', client_surname: '', client_phone: '', id_number: '', driving_license_number: '', car_id: '', booking_date: new Date().toISOString().split('T')[0], end_date: new Date(Date.now() + 86400000).toISOString().split('T')[0], pickup_location: '', physical_address: '', total_price: 0 });
     },
     onError: (err, _, context) => {
       queryClient.setQueryData(['bookings', statusFilter, search, page], context?.previousBookings);
@@ -276,91 +280,175 @@ export default function BookingsManagement() {
   const generatePDF = async (booking: Booking) => {
     const car = cars.find(c => (c._id === booking.car_id || c.id === booking.car_id));
     const doc = new jsPDF() as any;
+
     const logoUrl = '/smartmovelogo.png';
 
     // Add Brand Header
     try {
-      doc.addImage(logoUrl, 'PNG', 15, 15, 40, 15);
+      doc.addImage(logoUrl, 'PNG', 15, 10, 40, 15);
     } catch (e) { console.warn("Logo failed to load for PDF"); }
 
-    doc.setFontSize(22);
+    // Header & Company Info
+    doc.setFontSize(20);
     doc.setTextColor(0, 0, 0);
-    doc.text("VEHICLE RENTAL CONTRACT", 105, 25, { align: 'center' });
+    doc.setFont("helvetica", "bold");
+    doc.text("VEHICLE RENTAL CONTRACT", 105, 30, { align: 'center' });
     
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setTextColor(100);
-    doc.text(`Booking ID: ${booking._id || booking.id}`, 195, 15, { align: 'right' });
+    doc.setFont("helvetica", "normal");
+    doc.text(`Booking Ref: ${booking._id || booking.id}`, 195, 15, { align: 'right' });
     doc.text(`Date of Issue: ${new Date().toLocaleDateString()}`, 195, 20, { align: 'right' });
 
-    doc.setDrawColor(200);
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.5);
     doc.line(15, 35, 195, 35);
 
     // Section 1: Parties
-    doc.setFontSize(12);
-    doc.setTextColor(0);
-    doc.text("1. THE PARTIES", 15, 45);
+    let currentY = 45;
     doc.setFontSize(10);
-    doc.text(`OWNER: SMART MOVE TRANSPORT LTD (Kigali, Rwanda)`, 20, 52);
-    doc.text(`CLIENT: ${booking.client_name.toUpperCase()}`, 20, 58);
-    doc.text(`PHONE: ${booking.client_phone || 'N/A'}`, 20, 64);
-    doc.text(`ID/PASSPORT: ${booking.id_number || 'N/A'}`, 20, 70);
+    doc.setFont("helvetica", "bold");
+    doc.text("1. THE PARTIES TO THIS AGREEMENT ARE:", 15, currentY);
+    
+    doc.setFont("helvetica", "normal");
+    doc.text("1.1 OWNER: SKY RIDE CAR RENTAL Company Ltd, phone number: +250782164220", 20, currentY + 6);
+    doc.text("1.2 RENTER: (The personal information provided by the Renter must be true and accurate.)", 20, currentY + 12);
+    
+    currentY += 18;
+    doc.text(`• First Name: ${(booking.client_name || '').toUpperCase()}`, 25, currentY);
+    doc.text(`• Surname: ${(booking.client_surname || '').toUpperCase()}`, 25, currentY + 6);
+    doc.text(`• Identity No. / Passport No.: ${booking.id_number || 'N/A'}`, 25, currentY + 12);
+    doc.text(`• Driving License Number: ${booking.driving_license_number || 'N/A'}`, 25, currentY + 18);
+    doc.text(`• Contact: ${booking.client_phone || 'N/A'}`, 25, currentY + 24);
+    doc.text(`• Physical Address: ${booking.physical_address || booking.pickup_location || 'N/A'}`, 25, currentY + 30);
+    
+    doc.setFontSize(8);
+    doc.text("The parties agree to use the Owner’s stated address as their physical address for the purposes of legal proceedings.", 20, currentY + 36);
 
-    // Section 2: Vehicle
-    doc.setFontSize(12);
-    doc.text("2. THE VEHICLE", 15, 80);
+    // Section 2: Object
+    currentY += 48;
     doc.setFontSize(10);
-    doc.text(`MODEL: ${car?.name || 'Assigned Vehicle'}`, 20, 87);
-    doc.text(`PLATE NUMBER: ${car?.plate_number || 'TBD'}`, 20, 93);
-    doc.text(`YEAR: ${car?.year || 'N/A'}`, 20, 99);
+    doc.setFont("helvetica", "bold");
+    doc.text("2. THE OBJECT OF THE RENTAL IS:", 15, currentY);
+    doc.setFont("helvetica", "normal");
+    doc.text(`• Type of Vehicle: ${(car?.type || 'Vehicle').toUpperCase()}`, 20, currentY + 6);
+    doc.text(`• Model: ${(car?.name || 'N/A').toUpperCase()}`, 20, currentY + 12);
+    doc.text(`• Year: ${car?.year || 'N/A'}`, 20, currentY + 18);
+    doc.text(`• License Plate: ${(car?.plate_number || 'TBD').toUpperCase()}`, 20, currentY + 24);
+    doc.text(`• Color: ${(car?.color || 'N/A').toUpperCase()}`, 20, currentY + 30);
+    doc.text(`• Registration Number: ${car?.registration_number || 'N/A'}`, 20, currentY + 36);
 
-    // Section 3: Payment Details
-    doc.setFontSize(12);
-    doc.text("3. PAYMENT DETAILS", 15, 110);
+    // Section 3 & 4
+    currentY += 46;
+    doc.setFont("helvetica", "bold");
+    doc.text("3. CONDITION OF VEHICLE:", 15, currentY);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.text("The Owner affirms that, to the best of their knowledge, the described vehicle is in good condition and free from any known defects that would affect its safe operation under normal use.", 15, currentY + 5, { maxWidth: 180 });
+
+    currentY += 15;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("4. QUALIFICATIONS:", 15, currentY);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.text("The Renter confirms they are physically and legally qualified to operate the described vehicle.", 15, currentY + 5);
+
+    // Section 5: Period
+    currentY += 15;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("5. RENTAL PERIOD:", 15, currentY);
+    doc.setFont("helvetica", "normal");
+    doc.text("The Owner agrees to rent the vehicle to the Renter for the following period:", 15, currentY + 5);
+    doc.text(`• Start Date: ${booking.booking_date}`, 20, currentY + 11);
+    doc.text(`• End Date: ${booking.end_date || 'N/A'}`, 20, currentY + 17);
+
+    // Section 6: Rate
+    currentY += 27;
+    doc.setFont("helvetica", "bold");
+    doc.text("6. RENTAL RATE:", 15, currentY);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.text(`6.1 The Renter agrees to pay the Owner a rate of ${Number(booking.total_price).toLocaleString()} RWF for the stated period.`, 15, currentY + 5);
+    doc.text("6.2 Payment and security deposit (caution) are to be made in advance. Extensions of the rental contract are accepted but must be requested at least five hours before the expiration of the current contract.", 15, currentY + 10, { maxWidth: 180 });
+    doc.text("6.3 The Renter is responsible for the cost of all fuel used.", 15, currentY + 20);
+    doc.text("6.4 If the Renter fails to return the vehicle on time, the Owner will charge 5000 RWF for each additional hour.", 15, currentY + 25);
+
+    // New Page for the rest
+    doc.addPage();
+    currentY = 20;
+
+    // Section 7: Booking Rate (Table)
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("7. BOOKING RATE & PAYMENT:", 15, currentY);
     doc.autoTable({
-      startY: 115,
-      head: [['Description', 'Amount (RWF)']],
+      startY: currentY + 5,
+      head: [['Description', 'Value']],
       body: [
-        ['Total Rental Fee', Number(booking.total_price).toLocaleString()],
-        ['Paid Amount', Number(booking.paid_amount || 0).toLocaleString()],
-        ['Remaining Balance', Number(booking.balance || 0).toLocaleString()],
+        ['TOTAL AMOUNT', `${Number(booking.total_price).toLocaleString()} RWF`],
+        ['PAID AMOUNT', `${Number(booking.paid_amount || 0).toLocaleString()} RWF`],
+        ['BALANCE', `${Number(booking.balance || 0).toLocaleString()} RWF`],
+        ['BOOKING DATE', booking.booking_date],
+        ['PAYMENT METHOD', booking.payment_method || 'N/A'],
       ],
       theme: 'grid',
-      headStyles: { fillColor: [59, 130, 246] },
-      styles: { fontSize: 9 }
+      headStyles: { fillColor: [0, 0, 0] },
+      margin: { left: 15 }
     });
 
-    // Legal Terms (Sections 4-13)
-    let finalY = (doc as any).lastAutoTable.finalY + 15;
-    doc.setFontSize(12);
-    doc.text("4. TERMS & CONDITIONS", 15, finalY);
-    doc.setFontSize(8);
-    doc.setTextColor(50);
-    const splitText = doc.splitTextToSize(
-      "5. DRIVER QUALIFICATIONS: The Client must hold a valid driver's license. " +
-      "6. VEHICLE USE: The Vehicle shall be used only for legal purposes within Rwanda. " +
-      "7. FUEL & MAINTENANCE: The Client is responsible for fuel used during the rental period. " +
-      "8. ACCIDENTS: Any accident must be reported to the Owner and Police immediately. " +
-      "9. DAMAGE: The Client is liable for all damages not covered by insurance. " +
-      "10. RETURN: The Vehicle must be returned on the agreed date and time. " +
-      "11. LATE FEES: Late returns will attract an additional charge per hour. " +
-      "12. INSURANCE: The vehicle is covered by comprehensive insurance. 10% deduction applies on claims. " +
-      "13. DISPUTES: Any legal dispute shall be resolved according to the laws of Rwanda.",
-      180
-    );
-    doc.text(splitText, 15, finalY + 7);
+    currentY = (doc as any).lastAutoTable.finalY + 15;
+
+    // Section 8: Caution
+    doc.setFont("helvetica", "bold");
+    doc.text("8. CAUTION:", 15, currentY);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.text("• Day Rental: 50,000 RWF", 20, currentY + 6);
+    doc.text("• Week Rental: 350,000 RWF", 20, currentY + 11);
+    doc.text("• Above: 100,000 RWF", 20, currentY + 16);
+
+    currentY += 25;
+
+    // Sections 9-13 (Legal)
+    const sections = [
+      { t: "9. EXCLUSIONS:", c: "9.1 The vehicle shall not be used to carry passengers or property for hire. 9.2 The vehicle shall not be used to carry passengers outside of the interior or cab. 9.3 The vehicle shall not be used to push, propel, or tow another vehicle or object without the written permission of the Owner. 9.4 The vehicle shall not be used for racing or any competition. 9.5 The vehicle shall not be used for any illegal activities. 9.6 The Renter agrees not to operate the vehicle in a negligent manner. 9.7 No unauthorized drivers. 9.8 No rough roads/off-road use." },
+      { t: "10. PAYMENT OF FINES AND DAMAGES:", c: "10.1 The Renter agrees to promptly pay any fines, penalties, or damages incurred during the rental. 10.2 Any remaining balance of the caution deposit will be refunded within 24 hours of inspection." },
+      { t: "11. INSURANCE:", c: "11.1 The vehicle is covered under insurance, but the driver and passengers are not. The Renter is also responsible for any personal belongings or items left in the vehicle." },
+      { t: "12. RETURN OF VEHICLE:", c: "12.1 The Renter agrees to return the vehicle to the agreed location by the End Date. 12.2 The Owner has the right to inspect the vehicle upon return. 12.3 The Renter agrees to comply with all laws and traffic regulations." },
+      { t: "13. JURISDICTION:", c: "The parties agree that this is a legally binding document under the laws of the Republic of Rwanda." }
+    ];
+
+    sections.forEach(s => {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text(s.t, 15, currentY);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      const lines = doc.splitTextToSize(s.c, 180);
+      doc.text(lines, 15, currentY + 5);
+      currentY += (lines.length * 4.5) + 10;
+      
+      if (currentY > 275) { doc.addPage(); currentY = 20; }
+    });
 
     // Signatures
-    finalY += 60;
-    doc.setTextColor(0);
+    currentY += 10;
     doc.setFontSize(10);
-    doc.text("__________________________", 20, finalY);
-    doc.text("Owner Signature (SMT LTD)", 20, finalY + 5);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Signed at Kigali, Rwanda, on Date: ${new Date().toLocaleDateString()}`, 15, currentY);
     
-    doc.text("__________________________", 130, finalY);
-    doc.text("Client Signature", 130, finalY + 5);
-    doc.text(booking.client_name, 130, finalY + 10);
+    currentY += 20;
+    doc.text("__________________________", 20, currentY);
+    doc.text("THE OWNER", 20, currentY + 5);
+    doc.text("HABINEZA ERISHA", 20, currentY + 10);
+    
+    doc.text("__________________________", 130, currentY);
+    doc.text("THE RENTER", 130, currentY + 5);
+    doc.text(`${(booking.client_name || '')} ${(booking.client_surname || '')}`, 130, currentY + 10);
 
-    doc.save(`SMT_Rental_Contract_${booking.client_name.replace(/\s+/g, '_')}.pdf`);
+    doc.save(`SKY_RIDE_Contract_${(booking.client_name || 'Booking').replace(/\s+/g, '_')}.pdf`);
   };
 
   const carName = (id: string | null) => cars.find((c) => (c._id === id || c.id === id))?.name || '—';
@@ -425,12 +513,22 @@ export default function BookingsManagement() {
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>{t('admin.bookings.clientName')}</Label>
-                  <Input value={form.client_name} onChange={(e) => setForm({ ...form, client_name: e.target.value })} placeholder={t('admin.bookings.customerName')} className="bg-background" />
+                  <Label>First Name</Label>
+                  <Input value={form.client_name} onChange={(e) => setForm({ ...form, client_name: e.target.value })} placeholder="e.g. Jean" className="bg-background" />
                 </div>
                 <div className="space-y-2">
-                  <Label>ID Number / Passport</Label>
-                  <Input value={form.id_number} onChange={(e) => setForm({ ...form, id_number: e.target.value })} placeholder="12345..." className="bg-background" />
+                  <Label>Surname</Label>
+                  <Input value={form.client_surname} onChange={(e) => setForm({ ...form, client_surname: e.target.value })} placeholder="e.g. Dupont" className="bg-background" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>ID / Passport Number</Label>
+                  <Input value={form.id_number} onChange={(e) => setForm({ ...form, id_number: e.target.value })} placeholder="123456..." className="bg-background" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Driving License Number</Label>
+                  <Input value={form.driving_license_number} onChange={(e) => setForm({ ...form, driving_license_number: e.target.value })} placeholder="D-L-..." className="bg-background" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -450,17 +548,27 @@ export default function BookingsManagement() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>{t('admin.bookings.pickupDate')}</Label>
+                  <Label>Pickup Date (Start)</Label>
                   <Input type="date" value={form.booking_date} onChange={(e) => setForm({ ...form, booking_date: e.target.value })} className="bg-background" />
                 </div>
                 <div className="space-y-2">
-                  <Label>{t('admin.bookings.tripTotal')}</Label>
-                  <Input type="number" value={form.total_price} onChange={(e) => setForm({ ...form, total_price: Number(e.target.value) })} className="bg-background" />
+                  <Label>Return Date (End)</Label>
+                  <Input type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} className="bg-background" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t('admin.bookings.pickupLocation')}</Label>
+                  <Input value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} placeholder={t('admin.bookings.addressPlaceholder')} className="bg-background" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Physical Address (Renter)</Label>
+                  <Input value={form.physical_address} onChange={(e) => setForm({ ...form, physical_address: e.target.value })} placeholder="Gikondo..." className="bg-background" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>{t('admin.bookings.pickupLocation')}</Label>
-                <Input value={form.pickup_location} onChange={(e) => setForm({ ...form, pickup_location: e.target.value })} placeholder={t('admin.bookings.addressPlaceholder')} className="bg-background" />
+                <Label>{t('admin.bookings.tripTotal')}</Label>
+                <Input type="number" value={form.total_price} onChange={(e) => setForm({ ...form, total_price: Number(e.target.value) })} className="bg-background" />
               </div>
             </div>
             <DialogFooter>

@@ -64,6 +64,10 @@ interface CarRow {
   cautionDay: string | number;
   cautionWeek: string | number;
   cautionLongTerm: string | number;
+  year?: string | number;
+  color?: string;
+  plate_number?: string;
+  registration_number?: string;
 }
 
 const STANDARD_FEATURES = [
@@ -94,7 +98,11 @@ const emptyForm = {
   cautionDay: '50000RWF',
   cautionWeek: '350000RWF',
   cautionLongTerm: '100000RWF',
-  images: [] as string[]
+  images: [] as string[],
+  year: '',
+  color: '',
+  plate_number: '',
+  registration_number: ''
 };
 
 export default function CarsManagement() {
@@ -268,6 +276,10 @@ export default function CarsManagement() {
       cautionDay: form.cautionDay,
       cautionWeek: form.cautionWeek,
       cautionLongTerm: form.cautionLongTerm,
+      year: form.year,
+      color: form.color,
+      plate_number: form.plate_number,
+      registration_number: form.registration_number,
     };
 
     saveMutation.mutate(payload);
@@ -290,6 +302,10 @@ export default function CarsManagement() {
       cautionWeek: car.cautionWeek?.toString() || '350000RWF',
       cautionLongTerm: car.cautionLongTerm?.toString() || '100000RWF',
       images: car.images || (car.image ? [car.image] : []),
+      year: car.year?.toString() || '',
+      color: car.color || '',
+      plate_number: car.plate_number || '',
+      registration_number: car.registration_number || '',
     });
     setEditId(car._id || car.id || null);
     setOpen(true);
@@ -359,6 +375,22 @@ export default function CarsManagement() {
                   <div className="space-y-2">
                     <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t('admin.cars.category')}</Label>
                     <Input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder={t('admin.cars.placeholders.type')} className="h-12 rounded-xl border-zinc-200 dark:border-zinc-700 focus-visible:ring-primary focus-visible:border-primary transition-all shadow-sm" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Year</Label>
+                    <Input value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} placeholder="2024" className="h-12 rounded-xl border-zinc-200 dark:border-zinc-700 shadow-sm" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Color</Label>
+                    <Input value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} placeholder="Silver" className="h-12 rounded-xl border-zinc-200 dark:border-zinc-700 shadow-sm" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">License Plate</Label>
+                    <Input value={form.plate_number} onChange={(e) => setForm({ ...form, plate_number: e.target.value })} placeholder="RAA 000 A" className="h-12 rounded-xl border-zinc-200 dark:border-zinc-700 shadow-sm" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Registration Number</Label>
+                    <Input value={form.registration_number} onChange={(e) => setForm({ ...form, registration_number: e.target.value })} placeholder="123456" className="h-12 rounded-xl border-zinc-200 dark:border-zinc-700 shadow-sm" />
                   </div>
                 </div>
               </div>
