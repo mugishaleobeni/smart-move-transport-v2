@@ -58,9 +58,12 @@ interface CarRow {
   images: string[];
   status: string;
   price?: string | number;
-  pricePerHour?: string | number;
   priceInCity?: string | number;
   priceProvince?: string | number;
+  note: string | null;
+  cautionDay: string | number;
+  cautionWeek: string | number;
+  cautionLongTerm: string | number;
 }
 
 const STANDARD_FEATURES = [
@@ -85,9 +88,12 @@ const emptyForm = {
   image: '',
   status: 'available',
   price: '',
-  pricePerHour: '',
   priceInCity: '',
   priceProvince: '',
+  note: '',
+  cautionDay: '50000RWF',
+  cautionWeek: '350000RWF',
+  cautionLongTerm: '100000RWF',
   images: [] as string[]
 };
 
@@ -228,9 +234,12 @@ export default function CarsManagement() {
       images: form.images || [],
       status: form.status,
       price: form.price,
-      pricePerHour: form.pricePerHour,
       priceInCity: form.priceInCity,
       priceProvince: form.priceProvince,
+      note: form.note,
+      cautionDay: form.cautionDay,
+      cautionWeek: form.cautionWeek,
+      cautionLongTerm: form.cautionLongTerm,
     };
 
     saveMutation.mutate(payload);
@@ -246,9 +255,12 @@ export default function CarsManagement() {
       image: car.image || '',
       status: car.status,
       price: car.price?.toString() || '',
-      pricePerHour: car.pricePerHour?.toString() || '',
       priceInCity: car.priceInCity?.toString() || '',
       priceProvince: car.priceProvince?.toString() || '',
+      note: car.note || '',
+      cautionDay: car.cautionDay?.toString() || '50000RWF',
+      cautionWeek: car.cautionWeek?.toString() || '350000RWF',
+      cautionLongTerm: car.cautionLongTerm?.toString() || '100000RWF',
       images: car.images || (car.image ? [car.image] : []),
     });
     setEditId(car._id || car.id || null);
@@ -317,16 +329,34 @@ export default function CarsManagement() {
                   <Input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="30,000" className="h-10 rounded-lg" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.hourly')}</Label>
-                  <Input value={form.pricePerHour} onChange={(e) => setForm({ ...form, pricePerHour: e.target.value })} placeholder="5,000" className="h-10 rounded-lg" />
-                </div>
-                <div className="space-y-2">
                   <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.inCity') || 'In City'}</Label>
                   <Input value={form.priceInCity} onChange={(e) => setForm({ ...form, priceInCity: e.target.value })} placeholder="15,000" className="h-10 rounded-lg" />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.province') || 'Province'}</Label>
                   <Input value={form.priceProvince} onChange={(e) => setForm({ ...form, priceProvince: e.target.value })} placeholder="25,000" className="h-10 rounded-lg" />
+                </div>
+              </div>
+
+              {/* Caution Pricing Section */}
+              <div className="space-y-4">
+                <Label className="text-sm font-black text-rose-500 uppercase tracking-widest flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  {t('admin.cars.labels.caution')}
+                </Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-rose-50/30 dark:bg-rose-900/10 rounded-xl border border-rose-100 dark:border-rose-900/20">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('admin.cars.labels.cautionDay')}</Label>
+                    <Input value={form.cautionDay} onChange={(e) => setForm({ ...form, cautionDay: e.target.value })} placeholder="50,000RWF" className="h-10 rounded-lg border-rose-100 dark:border-rose-900/30 focus-visible:ring-rose-500" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('admin.cars.labels.cautionWeek')}</Label>
+                    <Input value={form.cautionWeek} onChange={(e) => setForm({ ...form, cautionWeek: e.target.value })} placeholder="350,000RWF" className="h-10 rounded-lg border-rose-100 dark:border-rose-900/30 focus-visible:ring-rose-500" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{t('admin.cars.labels.cautionLongTerm')}</Label>
+                    <Input value={form.cautionLongTerm} onChange={(e) => setForm({ ...form, cautionLongTerm: e.target.value })} placeholder="100,000RWF" className="h-10 rounded-lg border-rose-100 dark:border-rose-900/30 focus-visible:ring-rose-500" />
+                  </div>
                 </div>
               </div>
 
@@ -353,9 +383,15 @@ export default function CarsManagement() {
                     </div>
                   </div>
                 </div>
-                <div className="lg:col-span-9 space-y-2">
-                  <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.description')}</Label>
-                  <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t('admin.cars.placeholders.description')} className="min-h-[105px] rounded-lg resize-none" />
+                <div className="lg:col-span-9 space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.description')}</Label>
+                    <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t('admin.cars.placeholders.description')} className="min-h-[105px] rounded-lg resize-none" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('admin.cars.labels.note')}</Label>
+                    <Textarea value={form.note || ''} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="e.g. Return with same fuel level..." className="min-h-[80px] rounded-lg resize-none border-blue-50 dark:border-blue-900/20" />
+                  </div>
                 </div>
               </div>
 

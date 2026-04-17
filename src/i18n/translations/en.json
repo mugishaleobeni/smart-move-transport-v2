@@ -71,7 +71,13 @@
     "seoTitle": "Best Car Rental Kigali - Our Premium Fleet",
     "seoDescription": "Explore our diverse selection of car hire in Rwanda. From luxury SUVs for business to rugged 4x4s for safari, we provide the best Kigali car rental experience.",
     "galleryTitle": "Vehicle Gallery",
-    "photos": "Photos"
+    "photos": "Photos",
+    "cautionTitle": "CAUTION:",
+    "bookingCondition": "The car will only be given after inspection and confirmation that it has no issues. The customer must complete payment within 24 hours before taking the car.",
+    "cautionDay": "Day Rental",
+    "cautionWeek": "Week Rental",
+    "cautionLongTerm": "Long-term Rental",
+    "note": "Note"
   },
   "booking": {
     "title": "Book Your Ride",
@@ -415,7 +421,12 @@
         "uploadPhotos": "Upload Gallery Photos",
         "uploadLimits": "Select one or more (Max 5MB each)",
         "main": "Main",
-        "noImage": "No Image"
+        "noImage": "No Image",
+        "note": "Note",
+        "caution": "Caution Pricing",
+        "cautionDay": "Day Rental Caution",
+        "cautionWeek": "Week Rental Caution",
+        "cautionLongTerm": "Long-term Rental Caution"
       },
       "table": {
         "info": "Vehicle Info",

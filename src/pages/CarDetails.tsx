@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Users, Phone, MessageCircle, Check, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Users, Phone, MessageCircle, Check, Loader2, AlertCircle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { carsApi } from '@/lib/api';
@@ -209,15 +209,58 @@ export default function CarDetails() {
                 </div>
 
                 {/* Features */}
-                <div className="mb-8">
+                <div className="mb-10">
                   <h3 className="text-lg font-semibold mb-4">{t('cars.features')}</h3>
                   <div className="grid grid-cols-2 gap-3">
-                    {car.features.map((feature, i) => (
+                    {car.features.map((feature: string, i: number) => (
                       <div key={i} className="flex items-center gap-2 text-sm">
                         <Check className="w-4 h-4 text-accent" />
                         <span>{feature}</span>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                {/* Rental Information & Caution */}
+                <div className="mb-10 space-y-6">
+                  <div className="p-6 rounded-2xl bg-rose-500/5 border border-rose-500/10 space-y-4">
+                    <div className="flex items-center gap-2 text-rose-500">
+                      <AlertCircle className="w-5 h-5" />
+                      <h3 className="text-lg font-bold uppercase tracking-tight">{t('cars.cautionTitle')}</h3>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="bg-white/40 dark:bg-black/20 p-3 rounded-xl border border-white/20">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">{t('cars.cautionDay')}</p>
+                        <p className="text-sm font-black text-slate-900 dark:text-white">{car.cautionDay || '50,000 RWF'}</p>
+                      </div>
+                      <div className="bg-white/40 dark:bg-black/20 p-3 rounded-xl border border-white/20">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">{t('cars.cautionWeek')}</p>
+                        <p className="text-sm font-black text-slate-900 dark:text-white">{car.cautionWeek || '350,000 RWF'}</p>
+                      </div>
+                      <div className="bg-white/40 dark:bg-black/20 p-3 rounded-xl border border-white/20">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">{t('cars.cautionLongTerm')}</p>
+                        <p className="text-sm font-black text-slate-900 dark:text-white">{car.cautionLongTerm || '100,000 RWF'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {car.note && (
+                    <div className="p-6 rounded-2xl bg-blue-500/5 border border-blue-500/10 space-y-3">
+                      <div className="flex items-center gap-2 text-blue-500">
+                        <Info className="w-5 h-5" />
+                        <h3 className="text-sm font-bold uppercase tracking-tight">{t('cars.note')}</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground italic leading-relaxed">
+                        "{car.note}"
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/10 flex gap-3">
+                    <Check className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+                    <p className="text-xs text-orange-700 dark:text-orange-300 font-medium leading-relaxed italic">
+                      {t('cars.bookingCondition')}
+                    </p>
                   </div>
                 </div>
 

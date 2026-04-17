@@ -71,7 +71,13 @@
         "seoTitle": "Gukodesha Imodoka i Kigali - Imodoka Zacu",
         "seoDescription": "Hitamo mu modoka zacu zinyuranye dukodesha mu Rwanda. Kuva ku modoka zigezweho z'ubucuruzi kugeza kuri 4x4 zikomeye, duguha serivisi nziza i Kigali.",
         "galleryTitle": "Amafoto y'Imodoka",
-        "photos": "Amafoto"
+        "photos": "Amafoto",
+        "cautionTitle": "ICYITONDERWA:",
+        "bookingCondition": "Imodoka itangwa gusa nyuma yo gusuzumwa no kwemezwa ko nta bibazo ifite. Umukiriya agomba kwishyura mu masaha 24 mbere yo gufata imodoka.",
+        "cautionDay": "Umunsi",
+        "cautionWeek": "Icyumweru",
+        "cautionLongTerm": "Igihe Kirekire",
+        "note": "Icyitonderwa"
     },
     "booking": {
         "title": "Kodesha Urugendo Rwawe",
@@ -399,7 +405,12 @@
             },
             "labels": {
                 "inCity": "mumujyi",
-                "province": "Intara"
+                "province": "Intara",
+                "note": "Icyitonderwa",
+                "caution": "Amafaranga y'Ingwate",
+                "cautionDay": "Ingwate (Umunsi)",
+                "cautionWeek": "Ingwate (Icyumweru)",
+                "cautionLongTerm": "Ingwate (Igihe kirekire)"
             },
             "placeholders": {
                 "type": "Urugero: Premium SUV",
