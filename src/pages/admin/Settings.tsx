@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Shield, Mail, Lock, CheckCircle2, AlertCircle, Loader2, Send, BellRing } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { toast } from 'sonner';
-import { notificationsApi } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
+import { notificationsApi, settingsApi, authApi } from '@/lib/api';
 
 export default function Settings() {
+  const queryClient = useQueryClient();
   const { user, updateProfile } = useAuth();
   const { t } = useLanguage();
-  const [loading, setLoading] = useState(false);
-  const [testingEmail, setTestingEmail] = useState(false);
-  const [emailTestResult, setEmailTestResult] = useState<{ status: string; method?: string; hint?: string } | null>(null);
+  const { toast } = useToast();
   
   const [formData, setFormData] = useState({
     email: user?.email || '',
@@ -23,61 +23,71 @@ export default function Settings() {
     confirmPassword: ''
   });
 
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
+  // ─── QUERIES ───
+  const { data: notificationEmailsData, isLoading: emailsLoading } = useQuery({
+    queryKey: ['settings', 'notification-emails'],
+    queryFn: () => settingsApi.getNotificationEmails(),
+  });
 
-    if (!formData.currentPassword) {
-      toast.error('Current password is required to save changes');
-      return;
-    }
+  const notificationEmails = notificationEmailsData?.data?.emails || '';
 
-    setLoading(true);
-    try {
-      await updateProfile({
-        email: formData.email,
-        currentPassword: formData.currentPassword,
-        newPassword: formData.newPassword || undefined
-      });
-      
-      toast.success('Profile updated successfully');
-      setFormData(prev => ({
-        ...prev,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      }));
-    } catch (error: any) {
+  // ─── MUTATIONS ───
+  const updateProfileMutation = useMutation({
+    mutationFn: (data: any) => updateProfile(data),
+    onSuccess: () => {
+      toast({ title: 'Profile updated successfully' });
+      setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
+    },
+    onError: (error: any) => {
       const errorMessage = error.response?.data?.error || 'Failed to update profile';
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
+      toast({ title: errorMessage, variant: 'destructive' });
     }
+  });
+
+  const updateEmailsMutation = useMutation({
+    mutationFn: (emails: string) => settingsApi.updateNotificationEmails(emails),
+    onSuccess: () => {
+      toast({ title: 'Notification emails updated' });
+      queryClient.invalidateQueries({ queryKey: ['settings', 'notification-emails'] });
+    },
+    onError: () => toast({ title: 'Failed to update notification emails', variant: 'destructive' })
+  });
+
+  const testEmailMutation = useMutation({
+    mutationFn: () => notificationsApi.testEmail(),
+    onSuccess: (res) => {
+      if (res.data.status === 'success') {
+        toast({ title: res.data.message });
+      } else {
+        toast({ title: 'Email test failed', variant: 'destructive' });
+      }
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || 'Email configuration may be incomplete.';
+      toast({ title: 'Email test failed', description: message, variant: 'destructive' });
+    }
+  });
+
+  const handleUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
+      toast({ title: 'Passwords do not match', variant: 'destructive' });
+      return;
+    }
+    if (!formData.currentPassword) {
+      toast({ title: 'Current password is required to save changes', variant: 'destructive' });
+      return;
+    }
+
+    updateProfileMutation.mutate({
+      email: formData.email,
+      currentPassword: formData.currentPassword,
+      newPassword: formData.newPassword || undefined
+    });
   };
 
-  const handleTestEmail = async () => {
-    setTestingEmail(true);
-    setEmailTestResult(null);
-    try {
-      const { data } = await notificationsApi.testEmail();
-      setEmailTestResult(data);
-      if (data.status === 'success') {
-        toast.success(`Test email sent via ${data.method}!`);
-      } else {
-        toast.error('Email test failed. Check configuration.');
-      }
-    } catch (error: any) {
-      const hint = error.response?.data?.hint || 'Email configuration may be incomplete.';
-      setEmailTestResult({ status: 'failed', hint });
-      toast.error('Email test failed.');
-    } finally {
-      setTestingEmail(false);
-    }
-  };
+  const [localEmails, setLocalEmails] = useState<string | null>(null);
+  const displayEmails = localEmails !== null ? localEmails : notificationEmails;
 
   return (
     <div className="space-y-8">
@@ -115,7 +125,6 @@ export default function Settings() {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="pl-10 h-10"
                     placeholder="admin@smartmovetransportltd.com"
-
                   />
                 </div>
               </div>
@@ -185,9 +194,9 @@ export default function Settings() {
             <Button 
               type="submit" 
               className="w-full btn-accent text-white h-12 text-lg font-bold"
-              disabled={loading}
+              disabled={updateProfileMutation.isPending}
             >
-              {loading ? (
+              {updateProfileMutation.isPending ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                   Saving Changes...
@@ -229,20 +238,57 @@ export default function Settings() {
               </li>
             </ul>
           </motion.div>
-          
+
+          {/* Notification Emails Configuration */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="glass rounded-2xl p-8 border-rose-500/10"
+            transition={{ delay: 0.25 }}
+            className="glass rounded-2xl p-8 space-y-5"
           >
-            <h3 className="text-lg font-bold text-rose-500 mb-2">Need Immediate Help?</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              If you suspect your account has been compromised, contact the system administrator immediately.
-            </p>
-            <Button variant="outline" className="w-full border-rose-500/20 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20">
-              Report Security Issue
-            </Button>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-lg bg-emerald-500/10">
+                <Mail className="w-5 h-5 text-emerald-500" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Notification Emails</h3>
+                <p className="text-xs text-muted-foreground">Admin recipients for system alerts</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="notification-emails">Alert Recipients</Label>
+                <div className="relative">
+                  {emailsLoading ? (
+                    <Skeleton className="h-11 w-full" />
+                  ) : (
+                    <>
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="notification-emails"
+                        value={displayEmails}
+                        onChange={(e) => setLocalEmails(e.target.value)}
+                        className="pl-10 h-11"
+                        placeholder="email1@example.com, email2@example.com"
+                      />
+                    </>
+                  )}
+                </div>
+                <p className="text-[10px] text-muted-foreground italic pl-1">
+                  Separate multiple emails with commas. This is useful for team bcc.
+                </p>
+              </div>
+
+              <Button
+                onClick={() => updateEmailsMutation.mutate(displayEmails)}
+                disabled={updateEmailsMutation.isPending || emailsLoading}
+                className="w-full h-11 font-bold gap-2"
+              >
+                {updateEmailsMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                Save Notification Emails
+              </Button>
+            </div>
           </motion.div>
 
           {/* Email Notification Test */}
@@ -257,44 +303,18 @@ export default function Settings() {
                 <BellRing className="w-5 h-5 text-accent" />
               </div>
               <div>
-                <h3 className="text-lg font-bold">Email Notifications</h3>
+                <h3 className="text-lg font-bold">Email Connectivity</h3>
                 <p className="text-xs text-muted-foreground">Verify booking alert emails are working</p>
               </div>
             </div>
 
-            <div className="text-sm text-muted-foreground space-y-1 bg-muted/30 rounded-xl p-4">
-              <p className="font-semibold text-foreground">Configured sender:</p>
-              <p className="font-mono text-accent text-xs">smartmovetransportltd@gmail.com</p>
-
-              <p className="text-xs mt-2">Uses your Gmail App Password (SMTP) or the Firebase service account (Gmail API)</p>
-            </div>
-
-            {emailTestResult && (
-              <div className={`rounded-xl p-4 flex gap-3 text-sm ${
-                emailTestResult.status === 'success'
-                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                  : 'bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400'
-              }`}>
-                {emailTestResult.status === 'success' ? (
-                  <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                ) : (
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                )}
-                <div>
-                  {emailTestResult.status === 'success'
-                    ? <><strong>Success!</strong> Sent via <em>{emailTestResult.method}</em>. Check your inbox at leo@gmail.com.</>
-                    : <><strong>Failed.</strong> {emailTestResult.hint}</>}
-                </div>
-              </div>
-            )}
-
             <Button
               id="btn-test-email"
-              onClick={handleTestEmail}
-              disabled={testingEmail}
+              onClick={() => testEmailMutation.mutate()}
+              disabled={testEmailMutation.isPending}
               className="w-full btn-accent text-white h-11 font-bold gap-2"
             >
-              {testingEmail ? (
+              {testEmailMutation.isPending ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Sending Test Email...</>
               ) : (
                 <><Send className="w-4 h-4" /> Send Test Email</>  

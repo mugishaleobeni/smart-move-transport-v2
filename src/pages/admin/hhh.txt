@@ -1,0 +1,64 @@
+This plan addresses several issues across the frontend and backend to improve reliability, flexibility, and user experience.
+
+User Review Required
+IMPORTANT
+
+The "Notification Emails" will be stored as a comma-separated string in the database settings. These will be used in addition to the existing admin users' emails for all notifications.
+
+NOTE
+
+Based on feedback, Contract Export will be available for "approved" and "completed" bookings, not strictly "completed" only.
+
+Proposed Changes
+Backend (Flask)
+[MODIFY] 
+notifications.py
+Add /test-email POST route.
+Ensure it's placed before the dynamic /<notif_id> route to avoid 405 errors.
+Implement the email test logic using mailer.py.
+[MODIFY] 
+mailer.py
+Add logic to fetch notification_emails from the settings collection.
+Update notify_admin_booking and notify_admin_action to include these extra emails.
+Remove hardcoded fallback email smartmovetransportltd@gmail.com if a dynamic setting is available.
+[MODIFY] 
+settings.py
+Add endpoints to GET and POST the notification_emails setting.
+Frontend (React/Vite)
+[MODIFY] 
+ExpensesManagement.tsx
+Import Loader2 from lucide-react.
+Verify state updates to ensure no other crash causes.
+[MODIFY] 
+Settings.tsx
+Add a new section for "Notification Emails".
+Allow entering multiple comma-separated emails.
+Save to the new backend settings endpoint.
+Add a "Test Email" button that calls /api/notifications/test-email.
+[MODIFY] 
+BookingsManagement.tsx
+Update generatePDF to use a Base64 encoded logo for better reliability.
+Update generatePDF to ensure it reflects client_surname and other new fields.
+Allow "Export Contract PDF" for "approved" and "completed" bookings.
+[AUDIT] Real-Time UI Updates
+Review Dashboard.tsx, CarsManagement.tsx, PricingManagement.tsx, Analytics.tsx, Reports.tsx, and FileManager.tsx.
+Ensure they all use useQuery and their respective mutations call invalidateQueries correctly.
+Open Questions
+Contract Export restriction: Should I also allow export for "approved" bookings, or strictly "completed"? The request says "Only bookings with status completed", so I will follow that unless advised otherwise.
+Logo Base64: Do you have a preferred Base64 string for the logo, or should I attempt to fetch and convert the existing /smartmovelogo.png at runtime/compile time? (I will try to convert it or use a fallback if not available).
+Verification Plan
+Automated Tests
+Test /api/notifications/test-email using curl or POST tool.
+Verify settings persistence in MongoDB.
+Manual Verification
+Add an expense and verify no black screen occurs.
+Change notification emails and verify they are used in a new booking test.
+Check "Settings" page for the new email configuration UI.
+Verify "Export Contract" only appears for completed bookings.
+Verify logo appears in exported PDF.
+used this to continue to build
+Agent
+finalmove
+continue 
+
+AI may make mistakes. Double-check all generated code.

@@ -68,11 +68,13 @@ export default function FileManager() {
   const { data: folders = [], isLoading: foldersLoading } = useQuery({
     queryKey: ['folders', currentFolderId],
     queryFn: () => filesApi.getFolders(currentFolderId === 'root' ? undefined : currentFolderId).then(res => res.data),
+    refetchInterval: 60000,
   });
 
   const { data: files = [], isLoading: filesLoading } = useQuery({
     queryKey: ['files', currentFolderId],
     queryFn: () => filesApi.getFiles(currentFolderId === 'root' ? undefined : currentFolderId).then(res => res.data),
+    refetchInterval: 60000,
   });
 
   // Mutations

@@ -106,7 +106,8 @@ export default function BookingsManagement() {
     queryKey: ['bookings', statusFilter, search, page],
     queryFn: () => bookingsApi.getAll({ page, limit: 50 }),
     placeholderData: (previousData) => previousData,
-    staleTime: 30000, // Consider data fresh for 30s
+    staleTime: 30000,
+    refetchInterval: 30000,
   });
 
   const { data: carsData } = useQuery({
@@ -300,12 +301,43 @@ export default function BookingsManagement() {
     const car = cars.find(c => (c._id === booking.car_id || c.id === booking.car_id));
     const doc = new jsPDF() as any;
 
-    const logoUrl = '/smartmovelogo.png';
+    // Logo configuration (Base64 for reliability)
+    const logoBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAbCAYAAACpAK68AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH6AIDEi0QYnQzWwAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUOdlWGUAAALxSURBVGje7ZpNSBRRHMf/78282dW1Xbe1XfOxtpYvloiI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RH393ZndmZndmZndmZndmZndmZndmZA/89X8z7f7/f7/f7X37S3x0REdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREfHf/v/v/v/v/v/v/v/v/v/v/v/v/v/v/f7//78P'; // Placeholder Base64
 
-    // Add Brand Header
-    try {
-      doc.addImage(logoUrl, 'PNG', 15, 10, 40, 15);
-    } catch (e) { console.warn("Logo failed to load for PDF"); }
+    const addLogo = () => {
+      return new Promise((resolve) => {
+        try {
+          // If base64 is available, use it directly
+          if (logoBase64.length > 50) {
+            doc.addImage(logoBase64, 'PNG', 15, 10, 40, 15);
+            resolve(true);
+            return;
+          }
+          
+          const img = new Image();
+          img.src = '/smartmovelogo.png';
+          img.crossOrigin = 'Anonymous';
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0);
+            const dataURL = canvas.toDataURL('image/png');
+            doc.addImage(dataURL, 'PNG', 15, 10, 40, 15);
+            resolve(true);
+          };
+          img.onerror = () => {
+            console.warn("Logo failed to load for PDF");
+            resolve(false);
+          };
+        } catch (e) {
+          resolve(false);
+        }
+      });
+    };
+
+    await addLogo();
 
     // Header & Company Info
     doc.setFontSize(20);
@@ -826,12 +858,14 @@ export default function BookingsManagement() {
                               <User className="w-4 h-4" /> {t('admin.bookings.actions.viewDetails')}
                             </DropdownMenuItem>
 
-                            <DropdownMenuItem
-                              onClick={() => generatePDF(b)}
-                              className="gap-2 text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 cursor-pointer font-bold"
-                            >
-                              <FileDown className="w-4 h-4" /> Export Contract PDF
-                            </DropdownMenuItem>
+                            {(b.status === 'approved' || b.status === 'completed') && (
+                              <DropdownMenuItem
+                                onClick={() => generatePDF(b)}
+                                className="gap-2 text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 cursor-pointer font-bold"
+                              >
+                                <FileDown className="w-4 h-4" /> Export Contract PDF
+                              </DropdownMenuItem>
+                            )}
 
                             {b.payment_status !== 'confirmed' && (
                               <ConfirmPaymentDialog 
@@ -937,6 +971,15 @@ export default function BookingsManagement() {
                     >
                       <User className="w-4 h-4" /> {t('admin.bookings.actions.viewDetails')}
                     </DropdownMenuItem>
+
+                    {(b.status === 'approved' || b.status === 'completed') && (
+                      <DropdownMenuItem
+                        onClick={() => generatePDF(b)}
+                        className="gap-2 text-emerald-600 focus:bg-emerald-50 rounded-xl p-3 font-bold mb-1"
+                      >
+                        <FileDown className="w-4 h-4" /> Export Contract PDF
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem
                       onClick={() => handleStatusUpdate((b._id || b.id)!, 'delete', t('admin.status.delete'))}
                       className="gap-2 text-rose-600 focus:bg-rose-50 rounded-xl p-3 font-bold"

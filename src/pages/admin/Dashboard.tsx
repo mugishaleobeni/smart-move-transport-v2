@@ -62,7 +62,8 @@ export default function Dashboard() {
         netProfit: totalIncome - totalExpenses
       };
     },
-    staleTime: 60000, // 1 minute
+    staleTime: 60000, 
+    refetchInterval: 30000,
   });
 
   // 2. Recent Bookings
@@ -74,6 +75,7 @@ export default function Dashboard() {
       return bookings.slice(0, 5);
     },
     staleTime: 60000,
+    refetchInterval: 30000,
   });
 
   // 3. Chart Data
@@ -119,7 +121,8 @@ export default function Dashboard() {
           };
         });
     },
-    staleTime: 300000, // 5 minutes
+    staleTime: 300000,
+    refetchInterval: 60000,
   });
 
   const stats = statsData || { totalCars: 0, totalBookings: 0, totalIncome: 0, totalExpenses: 0, netProfit: 0 };

@@ -64,6 +64,7 @@ export default function PricingManagement() {
     queryKey: ['pricing-rules'],
     queryFn: () => pricingApi.getAll(),
     staleTime: 30000,
+    refetchInterval: 60000,
   });
 
   const carsList = Array.isArray(carsData?.data?.data) ? carsData.data.data : (Array.isArray(carsData?.data) ? carsData.data : []);

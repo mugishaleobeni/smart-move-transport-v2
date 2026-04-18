@@ -99,6 +99,8 @@ export const filesApi = {
 export const settingsApi = {
     getAgreement: () => api.get('/settings/agreement'),
     updateAgreement: (text: string) => api.post('/settings/agreement', { text }),
+    getNotificationEmails: () => api.get('/settings/notification-emails'),
+    updateNotificationEmails: (emails: string) => api.post('/settings/notification-emails', { emails }),
 };
 
 export default api;

@@ -107,6 +107,7 @@ export default function Analytics() {
       };
     },
     staleTime: 300000,
+    refetchInterval: 60000,
   });
 
   const { incomePerCar = [], expensePerCar = [], insights = { mostProfitable: 'N/A', highestCost: 'N/A', totalBookings: 0, monthlyBest: { name: 'N/A', amount: 0 } } } = analyticsData || {};

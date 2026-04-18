@@ -12,7 +12,8 @@ import {
   Search,
   Filter,
   BarChart3,
-  TrendingDown
+  TrendingDown,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,6 +58,7 @@ export default function ExpensesManagement() {
     queryFn: () => expensesApi.getAll({ page, limit: 50 }),
     placeholderData: (previousData) => previousData,
     staleTime: 30000,
+    refetchInterval: 60000,
   });
 
   const { data: carsData } = useQuery({
@@ -102,6 +104,7 @@ export default function ExpensesManagement() {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
     },
     onSuccess: () => {
       toast({ 
@@ -155,6 +158,7 @@ export default function ExpensesManagement() {
       queryClient.invalidateQueries({ queryKey: [ 'expenses' ] });
       queryClient.invalidateQueries({ queryKey: [ 'dashboard' ] });
       queryClient.invalidateQueries({ queryKey: [ 'analytics' ] });
+      queryClient.invalidateQueries({ queryKey: [ 'reports' ] });
     }
   });
 
@@ -190,6 +194,7 @@ export default function ExpensesManagement() {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       queryClient.invalidateQueries({ queryKey: [ 'dashboard' ] });
       queryClient.invalidateQueries({ queryKey: [ 'analytics' ] });
+      queryClient.invalidateQueries({ queryKey: [ 'reports' ] });
     }
   });
 
@@ -248,8 +253,8 @@ export default function ExpensesManagement() {
     return matchesCar && matchesSearch;
   });
 
-  const totalAmount = filtered.reduce((sum, e) => sum + Number(e.amount), 0);
-  const monthlyAvg = totalAmount / (expenses.length || 1); // Fixed calculation
+  const totalAmount = filtered.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+  const monthlyAvg = totalAmount / (expenses.length || 1);
 
   return (
     <div className="space-y-8 pb-10">
@@ -356,7 +361,7 @@ export default function ExpensesManagement() {
         {[
           { label: 'Cumulative Spending', value: `RWF ${totalAmount.toLocaleString()}`, icon: TrendingDown, color: 'text-rose-600 bg-rose-50' },
           { label: 'Active Cost Centers', value: cars.length, icon: Car, color: 'text-blue-600 bg-blue-50' },
-          { label: 'Total Entries', value: (expensesData?.data as any)?.pagination?.total || 0, icon: Receipt, color: 'text-amber-600 bg-amber-50' },
+          { label: 'Total Entries', value: (expensesDataBody as any)?.pagination?.total || expenses.length || 0, icon: Receipt, color: 'text-amber-600 bg-amber-50' },
         ].map((s, i) => (
           <Card key={i} className="border-none card-premium p-6 flex items-center justify-between bg-white dark:bg-zinc-900">
             <div>

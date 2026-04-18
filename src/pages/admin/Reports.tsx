@@ -97,6 +97,7 @@ export default function Reports() {
       };
     },
     staleTime: 60000,
+    refetchInterval: 60000,
   });
 
   const { carProfits = [], summary = { bookings: 0, income: 0, expenses: 0 } } = reportData || {};
