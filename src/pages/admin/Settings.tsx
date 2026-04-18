@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { notificationsApi, settingsApi, authApi } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Settings() {
   const queryClient = useQueryClient();

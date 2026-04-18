@@ -142,7 +142,7 @@ export default function Booking() {
     const fetchAgreement = async () => {
       try {
         const res = await settingsApi.getAgreement();
-        setAgreementText(res.data?.agreement || '');
+        setAgreementText(res.data?.text || res.data?.agreement || '');
       } catch (err) { console.error('Failed to fetch agreement', err); }
     };
     fetchCars();
@@ -615,17 +615,28 @@ export default function Booking() {
                             </div>
                           )}
 
-                          <div className="flex items-center space-x-3 p-2">
-                             <input 
-                               type="checkbox" 
-                               id="terms" 
-                               checked={booking.agreedToTerms}
-                               onChange={(e) => setBooking({...booking, agreedToTerms: e.target.checked})}
-                               className="w-5 h-5 rounded border-zinc-300 text-accent focus:ring-accent accent-accent"
-                             />
-                             <Label htmlFor="terms" className="text-xs font-bold text-muted-foreground uppercase cursor-pointer">
-                               I agree to the <span className="text-accent underline">Terms & Conditions</span> and rental policy
-                             </Label>
+                          <div className="space-y-4">
+                            <h4 className="text-sm font-black uppercase tracking-tight">Final Confirmation</h4>
+                            <p className="text-xs text-muted-foreground">Please verify your reservation details below before finalizing.</p>
+                            <div className="p-4 bg-zinc-50 dark:bg-zinc-800/80 border border-border/50 rounded-2xl">
+                              <h4 className="text-xs font-black uppercase mb-3 text-accent">Rental Agreement</h4>
+                              <div className="max-h-48 overflow-y-auto pr-4 text-xs text-muted-foreground whitespace-pre-wrap styled-scrollbar">
+                                {agreementText || "Please read our Terms & Conditions before confirming."}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center space-x-3 p-2">
+                               <input 
+                                 type="checkbox" 
+                                 id="terms" 
+                                 checked={booking.agreedToTerms}
+                                 onChange={(e) => setBooking({...booking, agreedToTerms: e.target.checked})}
+                                 className="w-5 h-5 rounded border-zinc-300 text-accent focus:ring-accent accent-accent"
+                               />
+                               <Label htmlFor="terms" className="text-xs font-bold text-muted-foreground uppercase cursor-pointer">
+                                 I have read the agreement and confirm my booking
+                               </Label>
+                            </div>
                           </div>
                         </div>
                       </div>
