@@ -7,6 +7,10 @@ import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useOnlineStatus } from '@/components/offline/OfflineBanner';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { useChat } from '@/hooks/useChat';
+import { carsApi } from '@/lib/api';
+import { CarCard } from '@/components/ui/CarCard';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -15,13 +19,26 @@ interface Message {
 
 export function AIAssistant() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { user } = useAuth();
+  const { messages, isLoading, sendMessage: aiSendMessage } = useChat(user?.id || 'guest');
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
   const isOnline = useOnlineStatus();
   const [isMobile, setIsMobile] = useState(false);
+  const [cars, setCars] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        const res = await carsApi.getAll();
+        setCars(Array.isArray(res.data?.data) ? res.data.data : (Array.isArray(res.data) ? res.data : []));
+      } catch (err) {
+        console.error('Failed to pre-fetch cars for AI chat', err);
+      }
+    };
+    fetchCars();
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -38,49 +55,17 @@ export function AIAssistant() {
     scrollToBottom();
   }, [messages]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading || !isOnline) return;
-
-    const userMessage: Message = { role: 'user', content: input.trim() };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
-
-    let assistantContent = '';
-
-    try {
-      // Mock/Demo response logic
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const responses = [
-        "Welcome to Smart Move Transport! How can I help you today?",
-        "We offer premium car rentals in Kigali with a focus on luxury and comfort.",
-        "Our fleet includes the latest Mercedes-Benz, Range Rover, and Toyota Land Cruisers.",
-        "You can book a car directly through our booking page. Would you like a link?",
-        "We provide professional chauffeurs for all our rentals to ensure your safety and comfort."
-      ];
-
-      assistantContent = responses[Math.floor(Math.random() * responses.length)];
-
-      setMessages(prev => [
-        ...prev,
-        { role: 'assistant', content: assistantContent }
-      ]);
-    } catch (error) {
-      console.error('AI Chat error:', error);
-      setMessages(prev => [
-        ...prev,
-        { role: 'assistant', content: t('ai.error') },
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSend = async (text: string = input) => {
+    if (!text.trim() || isLoading || !isOnline) return;
+    const content = text;
+    if (text === input) setInput('');
+    await aiSendMessage(content);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      handleSend();
     }
   };
 
@@ -172,8 +157,19 @@ export function AIAssistant() {
                     )}
                   >
                     {msg.role === 'assistant' ? (
-                      <div className="prose prose-sm dark:prose-invert max-w-none">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      <div className="prose prose-sm dark:prose-invert max-w-none flex flex-col gap-2">
+                        {msg.content.split(/\[CAR:([^\]]+)\]/g).map((part, index) => {
+                          if (index % 2 === 1) {
+                            const car = cars.find(c => (c._id || c.id) === part.trim());
+                            if (!car) return null;
+                            return (
+                              <div key={index} className="w-full mt-2 mb-2 w-full shrink-0">
+                                <CarCard car={car} />
+                              </div>
+                            );
+                          }
+                          return part.trim() ? <ReactMarkdown key={index}>{part}</ReactMarkdown> : null;
+                        })}
                       </div>
                     ) : (
                       msg.content
@@ -205,6 +201,24 @@ export function AIAssistant() {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Quick Actions */}
+            {messages.length < 2 && isOnline && (
+              <div className="px-4 pb-2 flex flex-wrap gap-2">
+                {["Available Cars", "Book a Ride", "Payment Options"].map((action) => (
+                  <Button
+                    key={action}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs rounded-full border-accent/20 hover:bg-accent/10 hover:text-accent font-medium leading-none h-7"
+                    onClick={() => handleSend(action)}
+                    disabled={isLoading}
+                  >
+                    {action}
+                  </Button>
+                ))}
+              </div>
+            )}
+
             {/* Input */}
             <div className="p-4 border-t border-border">
               <div className="flex gap-2">
@@ -217,7 +231,7 @@ export function AIAssistant() {
                   className="flex-1"
                 />
                 <Button
-                  onClick={sendMessage}
+                  onClick={() => handleSend()}
                   disabled={!input.trim() || !isOnline || isLoading}
                   size="icon"
                   className="btn-accent"
