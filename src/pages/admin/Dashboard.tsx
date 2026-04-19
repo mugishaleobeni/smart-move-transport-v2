@@ -51,12 +51,13 @@ export default function Dashboard() {
       const expenses = Array.isArray(expensesRes.data?.data) ? expensesRes.data.data : (Array.isArray(expensesRes.data) ? expensesRes.data : []);
       const cars = Array.isArray(carsRes.data?.data) ? carsRes.data.data : (Array.isArray(carsRes.data) ? carsRes.data : []);
 
-      const totalIncome = bookings.reduce((sum: number, b: any) => sum + Number(b.total_price || 0), 0);
+      const confirmedBookings = bookings.filter((b: any) => b.payment_status === 'confirmed');
+      const totalIncome = confirmedBookings.reduce((sum: number, b: any) => sum + Number(b.total_price || 0), 0);
       const totalExpenses = expenses.reduce((sum: number, e: any) => sum + Number(e.amount || 0), 0);
       
       return {
         totalCars: cars.length,
-        totalBookings: bookings.length,
+        totalBookings: bookings.length, // Keep all bookings count for "Current Bookings" stat
         totalIncome,
         totalExpenses,
         netProfit: totalIncome - totalExpenses
@@ -97,7 +98,9 @@ export default function Dashboard() {
         last6Months[key] = { income: 0, expense: 0 };
       }
 
-      bookings.forEach((b: any) => {
+      const confirmedBookings = bookings.filter((b: any) => b.payment_status === 'confirmed');
+      
+      confirmedBookings.forEach((b: any) => {
         const month = b.booking_date?.slice(0, 7);
         if (month && last6Months[month]) {
           last6Months[month].income += Number(b.total_price || 0);

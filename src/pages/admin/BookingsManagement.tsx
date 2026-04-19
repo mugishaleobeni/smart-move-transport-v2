@@ -301,44 +301,6 @@ export default function BookingsManagement() {
     const car = cars.find(c => (c._id === booking.car_id || c.id === booking.car_id));
     const doc = new jsPDF() as any;
 
-    // Logo configuration (Base64 for reliability)
-    const logoBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAbCAYAAACpAK68AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH6AIDEi0QYnQzWwAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUOdlWGUAAALxSURBVGje7ZpNSBRRHMf/78282dW1Xbe1XfOxtpYvloiI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RH393ZndmZndmZndmZndmZndmZndmZA/89X8z7f7/f7/f7X37S3x0REdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREdEhIiKiQ0RERIdI6BAREfHf/v/v/v/v/v/v/v/v/v/v/v/v/v/v/f7//78P'; // Placeholder Base64
-
-    const addLogo = () => {
-      return new Promise((resolve) => {
-        try {
-          // If base64 is available, use it directly
-          if (logoBase64.length > 50) {
-            doc.addImage(logoBase64, 'PNG', 15, 10, 40, 15);
-            resolve(true);
-            return;
-          }
-          
-          const img = new Image();
-          img.src = '/smartmovelogo.png';
-          img.crossOrigin = 'Anonymous';
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d');
-            ctx?.drawImage(img, 0, 0);
-            const dataURL = canvas.toDataURL('image/png');
-            doc.addImage(dataURL, 'PNG', 15, 10, 40, 15);
-            resolve(true);
-          };
-          img.onerror = () => {
-            console.warn("Logo failed to load for PDF");
-            resolve(false);
-          };
-        } catch (e) {
-          resolve(false);
-        }
-      });
-    };
-
-    await addLogo();
-
     // Header & Company Info
     doc.setFontSize(20);
     doc.setTextColor(0, 0, 0);

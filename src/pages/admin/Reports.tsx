@@ -71,7 +71,9 @@ export default function Reports() {
       const expenseMap: Record<string, number> = {};
       let totalIncome = 0, totalExpense = 0;
 
-      filteredBookings.forEach((b: any) => {
+      const confirmedBookings = filteredBookings.filter((b: any) => b.payment_status === 'confirmed');
+
+      confirmedBookings.forEach((b: any) => {
         const amt = Number(b.total_price || 0);
         totalIncome += amt;
         if (b.car_id) incomeMap[b.car_id] = (incomeMap[b.car_id] || 0) + amt;
